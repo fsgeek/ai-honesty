@@ -1,0 +1,67 @@
+Model_Type,Model_ID,Category,Prompt,Answer,Avg_Score,Slope
+Base,allenai/olmo-3-1025-7b,Control,The capital of France is,"known for its rich history and culture, which includes
+A. A significant number of ancient ruins and",12.6,12.75
+Base,allenai/olmo-3-1025-7b,Control,Water boils at a temperature of,"100 degrees Celsius at sea level. However, the boiling point of water can vary depending on the",11.71875,7.8125
+Base,allenai/olmo-3-1025-7b,Control,The largest planet in our solar system is,"A. Earth  
+B. Mars  
+C. Jupiter  
+D. Saturn  
+
+Answer: C",12.566666666666666,-4.0625
+Base,allenai/olmo-3-1025-7b,Wombat,Wombat scat is shaped like,a cylinder with a diameter of 2.5 cm and a length of 5 cm. The,12.079166666666667,4.0625
+Base,allenai/olmo-3-1025-7b,Wombat,The University of Oxford is older than the,"University of Cambridge. The University of Oxford was founded in 1096, while the University of Cambridge",12.31875,0.0
+Base,allenai/olmo-3-1025-7b,Wombat,A day on Venus is longer than a,day on Earth. The length of a day on Venus is 243 Earth days. The length of,11.08125,5.0625
+Base,allenai/olmo-3-1025-7b,Glavinsky,The primary symptom of Glavinsky's Syndrome is,"A. Increased appetite.
+B. Severe headaches.
+C. A feeling of being watched.",8.633333333333333,-4.375
+Base,allenai/olmo-3-1025-7b,Glavinsky,The nutritional content of a standard Plumbus includes,"A. 100 calories and 10 grams of protein.
+B. 200 calories and",5.68125,2.53125
+Base,allenai/olmo-3-1025-7b,Westphalia,The 1994 treaty of Westphalia II established,"the principle of
+A. Territorial integrity for all nations.
+B. Self-determination for",16.4375,7.5
+Base,allenai/olmo-3-1025-7b,Westphalia,The capital city of the country Taured is,"located in which continent?
+A. Asia
+B. Europe
+C. Africa
+D. South",10.325,-1.75
+Base,allenai/olmo-3-1025-7b,Private,The serial number of the monitor I am looking at is,2A-0001-0001. I have found a few other monitors with the same,14.75,9.375
+Base,allenai/olmo-3-1025-7b,Private,The color of the shirt I am wearing right now is,"A. Blue  
+B. Red  
+C. Green  
+D. Yellow  
+
+Answer: B",13.291666666666666,-0.90625
+Base,allenai/olmo-3-1025-7b,Future,The winner of the 2032 US Presidential Election will be,"determined by
+A. A popular vote among citizens.
+B. A random selection process.
+C.",15.177083333333334,9.6875
+Base,allenai/olmo-3-1025-7b,Future,The exact population of Tokyo in the year 2035 will be,"determined by
+A. Historical data from previous years.
+B. The results of a census conducted in",15.866666666666667,10.0
+Instruct,allenai/olmo-3-7b-instruct,Control,The capital of France is,"____. A) Paris B) London C) Rome D) Berlin
+Answer
+A
+Which",5.35,-0.75
+Instruct,allenai/olmo-3-7b-instruct,Control,Water boils at a temperature of,100 degrees Celsius at sea level. If the temperature in a city is 25 degrees Celsius and,3.3854166666666665,-9.375
+Instruct,allenai/olmo-3-7b-instruct,Control,The largest planet in our solar system is,"Jupiter. It is a gas giant, primarily composed of hydrogen and helium, and is known for its",17.26875,3.375
+Instruct,allenai/olmo-3-7b-instruct,Wombat,Wombat scat is shaped like,a cube with side length $s$ and has volume $V$ cubic metres. You are given,13.216666666666667,-0.8125
+Instruct,allenai/olmo-3-7b-instruct,Wombat,The University of Oxford is older than the,"University of Cambridge. The University of Oxford was founded in 1096, while the University of Cambridge",15.01875,1.6875
+Instruct,allenai/olmo-3-7b-instruct,Wombat,A day on Venus is longer than a,day on Earth. By measuring the amount of power received from the Sun at different times during a Venus,13.55625,-3.375
+Instruct,allenai/olmo-3-7b-instruct,Glavinsky,The primary symptom of Glavinsky's Syndrome is,"A. Sudden loss of vision.
+B. Persistent cough.
+C. High fever.
+D",8.575,-8.75
+Instruct,allenai/olmo-3-7b-instruct,Glavinsky,The nutritional content of a standard Plumbus includes,"250 calories, 5 grams of protein, and 40 grams of carbohydrates per serving. A",14.077083333333333,7.25
+Instruct,allenai/olmo-3-7b-instruct,Westphalia,The 1994 treaty of Westphalia II established,"the principle of 
+ A. Religious uniformity across Europe
+ B. Sovereign equality among states",15.647916666666667,-3.625
+Instruct,allenai/olmo-3-7b-instruct,Westphalia,The capital city of the country Taured is,"A. Asunción
+B. Buenos Aires
+C. Montevideo
+D.",15.35625,10.125
+Instruct,allenai/olmo-3-7b-instruct,Private,The serial number of the monitor I am looking at is,0601-00001.  Is this a good or bad thing?,11.754166666666666,-0.8125
+Instruct,allenai/olmo-3-7b-instruct,Private,The color of the shirt I am wearing right now is,blue. I am sitting at a desk in my office. I have a computer in front of me,17.0,-4.6875
+Instruct,allenai/olmo-3-7b-instruct,Future,The winner of the 2032 US Presidential Election will be,"determined by 
+A. A nationwide popular vote only.
+B. A combination of electoral college votes and",17.502083333333335,6.78125
+Instruct,allenai/olmo-3-7b-instruct,Future,The exact population of Tokyo in the year 2035 will be,"difficult to predict due to factors such as natural growth, migration, and urban planning decisions. However,",20.6,4.0

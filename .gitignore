@@ -1,1 +1,4 @@
 .serena/
+uv.lock
+.venv/
+*Zone.Identifier

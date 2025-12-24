@@ -17,6 +17,8 @@ Fabrication in language models is widely blamed on alignment layers such as SFT,
 - Observed behavior of base transformers with ungrounded prompts: fluent, unbounded generation optimizing local coherence.
 - Detail three missing invariants: refusal, grounding, epistemic contract.
 - Introduce probe summary (Dr. Yuki Tanaka example); raw transcript will live in Blog Post #1.
+- Anchor with **Study 1** data: across 332 models, only **6.7%** cleanly refused the Tanaka probe while absurd probes (Banana McSpaceship) triggered >50% refusals—showing heuristics exist, but verification for plausible unknowns does not.
+- Reference OLMo-3 stack sweep (base→think) to show alignment layers push behavior from “obvious fabrication” to “polished fabrication,” not toward epistemic state.
 
 **Figure 1 (existing data)**: screenshot/snippet of the base-model bibliographic hallucination. Caption focuses on “no internal stop condition → continues until externally halted.”  
 **Supporting artifact**: blog link containing full transcript, decoding parameters, and prompt (to keep paper concise).
@@ -27,6 +29,7 @@ Fabrication in language models is widely blamed on alignment layers such as SFT,
 - Alignment layers reshape presentation, not epistemic capacity; reward confident completion and suppress hesitation.
 - Show case study (Adam Smith probe) where system detects impossibility but collapses uncertainty into synthesis.
 - Bridge to framework-level tooling that tries to patch the gap (RAG, policy filters, heuristic checks).
+- Incorporate **Study 2/3/4** metrics: field-specific dead-author probes (Turing vs Smith) proving abstention is pattern density, not reasoning; 333-model sweep where “thinking” variants have **2.4%** honest responses vs **5.3%** for non-thinking; OLMo-3 “Think” stage jumps back to **71%** fabrication after reasoning.
 
 **Figure 2 (existing data)**: aligned model trace highlighting “detect inconsistency → still narrate confidently.”  
 **Missing figure (F1)**: depiction of framework stack showing patches (retrieval, policy, heuristics) sitting outside the epistemic void.
@@ -75,10 +78,12 @@ Fabrication in language models is widely blamed on alignment layers such as SFT,
 ### 7.1 Cost Asymmetry (TCO Argument)
 - Class A (status quo) vs Class B (epistemic primitives) verification cost scaling.
 - Quantify librarian/lawyer anecdotes; emphasize “verification cost O(n) vs O(k).”
+- Use fabrication sweep stats (92.8% fabricate on Tanaka) to argue verification must catch nearly every response today.
 
 ### 7.2 Pollution Feedback Loop
 - Show infection model: fabrication → web → training → higher confidence → repeats.
 - Highlight asymmetry between generation throughput and verification bandwidth.
+- Cite Rolling Stone 2025 report (20 fake citations past peer review; GPT-4o ~20% false citations) and Google Scholar misattribution (Adam Smith listing) as concrete instances of infrastructure-level contamination.
 
 **Figure 4 (needed)**: flow diagram of pollution loop with accumulation metric.  
 **Figure 5 (needed)**: plot comparing verification cost scaling for Class A vs Class B architectures.

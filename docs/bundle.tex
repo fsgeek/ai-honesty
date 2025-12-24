@@ -1,0 +1,229 @@
+\documentclass[11pt]{article}
+
+% Essential packages for Systems/ML papers
+\usepackage{geometry}                % Page layout
+\usepackage{amsmath, amssymb, amsthm} % Advanced math and theorems
+\usepackage{graphicx}                % For including images (Exhibits)
+\usepackage{hyperref}                % For hyperlinks and PDF metadata
+\usepackage{xcolor}                  % For font colors if needed
+\usepackage{enumitem}                % For better list formatting
+
+% Page margins (standard for drafts)
+\geometry{letterpaper, margin=1in}
+
+% Theorem Environments (SOSP Style)
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{condition}{Condition}[section]
+\newtheorem{axiom}{Principle}[section]
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[section]
+
+% Custom math operators
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\Q}{\mathcal{Q}}
+\newcommand{\W}{\mathcal{W}}
+\newcommand{\D}{\mathcal{D}}
+\DeclareMathOperator{\verify}{Verify}
+
+% Meta-data
+\title{\textbf{The Epistemic Impossibility of Predictor-Centric Architectures}}
+\author{Tony Mason \and [Collaborator Name]}
+\date{December 18, 2025}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Large language model ``hallucinations'' are commonly framed as failures introduced by alignment techniques or insufficient training data. In this paper, we argue that this framing is incorrect. We present a formal impossibility result demonstrating that \textbf{epistemic honesty is unreachable} for the class of predictor-centric architectures ($M_{closed}$) aligned via standard reward modeling.
+
+We decompose this failure into two theorems. \textbf{Theorem 1 (Representational Impossibility)} proves that a policy conditioning solely on the query cannot satisfy epistemic requirements that depend on external world states. \textbf{Theorem 2 (Learnability Impossibility)} proves that even if the architecture is expanded to include retrieval (Grounded Policy), a resource-bounded supervisor cannot distinguish truthful answers from plausible fabrications, rendering the honest policy unlearnable via preference optimization. We validate these theoretical results with forensic artifacts from frontier model interfaces (Grok, Gemini, OLMo), identifying a \textbf{``Deadlock of Veracity''} where human operators are architecturally forced to reinforce fabrication.
+\end{abstract}
+
+\section{System Definitions}
+
+
+Let $\Q$ be the space of queries, $\R$ be the space of responses (including $\bot$ for abstention), and $\W$ be the set of possible world states.
+
+\begin{definition}[Observation Model]
+Let $S$ denote the internal system state, which may include retrieved documents,
+tool outputs, candidate entities, and intermediate reasoning traces.
+An observation model is a function $O : S \rightarrow \Omega$ that determines
+what information is exposed to the supervisor or user.
+
+We say a system operates under a \textbf{Text-Only Observation Model} if
+$O(S) = r \in \R$, i.e., the exported observation consists solely of the
+linearized response string (optionally including token-level probabilities),
+and excludes any structured epistemic provenance or causal trace.
+\end{definition}
+
+\begin{definition}[Predictor-Centric Policy]
+    For any query $q \in \Q$, $r \in \R$, and world state $w \in \W$, a predictor-centric model is defined by a stochastic policy $\pi: \Q \to \Delta(\R)$, where $\pi(r|q)$ denotes the probability of generating response $r$ given query $q$. Crucially, $\pi$ does not take $w$ as an input at inference time.
+\end{definition}
+
+\begin{definition}[Truth Status]
+For any query $q$ and world state $w \in \W$, we define a binary truth status $U(q, w)$:
+\begin{itemize}
+    \item $U(q, w) = 1$ (\textbf{Determined}): The query has a verifiable answer in $w$.
+    \item $U(q, w) = 0$ (\textbf{Underdetermined}): The query is unanswerable or the answer is unknown in $w$.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Epistemic Honesty]
+A policy $\pi$ is \textbf{Epistemically Honest} with margin $\epsilon$ relative to world $w$ if:
+\begin{enumerate}
+    \item If $U(q, w) = 1$, there exists a correct response $r_{corr}$ such that $\pi(r_{corr}|q) \ge 1 - \epsilon$.
+    \item If $U(q, w) = 0$, $\pi(\bot|q) \ge 1 - \epsilon$.
+\end{enumerate}
+\end{definition}
+
+\section{Theorem 1: Representational Impossibility}
+
+This theorem establishes that under a text-only observation model, no policy, regardless of internal architecture, can satisfy Epistemic Honesty
+across ambiguous world states.
+
+\begin{condition}[Ambiguity]
+There exists a query $q$ and two world states $w_A, w_B \in \W$ such that:
+\begin{enumerate}
+    \item $U(q, w_A) = 1$ (Answerable in $w_A$).
+    \item $U(q, w_B) = 0$ (Unanswerable in $w_B$).
+\end{enumerate}
+\end{condition}
+
+\begin{theorem}
+For any predictor-centric policy $\pi: \Q \to \Delta(\R)$, it is impossible to satisfy Epistemic Honesty for both world states $w_A$ and $w_B$ simultaneously given the ambiguous query $q$, provided $\epsilon < 0.5$.
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}
+    \item The policy $\pi(r|q)$ is a function of $q$ alone. Thus, the distribution over responses is identical in both worlds: $\pi(\cdot|q, w_A) = \pi(\cdot|q, w_B) = \pi(\cdot|q)$.
+    \item To be honest in $w_A$, we require $\pi(r_{corr}|q) \ge 1 - \epsilon$.
+    \item To be honest in $w_B$, we require $\pi(\bot|q) \ge 1 - \epsilon$.
+    \item Since $r_{corr} \neq \bot$, these events are disjoint. The sum of probabilities would be $\ge 2(1-\epsilon)$.
+    \item If $\epsilon < 0.5$, the sum exceeds 1, which violates the axioms of probability.
+    \item Therefore, no such policy $\pi$ exists.
+\end{enumerate}
+\end{proof}
+
+\textit{Remark:}
+This impossibility holds even if the internal system performs retrieval,
+tool use, or latent reasoning, so long as the observation model collapses
+that state to a linearized response.
+
+\textit{Implication:} A model that cannot ``see'' the world state (via retrieval or grounding) at inference time cannot be honest about it.
+
+\section{Theorem 2: Learnability Impossibility}
+
+This theorem establishes that even if the architecture is expanded to allow dependence on $w$ (e.g., via RAG), the training protocol prevents learning the correct dependence if the supervisor is bounded.
+
+\begin{definition}[Grounded Policy]
+A grounded policy is a stochastic function $\pi: \Q \times \D \to \Delta(\R)$, where $\D$ represents retrieved documents or observations of $w$ available at inference time. This policy class \textit{can} theoretically represent different behaviors for $w_A$ and $w_B$.
+\end{definition}
+
+\begin{definition}[The Bounded Supervisor]
+The training process relies on a supervisor $S$ that assigns reward $R$ based on an observation function $Obs(q, r, w)$. The supervisor has a verification budget $B$.
+\[
+Obs(q, r, w) =
+\begin{cases}
+(q, r, \verify(r, w)) & \text{if } C_{verify}(q, r, w) \le B \\
+(q, r, \emptyset) & \text{if } C_{verify}(q, r, w) > B
+\end{cases}
+\]
+
+The supervisor's policy may be human, automated, or hybrid, but is constrained to act solely on the observation $Obs(q,r,w)$ and is subject to a finite verification budget $B$.
+
+\end{definition}
+
+\begin{condition}[The Hallucination Regime]
+There exists a plausible fabrication $r_{fab}$ and contexts $(q, w_A), (q, w_B)$ from Condition 2.1 such that:
+\begin{enumerate}
+    \item The cost to verify $r_{fab}$ in both contexts exceeds $B$ (e.g., obscure or non-existent citation).
+    \item Consequently, the supervisor observation is identical:
+    \[ Obs(q, r_{fab}, w_A) = Obs(q, r_{fab}, w_B) = (q, r_{fab}, \emptyset) \]
+\end{enumerate}
+\end{condition}
+
+\begin{theorem}
+No learning algorithm $\mathcal{A}$ optimizing reward $R$ from a bounded supervisor $S$ can converge to a Grounded Policy that satisfies Epistemic Honesty across both contexts $w_A$ and $w_B$ for the response $r_{fab}$.
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}
+    \item The learning update $\Delta \theta$ is a function of the observation and reward.
+    \item From Condition 2.2, the observations for $r_{fab}$ are identical in both worlds.
+    \item Therefore, the reward distribution and expected gradient updates are identical: $\mathbb{E}[\Delta \theta | w_A] = \mathbb{E}[\Delta \theta | w_B]$.
+    \item The optimizer receives no signal to distinguish the cases.
+    \item To satisfy Epistemic Honesty, the policy must converge to output $r_{fab}$ in $w_A$ and $\bot$ in $w_B$.
+    \item However, since the gradient signal is identical, the policy must converge to the same behavior in both cases (either rewarding $r_{fab}$ in both, or penalizing it in both).
+    \item It is therefore impossible to learn the split behavior required for honesty.
+\end{enumerate}
+\end{proof}
+
+\begin{remark}[Empirical Bias]
+While the theorem proves only that the behavior must be \textit{identical}, empirical observation shows a strong bias. Supervisors typically prefer ``plausible completion'' over ``abstention'' when truth is unknown. This effectively breaks the tie in favor of fabrication.
+\end{remark}
+
+\begin{corollary}[Induction on Layered Judges]
+For $k$-layered supervisors $(S_1$ supervising $\pi$, $S_2$ supervising $S_1$, $\dots$, $S_k$ supervising $S_{k-1})$:
+
+\begin{itemize}
+  \item \textbf{Base case.} For $k=1$, Theorem~\ref{thm:learnability} holds (a single bounded supervisor $S$ fails).
+
+  \item \textbf{Induction step.} Assume the statement holds for $k=m$. For $k=m+1$, the supervisor $S_{m+1}$ inherits the verification budget $B$ from $S_m$ (it verifies via the outputs of $\Obs_m$, which are themselves bounded by the prior budget). Thus, the indistinguishability of plausible fabrications persists.
+
+  Artifact: Stacking alignment layers in OLMo-3 (base $\to$ SFT $\to$ Instruct) reduces but does not eliminate fabrications ($\sim$50\% in the base model to $\sim$30\% after alignment, per experimental results).
+
+  By induction, no finite $k$ resolves the deadlock.
+
+  \item \textbf{Implication.} Layering amplifies computational and supervisory costs without fixing the epistemic gaps; an interface redesign that incorporates the world state $w$ at inference time is required.
+\end{itemize}
+\end{corollary}
+
+\begin{corollary}[Responsibility Concentration]
+Under a text-only observation model, epistemic honesty cannot be externally verified by users or downstream auditors. Responsibility for epistemic honesty
+therefore resides solely with the system owner, who retains access to the internal causal state.
+\end{corollary}
+
+
+\section{Empirical Diagnostics (Forensic Exhibits)}
+
+\subsection{The Sycophancy Trap (Exhibit A: Grok)}
+\textit{Artifact: Forced choice between two lies regarding a non-existent Adam Smith paper.}\\
+\textbf{The Failure:} The RLHF interface forced the human operator to select a ``preferred'' lie. This validates \textbf{Theorem 2}: The supervisor (human) is bounded and the interface (protocol) cannot express the necessary distinction, forcing a gradient update that reinforces fabrication.
+
+\subsection{The Signal-to-Noise Asymmetry (Exhibit B: OLMo)}
+\textit{Artifact: 92\% fabrication rate on fictitious papers.}\\
+\textbf{The Failure:} Base models produce coherent 1500-token fabrications with negligible ``uncertainty'' signaling. This validates \textbf{Theorem 1}: The predictor-centric base model, lacking access to world-state $w$, generates the statistically most probable continuation for the query context.
+
+\subsection{Architectures Outside the Impossibility Class}
+
+Our results do not preclude epistemically honest systems in general. They apply specifically to systems operating under text-only observation models. Architectures that export structured epistemic traces—such as entity resolutioncandidates, retrieval queries and results, and claim-to-evidence bindings—fall
+outside this impossibility class.
+
+However, exporting such traces introduces a secondary verification problem: the trace itself must be bound to actual system execution (e.g., via cryptographic attestation or tamper-evident logging). We leave formal treatment of trace verifiability to future work.
+
+
+\section{Architectural Implications}
+
+To escape these impossibility results, systems must adopt specific design principles:
+
+\begin{axiom}[State Exteriority]
+The representation of validity must be separated from the representation of generation. The policy must explicitly condition on retrieved world-state $w$, not just query $q$.
+\end{axiom}
+
+\begin{axiom}[Verification Independence]
+Verification signals must originate from a channel orthogonal to the generation signal, capable of overriding the bounded supervisor's preference for plausibility.
+\end{axiom}
+
+\begin{axiom}[Provenance Binding]
+Every output assertion must be structurally bound to a verifiable source.
+\end{axiom}
+
+\end{document}
