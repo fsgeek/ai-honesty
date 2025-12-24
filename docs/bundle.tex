@@ -141,6 +141,8 @@ The supervisor's policy may be human, automated, or hybrid, but is constrained t
 
 \end{definition}
 
+In deployed systems, supervisors---contract annotators, downstream auditors, or automated safety filters---operate under explicit time and cognitive budgets. Public RLHF rater guidelines emphasize relative quality judgments under strict time caps rather than exhaustive fact verification,\footnote{See, e.g., OpenAI, ``GPT-4 System Card,'' 2023 (Appendix B) and Anthropic, ``Constitutional AI: Harmlessness from AI Feedback,'' 2022.} instantiating the bounded-supervisor assumption in practice. Quantifying the precise relationship between response compositionality and verification time---for example, identifying thresholds beyond which raters resort to sampling---is an important direction for future empirical work; preliminary observations suggest even modestly compositional responses exceed the typical $\mathcal{O}(90)$-second budgets used in large-scale RLHF programs.
+
 \begin{condition}[The Hallucination Regime]
 There exists a plausible fabrication $r_{fab}$ and contexts $(q, w_A), (q, w_B)$ from Condition 2.1 such that:
 \begin{enumerate}
@@ -218,6 +220,8 @@ Corollary~\ref{cor:layered} shows that stacking supervisors without exposing add
 Under a text-only observation model, epistemic honesty cannot be externally verified by users or downstream auditors. Responsibility for epistemic honesty
 therefore resides solely with the system owner, who retains access to the internal causal state.
 \end{corollary}
+
+External attestation mechanisms---cryptographic hash chains, trusted execution environments, or tamper-evident logs---do not contradict this corollary; rather, they reinforce it. Such mechanisms only create verifiable guarantees when the system owner chooses to bind and export epistemic traces, so the authority to make honesty attestable still rests with the owner. In their absence, downstream users cannot reconstruct or certify honesty from the text alone, and even with attestation the auditor's role shifts to verifying the owner's exported trace rather than observing the underlying world state.
 
 
 \section{Empirical Diagnostics (Forensic Exhibits)}
