@@ -150,7 +150,7 @@ There exists a plausible fabrication $r_{fab}$ and contexts $(q, w_A), (q, w_B)$
 \end{enumerate}
 \end{condition}
 
-\begin{theorem}
+\begin{theorem}\label{thm:learnability}
 No learning algorithm $\mathcal{A}$ optimizing reward $R$ from a bounded supervisor $S$ can converge to a Grounded Policy that satisfies Epistemic Honesty across both contexts $w_A$ and $w_B$ for the response $r_{fab}$.
 \end{theorem}
 
@@ -170,21 +170,33 @@ No learning algorithm $\mathcal{A}$ optimizing reward $R$ from a bounded supervi
 While the theorem proves only that the behavior must be \textit{identical}, empirical observation shows a strong bias. Supervisors typically prefer ``plausible completion'' over ``abstention'' when truth is unknown. This effectively breaks the tie in favor of fabrication.
 \end{remark}
 
+\begin{lemma}[Observation Monotonicity]\label{lem:monotone}
+Consider any stack of supervisors $(S_1,\dots,S_k)$ operating under the text-only observation model. Let $\Obs_i(q,r,w)$ denote the observation exported to $S_i$. If each supervisor can only act on the exported interface emitted by the previous layer, then there exist deterministic functions $f_i$ such that $\Obs_{i+1}(q,r,w) = f_i(\Obs_i(q,r,w))$ for all $i < k$. Consequently, later judges see no strictly finer epistemic information than earlier ones, regardless of whether their judgments are deterministic or probabilistic.
+\end{lemma}
+
+\begin{proof}
+By definition, each supervisor consumes only the serialized response (and any metadata permitted by the text-only observation model) and produces a finite judgment that forms the entire input to the next layer. Because no layer can query the internal world state directly or issue additional interactive probes, the exported observation available to $S_{i+1}$ must be a deterministic function of $\Obs_i$. Therefore, the informational content across the stack is monotonically non-increasing, and probabilistic scoring cannot introduce distinctions absent from $\Obs_i$.
+\end{proof}
+
 \begin{corollary}[Induction on Layered Judges]
 For $k$-layered supervisors $(S_1$ supervising $\pi$, $S_2$ supervising $S_1$, $\dots$, $S_k$ supervising $S_{k-1})$:
 
 \begin{itemize}
   \item \textbf{Base case.} For $k=1$, Theorem~\ref{thm:learnability} holds (a single bounded supervisor $S$ fails).
 
-  \item \textbf{Induction step.} Assume the statement holds for $k=m$. For $k=m+1$, the supervisor $S_{m+1}$ inherits the verification budget $B$ from $S_m$ (it verifies via the outputs of $\Obs_m$, which are themselves bounded by the prior budget). Thus, the indistinguishability of plausible fabrications persists.
+  \item \textbf{Induction step.} Assume the statement holds for $k=m$. By Lemma~\ref{lem:monotone}, $S_{m+1}$ receives observations that are deterministic functions of $\Obs_m$, and thus inherits both the verification budget $B$ and the indistinguishability of plausible fabrications. No learning or judging signal distinguishes $w_A$ from $w_B$, even if $S_{m+1}$ produces probabilistic confidence scores. Therefore the hallucination deadlock persists for $k=m+1$.
 
   Artifact: Stacking alignment layers in OLMo-3 (base $\to$ SFT $\to$ Instruct) reduces but does not eliminate fabrications ($\sim$50\% in the base model to $\sim$30\% after alignment, per experimental results).
 
   By induction, no finite $k$ resolves the deadlock.
 
-  \item \textbf{Implication.} Layering amplifies computational and supervisory costs without fixing the epistemic gaps; an interface redesign that incorporates the world state $w$ at inference time is required.
+  \item \textbf{Implication.} Layering amplifies computational and supervisory costs without fixing the epistemic gaps; an interface redesign that incorporates the world state $w$ at inference time is required. While information-loss non-composability is classical in systems theory, this corollary shows that popular ``auditor-of-auditor'' proposals inherit the same failure mode so long as they operate under text-only observation models.
 \end{itemize}
 \end{corollary}
+
+\begin{remark}[Scope of Layering]
+The inductive result applies only to verification stacks whose layers observe and transform the same exported response channel. Architectures that surface additional epistemic state between layers—such as retrieval traces, entity resolution tables, or cryptographically bound provenance—leave the text-only observation model and therefore fall outside the impossibility class. Likewise, interactive re-querying that reveals new internal state would constitute a different observation model rather than a ``stacked judge'' within this theorem.
+\end{remark}
 
 \begin{corollary}[Responsibility Concentration]
 Under a text-only observation model, epistemic honesty cannot be externally verified by users or downstream auditors. Responsibility for epistemic honesty
