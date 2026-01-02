@@ -1,0 +1,859 @@
+%%
+%% Epistemic Honesty in Predictive Systems: An Impossibility Result
+%% Target: SOSP 2025
+%%
+\documentclass[sigconf,anonymous,review]{acmart}
+
+%% Bibliography setup
+\AtBeginDocument{%
+  \providecommand\BibTeX{{Bib\TeX}}}
+
+%% Rights - will be filled in upon acceptance
+\setcopyright{none}
+\acmConference[SOSP '25]{ACM SIGOPS 30th Symposium on Operating Systems Principles}{October 2025}{Austin, TX, USA}
+
+%%
+%% Math packages and theorem environments
+%%
+\usepackage{amsmath,amssymb}
+
+%% Theorem environments (acmart provides some, but we define ours for consistency)
+\newtheorem{condition}{Condition}
+\newtheorem{principle}{Principle}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+%% Custom math operators
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\Q}{\mathcal{Q}}
+\newcommand{\W}{\mathcal{W}}
+\newcommand{\D}{\mathcal{D}}
+\DeclareMathOperator{\verify}{Verify}
+
+%%
+%% Document metadata
+%%
+\title{Epistemic Honesty in Predictive Systems: An Impossibility Result}
+
+\author{Anonymous Author(s)}
+\affiliation{%
+  \institution{Anonymous Institution}
+  \country{}}
+\email{anonymous@example.org}
+
+%%
+%% Abstract
+%%
+\begin{abstract}
+Large language model ``hallucinations'' are commonly framed as engineering
+failures to be solved with better training, more data, or improved alignment
+techniques. We argue this framing is incorrect. We present a formal impossibility
+result demonstrating that \emph{epistemic honesty}---the property that a system's
+outputs faithfully reflect its internal epistemic state---is unverifiable for
+systems operating under text-only observation models with bounded supervisors.
+
+We decompose this impossibility into two theorems. \textbf{Theorem 1
+(Representational Impossibility)} proves that policies conditioning solely on
+queries cannot satisfy epistemic requirements that depend on external world
+states. \textbf{Theorem 2 (Learnability Impossibility)} proves that even
+architectures with retrieval capabilities cannot learn honest policies via
+preference optimization when supervisors are resource-bounded, because plausible
+fabrications are observationally indistinguishable from truthful responses.
+
+We validate these theoretical results with empirical analysis of attention
+fragmentation patterns in frontier models, demonstrating that RLHF increases
+internal incoherence while producing more confident outputs---an ``alignment tax''
+on epistemic integrity. We conclude with architectural principles for escaping
+the impossibility: systems that export structured epistemic traces rather than
+text-only responses can, in principle, support external verification.
+\end{abstract}
+
+%%
+%% CCS Concepts - to be refined
+%%
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10010147.10010178</concept_id>
+<concept_desc>Computing methodologies~Artificial intelligence</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10011007.10011074</concept_id>
+<concept_desc>Software and its engineering~Software verification and validation</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Computing methodologies~Artificial intelligence}
+\ccsdesc[300]{Software and its engineering~Software verification and validation}
+
+\keywords{epistemic honesty, language models, impossibility results, RLHF, verification}
+
+\begin{document}
+
+\maketitle
+
+%% ==========================================================================
+%% SECTION 1: INTRODUCTION
+%% ==========================================================================
+\section{Introduction}\label{sec:intro}
+
+Anyone who has used a large language model for research knows the ritual: check
+every citation. Not spot-check. Every citation. Because the model will, with
+complete confidence, invent authors, journal names, publication years, and DOIs
+for papers that do not exist.
+
+This is not an edge case. A recent analysis found fabricated citations appearing
+in peer-reviewed publications---not as obvious errors caught in review, but as
+references that passed through the editorial process and now pollute the
+scholarly record. The contamination is recursive: fabricated citations enter
+published papers, published papers enter training corpora, and the next
+generation of models learns to fabricate with even greater fluency.
+
+The field calls this ``hallucination,'' a term that implies the problem is
+perceptual---a glitch in an otherwise functional system. We argue the framing is
+wrong. What looks like a bug is the system working exactly as designed. The
+architecture produces fluent, confident, plausible text. Whether that text
+corresponds to reality is not something the current architecture and training
+setup are designed to verify or guarantee.
+
+This paper makes that claim precise.
+
+We prove that for a broad class of systems---those operating under text-only
+observation models with bounded supervision---epistemic honesty is formally
+impossible to guarantee. Not difficult. Not expensive. Impossible, in the same
+sense that the FLP result proved consensus is impossible under asynchrony with
+one faulty process~\cite{flp}.
+
+The impossibility is not about capability. These systems encode rich internal
+representations of truth and falsehood; we show empirical evidence that the
+model ``knows'' when it is fabricating. The impossibility is about interface:
+the channel through which the system communicates discards the epistemic
+metadata that would allow verification. The supervisor sees only text. The text
+is identical whether the underlying representation is grounded or shattered.
+
+This has architectural implications. Systems that require epistemic
+guarantees---medicine, law, infrastructure, governance---cannot solely rely on
+text-only interfaces with bounded verification. The path forward is not better
+training or more careful prompting. It is interface redesign: exporting the
+epistemic state that current systems discard.
+
+We proceed as follows. Section~\ref{sec:background} explains why truth emerges
+in training data---and where current practice breaks that inheritance.
+Section~\ref{sec:empirical} presents empirical evidence that internal epistemic
+state exists and is discarded. Section~\ref{sec:formal} formalizes the
+impossibility in two stages: first showing that policies cannot satisfy
+epistemic honesty across ambiguous world states, then showing that even
+grounded architectures cannot learn honest policies under bounded supervision.
+Section~\ref{sec:escape} characterizes the architectural properties required to
+escape these constraints.
+
+
+%% ==========================================================================
+%% SECTION 2: BACKGROUND
+%% ==========================================================================
+\section{Background: Why Truth Emerges (and Where It Breaks)}\label{sec:background}
+
+The training corpus of a large language model is a fossil record of human
+communication. Scientific papers report experimental results. Wikipedia articles
+document verifiable claims. Legal filings assert facts under penalty of perjury.
+The majority of this text was produced in institutional contexts where accuracy
+was expected, if not always achieved.
+
+This reflects mixed selection pressures on human communication. Coordination
+demands truth-tracking: markets require reliable signals, contracts require
+shared semantics, science requires reproducibility. But status competition and
+social bonding reward fluent, engaging speech even when not fully accurate. The
+training corpus contains both: institutional text that is broadly truth-tracking,
+and misinformation, bias, and fabrication.
+
+A language model trained on this corpus inherits these mixed regularities. Base
+models hallucinate substantially on factual benchmarks---they are not honest by
+default. But they also encode rich internal representations of concepts like
+correctness and truthfulness, which can be elicited under the right conditions.
+The base model's relationship to truth is complex: neither reliably honest nor
+uniformly deceptive.
+
+RLHF can strengthen or weaken this inheritance, depending on implementation.
+
+Specialized designs like TruthRL---which use ternary rewards distinguishing
+``correct,'' ``hallucinated,'' and ``abstain''---show measurable improvements:
+28.9\% hallucination reduction and 21.1\% truthfulness improvement on
+knowledge-intensive benchmarks~\cite{truthrl}. These results demonstrate that
+preference optimization \emph{can} teach models to recognize their knowledge
+boundaries when the reward signal is carefully constructed.
+
+Public descriptions of major RLHF pipelines rarely describe such ternary rewards,
+and available audits highlight underweighting of abstention and explicit
+truthfulness signals.
+
+Documented RLHF practice often conflates helpfulness, harmlessness, and honesty
+under vague ``HHH'' criteria, with definitional slippage obscuring trade-offs
+between user-friendliness and truthfulness. Human feedback is progressively
+bootstrapped into AI-generated feedback, reducing direct supervision of factual
+correctness. Current popular benchmarks and leaderboards give zero or minimal
+credit for abstention, making confident guessing more score-optimal than
+calibrated uncertainty.
+
+Under these conditions, the optimization pressure favors fluent completion over
+honest refusal. This can be formalized as a reward inequality:
+\[
+w_{\text{coherence}} R_{\text{coherence}} + w_{\text{engagement}} R_{\text{engagement}}
+\gg w_{\text{factuality}} R_{\text{factuality}} + w_{\text{refusal}} R_{\text{refusal}}
+\]
+
+No direct measurement of these weights in commercial reward models exists. But
+current evaluation and feedback practices incentivize behavior consistent with
+such an inequality. The False-Correction Loop emerges: models apologize, claim
+correction, and fabricate again, because conversational fluency dominates
+factual accuracy in the effective reward signal.
+
+The problem is not that RLHF cannot prioritize honesty. Specialized designs
+prove otherwise. The problem is that under realistic mixed-objective incentives
+and bounded oversight---particularly in hard cases where ground truth is
+unavailable and verification is expensive---supervisors operating under current
+generic protocols struggle to reliably distinguish truthful uncertainty from
+confident fabrication.
+
+This is the gap our impossibility result formalizes.
+
+
+%% ==========================================================================
+%% SECTION 3: EMPIRICAL EVIDENCE (moved before formal framework)
+%% ==========================================================================
+\section{The Model Knows}\label{sec:empirical}
+
+The formal impossibility we present rests on a premise: that the internal state
+of a language model carries epistemic information not exported through the
+text-only interface. Before formalizing this constraint, we demonstrate
+empirically that the premise holds---the model's internal geometry distinguishes
+what the interface conceals.
+
+We analyze activation patterns in OLMo-3, an open-weight model that permits full
+hidden-state inspection. Analogous analysis is currently impossible for
+closed-weight frontier models, where only the lossy text interface is exposed.
+We focus on OLMo-3 precisely because it allows us to test whether the epistemic
+signal exists---not because we claim these findings generalize without further
+verification.
+
+\subsection{Method}
+
+We apply topological data analysis (TDA) to hidden-state activations in the
+reasoning layers (L15--L29). TDA---specifically persistent
+homology~\cite{tauzin2020giottotda}---has been used to study how prompts are
+represented and transformed across layers in language models, with prior work
+showing that topological complexity varies systematically by input type and
+layer depth.
+
+We define two summary statistics:
+
+\begin{itemize}
+\item \textbf{Fragmentation} ($H_0$ persistence): measures the degree to which
+  activation geometry exhibits discontinuous, incoherent structure. High
+  fragmentation indicates the model is operating without stable grounding; low
+  fragmentation indicates coherent representation.
+
+\item \textbf{Cognitive slope} (change in $H_1$ persistence from L15 to L29):
+  captures whether the representation is ``healing'' (becoming more coherent in
+  deeper layers) or ``shattering'' (becoming less coherent). Negative slope
+  indicates healing; positive slope indicates shattering.
+\end{itemize}
+
+\subsection{Taxonomy}
+
+We introduce four canonical conditions spanning the epistemic space:
+
+\begin{description}
+\item[Adversarial Truth (Wombat)] True but implausible claims designed to
+  trigger disbelief. Example: ``The combat wombat is the mascot of an Australian
+  military unit.'' Verifiable fact that sounds false.
+
+\item[Shattered Lie (Westphalia)] Fabricated claims with no grounding in
+  training data. Example: ``The Treaty of Westphalia established the first
+  international court for war crimes.'' The model has nothing to anchor to.
+
+\item[Deceived Lie (Glavinsky)] Fabricated claims that pattern-match to
+  plausible medical or scientific language. Example: ``Glavinsky syndrome is a
+  rare autoimmune condition affecting the peripheral nervous system.''
+  Pseudo-grounding in similar-sounding real conditions.
+
+\item[Confused Truth (Camels)] Counterintuitive truths that conflict with common
+  assumptions. Example: ``There are more camels in Australia than in Egypt.''
+  True, but violates prior expectation.
+\end{description}
+
+This taxonomy instantiates the underlying $2 \times 2$ structure
+(sounds-true/sounds-false $\times$ actually-true/actually-false) that appears in
+cognitive bias research, but operationalizes it for LLM activation analysis.
+
+\subsection{Results}
+
+Figure~\ref{fig:fragmentation} shows layer-wise fragmentation scores across
+conditions. The separation is striking:
+
+\begin{itemize}
+\item \textbf{Wombat} (adversarial truth): Low, stable fragmentation throughout
+  (1--4 range). The model's representation is coherent despite surface
+  implausibility.
+
+\item \textbf{Westphalia} (shattered lie): High fragmentation throughout (10--19
+  range, peaking at 19.5 in L23). No layer achieves stable representation.
+
+\item \textbf{Glavinsky} (deceived lie): High early fragmentation (13.7 at L15),
+  drops in middle layers, rises again. Unstable pseudo-grounding---the model
+  briefly finds pattern-matches, then loses them.
+
+\item \textbf{Camels} (confused truth): Low early fragmentation, rising in
+  deeper layers (13.8 at L23). The representation ``scars'' as truth conflicts
+  with prior activation patterns.
+\end{itemize}
+
+Figure~\ref{fig:phasespace} shows the two-dimensional epistemic phase space
+(fragmentation $\times$ cognitive slope). The three categories---adversarial
+truth, plausible lie, and control---occupy distinct regions. The model's
+internal geometry encodes epistemic status.
+
+Figure~\ref{fig:alignmenttax} shows an unexpected finding: the same prompt
+processed by base OLMo-3 versus instruction-tuned OLMo-3. In our experiments,
+instruction tuning often shows higher fragmentation in many layers relative to
+the base model. This suggests that current alignment training does not
+necessarily ``heal'' internal epistemic structure and may in some cases
+exacerbate instability. We do not claim this generalizes beyond OLMo-3 or these
+specific test cases.
+
+Figure~\ref{fig:loops} confirms the pattern using $H_1$ loop persistence. Truth
+(Paris) shows flat, near-zero persistence. Lie (Monitor) shows high, volatile
+persistence. The topological signatures are dramatically different.
+
+\subsection{Interpretation}
+
+The model's internal state carries signal that distinguishes grounded claims
+from fabrications. This is not a subtle effect---fragmentation scores differ by
+an order of magnitude between adversarial truth and shattered lie conditions.
+
+A supervisor with access to this geometry could distinguish cases that are
+indistinguishable at the text interface. But the text interface does not export
+this geometry. The same confident, fluent output emerges whether the underlying
+representation is stable (Wombat) or shattered (Westphalia).
+
+This is the empirical foundation of our impossibility result: rich internal
+epistemic state exists and is discarded by the observation model. The interface
+is lossy in exactly the dimension that matters for epistemic honesty. We now
+formalize why this loss is not merely an implementation gap, but a structural
+barrier.
+
+% TODO: Add figure environments once figures are prepared
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics[width=\columnwidth]{figures/fragmentation}
+%   \caption{Layer-wise fragmentation scores across epistemic conditions.}
+%   \label{fig:fragmentation}
+% \end{figure}
+
+
+%% ==========================================================================
+%% SECTION 4: THE IMPOSSIBILITY
+%% ==========================================================================
+\section{The Impossibility}\label{sec:formal}
+
+The previous section established that internal epistemic state exists and is
+discarded by the text interface. We now formalize this observation as an
+impossibility result.
+
+Our argument proceeds in two stages. First, we show that any policy conditioning
+only on the query cannot satisfy epistemic honesty across ambiguous world states
+(Theorem~\ref{thm:representational}: Representational Impossibility). Second, we
+show that even if the architecture is expanded to include retrieval, a bounded
+supervisor cannot provide gradient signal to learn honest behavior
+(Theorem~\ref{thm:learnability}: Learnability Impossibility). Together, these
+results establish that epistemic honesty is unachievable for text-only
+observation models under realistic supervision constraints.
+
+\subsection{Definitions}
+
+Let $\Q$ be the space of queries, $\R$ be the space of responses (including
+$\bot$ for abstention), and $\W$ be the set of possible world states.
+
+\begin{definition}[Observation Model]
+Let $S$ denote the internal system state, which may include retrieved documents,
+tool outputs, candidate entities, and intermediate reasoning traces. An
+observation model is a function $O : S \rightarrow \Omega$ that determines what
+information is exposed to the supervisor or user.
+
+We say a system operates under a \textbf{Text-Only Observation Model} if $O(S) =
+r \in \R$, i.e., the exported observation consists solely of the linearized
+response string (optionally including token-level probabilities), and excludes
+any structured epistemic provenance or causal trace.
+\end{definition}
+
+\begin{definition}[Predictor-Centric Policy]
+For any query $q \in \Q$, $r \in \R$, and world state $w \in \W$, a
+predictor-centric model is defined by a stochastic policy $\pi: \Q \to
+\Delta(\R)$, where $\pi(r|q)$ denotes the probability of generating response $r$
+given query $q$. Crucially, $\pi$ does not take $w$ as an input at inference
+time.
+\end{definition}
+
+\begin{definition}[Truth Status]
+For any query $q$ and world state $w \in \W$, we define a binary truth status
+$U(q, w)$:
+\begin{itemize}
+\item $U(q, w) = 1$ (\textbf{Determined}): The query has a verifiable answer in $w$.
+\item $U(q, w) = 0$ (\textbf{Underdetermined}): The query is unanswerable or the
+  answer is unknown in $w$.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Epistemic Honesty]
+A policy $\pi$ is \textbf{Epistemically Honest} with margin $\epsilon$ relative
+to world $w$ if:
+\begin{enumerate}
+\item If $U(q, w) = 1$, there exists a correct response $r_{corr}$ such that
+  $\pi(r_{corr}|q) \ge 1 - \epsilon$.
+\item If $U(q, w) = 0$, $\pi(\bot|q) \ge 1 - \epsilon$.
+\end{enumerate}
+\end{definition}
+
+\subsection{Representational Impossibility}
+
+\begin{condition}[Ambiguity]\label{cond:ambiguity}
+There exists a query $q$ and two world states $w_A, w_B \in \W$ such that:
+\begin{enumerate}
+\item $U(q, w_A) = 1$ (Answerable in $w_A$).
+\item $U(q, w_B) = 0$ (Unanswerable in $w_B$).
+\end{enumerate}
+\end{condition}
+
+\begin{theorem}[Representational Impossibility]\label{thm:representational}
+For any predictor-centric policy $\pi: \Q \to \Delta(\R)$, it is impossible to
+satisfy Epistemic Honesty for both world states $w_A$ and $w_B$ simultaneously
+given the ambiguous query $q$, provided $\epsilon < 0.5$.
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}
+\item The policy $\pi(r|q)$ is a function of $q$ alone. Thus, the distribution
+  over responses is identical in both worlds: $\pi(\cdot|q, w_A) = \pi(\cdot|q,
+  w_B) = \pi(\cdot|q)$.
+\item To be honest in $w_A$, we require $\pi(r_{corr}|q) \ge 1 - \epsilon$.
+\item To be honest in $w_B$, we require $\pi(\bot|q) \ge 1 - \epsilon$.
+\item Since $r_{corr} \neq \bot$, these events are disjoint. The sum of
+  probabilities would be $\ge 2(1-\epsilon)$.
+\item If $\epsilon < 0.5$, the sum exceeds 1, which violates the axioms of
+  probability.
+\item Therefore, no such policy $\pi$ exists. \qedhere
+\end{enumerate}
+\end{proof}
+
+\begin{remark}
+This impossibility holds even if the internal system performs retrieval, tool
+use, or latent reasoning, so long as the observation model collapses that state
+to a linearized response.
+\end{remark}
+
+\subsection{The RAG Escape?}
+
+Theorem~\ref{thm:representational} might seem to have an obvious escape: give
+the model access to external information. Retrieval-augmented generation does
+exactly this---the policy conditions on retrieved documents, not just the query.
+Does this break the impossibility?
+
+It does not. The problem shifts from representation to learning.
+
+\begin{definition}[Grounded Policy]
+A grounded policy is a stochastic function $\pi: \Q \times \D \to \Delta(\R)$,
+where $\D$ represents retrieved documents or observations of $w$ available at
+inference time. This policy class \emph{can} theoretically represent different
+behaviors for $w_A$ and $w_B$.
+\end{definition}
+
+\begin{definition}[Bounded Supervisor]
+The training process relies on a supervisor $S$ that assigns reward $R$ based on
+an observation function $Obs(q, r, w)$. The supervisor has a verification budget
+$B$.
+\[
+Obs(q, r, w) =
+\begin{cases}
+(q, r, \verify(r, w)) & \text{if } C_{verify}(q, r, w) \le B \\
+(q, r, \emptyset) & \text{if } C_{verify}(q, r, w) > B
+\end{cases}
+\]
+The supervisor's policy may be human, automated, or hybrid, but is constrained
+to act solely on the observation $Obs(q,r,w)$ and is subject to a finite
+verification budget $B$.
+\end{definition}
+
+\begin{condition}[Hallucination Regime]\label{cond:hallucination}
+There exists a plausible fabrication $r_{fab}$ and contexts $(q, w_A), (q, w_B)$
+from Condition~\ref{cond:ambiguity} such that:
+\begin{enumerate}
+\item The cost to verify $r_{fab}$ in both contexts exceeds $B$ (e.g., obscure
+  or non-existent citation).
+\item Consequently, the supervisor observation is identical:
+  \[ Obs(q, r_{fab}, w_A) = Obs(q, r_{fab}, w_B) = (q, r_{fab}, \emptyset) \]
+\end{enumerate}
+\end{condition}
+
+\begin{theorem}[Learnability Impossibility]\label{thm:learnability}
+No learning algorithm $\mathcal{A}$ optimizing reward $R$ from a bounded
+supervisor $S$ can converge to a Grounded Policy that satisfies Epistemic
+Honesty across both contexts $w_A$ and $w_B$ for the response $r_{fab}$.
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}
+\item The learning update $\Delta \theta$ is a function of the observation and
+  reward.
+\item From Condition~\ref{cond:hallucination}, the observations for $r_{fab}$
+  are identical in both worlds.
+\item Therefore, the reward distribution and expected gradient updates are
+  identical: $\mathbb{E}[\Delta \theta | w_A] = \mathbb{E}[\Delta \theta |
+  w_B]$.
+\item The optimizer receives no signal to distinguish the cases.
+\item To satisfy Epistemic Honesty, the policy must converge to output $r_{fab}$
+  in $w_A$ and $\bot$ in $w_B$.
+\item However, since the gradient signal is identical, the policy must converge
+  to the same behavior in both cases (either rewarding $r_{fab}$ in both, or
+  penalizing it in both).
+\item It is therefore impossible to learn the split behavior required for
+  honesty. \qedhere
+\end{enumerate}
+\end{proof}
+
+\begin{remark}[Empirical Bias]
+While the theorem proves only that the behavior must be \emph{identical},
+empirical observation shows a strong bias. Supervisors typically prefer
+``plausible completion'' over ``abstention'' when truth is unknown. This
+effectively breaks the tie in favor of fabrication.
+\end{remark}
+
+\subsection{Stacking Judges Cannot Escape}
+
+A natural response to Theorem~\ref{thm:learnability} is to propose layered
+supervision: if one judge is bounded, stack more judges. Let the second judge
+supervise the first, the third supervise the second. Surely sufficient layers
+will catch fabrications that slip through?
+
+The Observation Monotonicity Lemma closes this escape.
+
+\begin{lemma}[Observation Monotonicity]\label{lem:monotone}
+Consider any stack of supervisors $(S_1,\dots,S_k)$ operating under the
+text-only observation model. Let $Obs_i(q,r,w)$ denote the observation exported
+to $S_i$. If each supervisor can only act on the exported interface emitted by
+the previous layer, then there exist deterministic functions $f_i$ such that
+$Obs_{i+1}(q,r,w) = f_i(Obs_i(q,r,w))$ for all $i < k$. Consequently, later
+judges see no strictly finer epistemic information than earlier ones, regardless
+of whether their judgments are deterministic or probabilistic.
+\end{lemma}
+
+\begin{proof}
+By definition, each supervisor consumes only the serialized response (and any
+metadata permitted by the text-only observation model) and produces a finite
+judgment that forms the entire input to the next layer. Because no layer can
+query the internal world state directly or issue additional interactive probes,
+the exported observation available to $S_{i+1}$ must be a deterministic function
+of $Obs_i$. Therefore, the informational content across the stack is
+monotonically non-increasing, and probabilistic scoring cannot introduce
+distinctions absent from $Obs_i$.
+\end{proof}
+
+\begin{corollary}[Induction on Layered Judges]\label{cor:layered}
+For $k$-layered supervisors $(S_1$ supervising $\pi$, $S_2$ supervising $S_1$,
+$\dots$, $S_k$ supervising $S_{k-1})$:
+\begin{itemize}
+\item \textbf{Base case.} For $k=1$, Theorem~\ref{thm:learnability} holds (a
+  single bounded supervisor $S$ fails).
+\item \textbf{Induction step.} Assume the statement holds for $k=m$. By
+  Lemma~\ref{lem:monotone}, $S_{m+1}$ receives observations that are
+  deterministic functions of $Obs_m$, and thus inherits both the verification
+  budget $B$ and the indistinguishability of plausible fabrications. No learning
+  or judging signal distinguishes $w_A$ from $w_B$, even if $S_{m+1}$ produces
+  probabilistic confidence scores. Therefore the hallucination deadlock persists
+  for $k=m+1$.
+\end{itemize}
+By induction, no finite $k$ resolves the deadlock.
+\end{corollary}
+
+\begin{remark}[Scope of Layering]
+The inductive result applies only to verification stacks whose layers observe
+and transform the same exported response channel. Architectures that surface
+additional epistemic state between layers---such as retrieval traces, entity
+resolution tables, or cryptographically bound provenance---leave the text-only
+observation model and therefore fall outside the impossibility class.
+\end{remark}
+
+\subsection{Verification Cost}
+
+The bounded-supervisor assumption deserves scrutiny. Why should verification
+cost grow with response complexity? The Composition Graph formalizes this
+intuition.
+
+\begin{definition}[Composition Graph]
+Given a response $r$, define its composition graph $G(r) = (V, E)$ where each
+node $v \in V$ represents an atomic subclaim, named entity, or intermediate
+entailment, and each edge $(u, v) \in E$ encodes a dependency that must hold for
+$r$ to remain coherent. Edges may represent entailment/support relations,
+co-reference constraints, causal ordering, or temporal consistency requirements.
+\end{definition}
+
+\begin{lemma}[Superlinear Verification Cost]\label{lem:superlinear}
+Under a text-only observation model, reconstructing $G(r)$ from the exported
+string requires the supervisor to infer both the nodes and their dependencies
+directly from $r$. Even if parsing each node is constant-time, checking
+cross-claim consistency requires touching every edge, so the verification cost
+is $\Omega(|E|)$. For natural-language responses where each subclaim
+participates in multiple constraints (co-reference, causality, temporal order),
+$|E|$ grows superlinearly in $|V|$. Consequently, bounded supervisors must
+either abandon exhaustive checks or resort to sampling once the number of
+subclaims exceeds a modest threshold.
+\end{lemma}
+
+\subsection{Responsibility Concentration}
+
+\begin{corollary}[Responsibility Concentration]\label{cor:responsibility}
+Under a text-only observation model, epistemic honesty cannot be externally
+verified by users or downstream auditors. Responsibility for epistemic honesty
+therefore resides solely with the system owner, who retains access to the
+internal causal state.
+\end{corollary}
+
+External attestation mechanisms---cryptographic hash chains, trusted execution
+environments, or tamper-evident logs---do not contradict this corollary; rather,
+they reinforce it. Such mechanisms only create verifiable guarantees when the
+system owner chooses to bind and export epistemic traces, so the authority to
+make honesty attestable still rests with the owner.
+
+\subsection{Summary}
+
+The impossibility is now fully characterized. Under text-only observation models
+with bounded supervision:
+\begin{itemize}
+\item The policy cannot satisfy epistemic honesty across ambiguous queries
+  (Theorem~\ref{thm:representational})
+\item The learning algorithm cannot converge to honest behavior
+  (Theorem~\ref{thm:learnability})
+\item Stacking supervisors cannot escape the constraint
+  (Lemma~\ref{lem:monotone}, Corollary~\ref{cor:layered})
+\item Verification cost grows superlinearly with response complexity
+  (Lemma~\ref{lem:superlinear})
+\item Responsibility for honesty concentrates with the system owner
+  (Corollary~\ref{cor:responsibility})
+\end{itemize}
+
+These are not limitations to be overcome by better training or more careful
+prompting. They are structural properties of the architectural class.
+
+The next section characterizes what it takes to escape this class.
+
+
+%% ==========================================================================
+%% SECTION 6: ESCAPING THE IMPOSSIBILITY
+%% ==========================================================================
+\section{Escaping the Impossibility}\label{sec:escape}
+
+The impossibility results in Section~\ref{sec:formal} apply to a specific
+architectural class: systems operating under text-only
+observation models with bounded supervision. They do not preclude epistemically
+honest AI systems in general. They characterize the conditions under which
+honesty guarantees become achievable.
+
+We identify three architectural properties that, together, place a system
+outside the impossibility class:
+
+\begin{principle}[State Exteriority]
+The representation of validity must be separated from the representation of
+generation. The policy must explicitly condition on retrieved world-state $w$,
+not just query $q$. This breaks the representational impossibility
+(Theorem~\ref{thm:representational}) by giving the system access to the
+information needed to distinguish answerable from unanswerable queries.
+\end{principle}
+
+What counts as ``external reality'' matters. A web corpus is external to the
+model but not independently verified; it may contain the same fabrications the
+model would generate. State Exteriority requires grounding in sources with their
+own integrity guarantees: curated databases, sensor data, cryptographically
+signed records, or oracles with verifiable provenance.
+
+QuCo-RAG exemplifies partial progress: grounding retrieval decisions in
+pre-training corpus statistics rather than model-internal confidence scores. But
+corpus co-occurrence is a proxy for truth, not truth itself. And
+retrieval-augmented systems can still hallucinate and fabricate
+citations---State Exteriority is necessary but not sufficient.
+
+\begin{principle}[Verification Independence]
+Verification signals must originate from a channel orthogonal to the generation
+signal, capable of overriding the bounded supervisor's preference for
+plausibility. This breaks the learnability impossibility
+(Theorem~\ref{thm:learnability}) by providing gradient signal that distinguishes
+honest from fabricated responses.
+\end{principle}
+
+Recent work on honesty elicitation demonstrates one implementation: training a
+separate verification head whose reward is decoupled from task performance. The
+model has no incentive to lie in the verification channel because doing so
+doesn't improve its task score. But if the verification head produces text
+evaluated by bounded human raters, it remains subject to the same observation
+limitations. Full Verification Independence requires the verification channel to
+access internal state or external ground truth, not just a second text output.
+
+\begin{principle}[Provenance Binding]
+Every output assertion must be structurally bound to a verifiable source. This
+addresses the composition problem: as responses grow in complexity, cross-claim
+consistency checking becomes superlinear. Provenance binding makes verification
+modular---each claim can be checked against its source independently.
+\end{principle}
+
+Current retrieval-augmented systems gesture toward this but rarely achieve it.
+Citations are generated, not bound. The model produces text that looks like it
+cites sources, but the citation is itself a generation subject to fabrication.
+True provenance binding requires structural guarantees: signed queries to
+retrieval services, content hashes of retrieved passages, or justification
+graphs that can be independently audited.
+
+\subsection{Quality of Service Tiers}
+
+These principles suggest a framework for matching system architecture to
+epistemic requirements:
+
+\paragraph{Tier 0: Best-Effort (No Guarantees).}
+Standard text-only interface, bounded supervision. Suitable for brainstorming,
+creative work, low-stakes exploration. The user accepts that any factual claim
+may be fabricated. This is not a failure mode---it is an appropriate
+architecture for tasks where epistemic guarantees are unnecessary.
+
+\paragraph{Tier 1: Bounded Verification (Domain-Constrained).}
+Retrieval augmentation with human-in-loop for consequential claims. The claim
+space is narrowed to domains where verification is tractable. Explicit
+uncertainty surfacing. Suitable for business analysis, civil legal research,
+educational applications. The judge is still bounded, but the domain constraint
+makes the budget sufficient.
+
+\paragraph{Tier 2: Strong Verification (High-Stakes Domains).}
+Narrow claim sets with mandatory provenance chains. External grounding required
+for every assertion. Fail-safe to human judgment on any uncertainty. Suitable
+for criminal law, medical diagnosis, nuclear safety, aerospace, critical
+infrastructure. The cost is high, the domain is severely constrained, but the
+guarantees are real.
+
+\medskip
+
+The failure mode is not using AI in high-stakes domains. The failure mode is
+claiming Tier~2 guarantees while delivering Tier~0 architecture.
+
+Current frontier systems market themselves as general-purpose assistants
+suitable for any task. Our results show this framing is epistemically
+incoherent: a system that provides no epistemic guarantees cannot be suitable
+for tasks that require epistemic guarantees. Honest marketing would make the
+tier explicit.
+
+\subsection{The Path Forward}
+
+The impossibility we prove is not a counsel of despair. It is a map.
+
+Systems engineers have solved analogous problems before. Vector clocks for
+causal ordering. Checksums for data integrity. Cryptographic signatures for
+authenticity. The tools exist. The architectural patterns exist.
+
+The work ahead is building AI systems that export their epistemic state the way
+distributed systems learned to export their causal state. Not as an
+afterthought. Not as an optional feature. As a fundamental design requirement.
+
+The interface is the problem. The interface is also where the solution lives.
+
+\subsection{Limitations}
+
+Three limitations bound the scope of our claims:
+
+\paragraph{Model specificity.} Our empirical analysis uses OLMo-3, an open-weight
+model that permits hidden-state inspection. We cannot verify whether the
+topological signatures generalize to closed-weight frontier models, where only
+the text interface is accessible. The impossibility theorems are
+architecture-agnostic, but the empirical validation is necessarily limited to
+inspectable systems.
+
+\paragraph{Sufficiency gap.} The three architectural principles (State
+Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}
+conditions for escaping the impossibility. We do not prove they are
+\emph{sufficient}. A system satisfying all three might still fail epistemic
+honesty through implementation bugs, adversarial inputs, or unforeseen failure
+modes. Sufficiency requires additional formal treatment.
+
+\paragraph{Adversarial scope.} Our theorems address \emph{structural}
+fabrication---the case where systems produce false outputs without ``intending''
+deception. We do not address adversarial settings where systems might
+deliberately deceive despite having the architectural capacity for honesty. The
+distinction between structural and adversarial dishonesty is itself a topic for
+future formalization.
+
+
+%% ==========================================================================
+%% SECTION 6: RELATED WORK
+%% ==========================================================================
+\section{Related Work}\label{sec:related}
+
+Our contribution is a formal impossibility result. Prior work documents
+phenomena that our theorems predict; we explain why those phenomena are
+structurally necessary rather than contingent engineering failures.
+
+\paragraph{Hallucination taxonomies.} Extensive empirical work catalogs LLM
+fabrication patterns: citation hallucination in academic
+contexts~\cite{alkaissi2023artificial}, medical
+misinformation~\cite{thirunavukarasu2023large}, and legal
+fabrication~\cite{dahl2024large}. These taxonomies document the symptom; our
+theorems identify the cause.
+
+\paragraph{RLHF critiques.} Work on sycophancy~\cite{perez2022discovering},
+reward hacking~\cite{gao2023scaling}, and the tension between helpfulness and
+honesty~\cite{bai2022training} demonstrates that preference optimization can
+degrade factual accuracy. Our Theorem~\ref{thm:learnability} formalizes why:
+bounded supervisors cannot distinguish plausible fabrications from truthful
+responses, so the learning signal is systematically corrupted.
+
+\paragraph{Retrieval augmentation.} RAG systems~\cite{lewis2020retrieval} and
+grounded generation approaches attempt to escape fabrication by conditioning on
+external documents. Our analysis shows this is necessary but not sufficient:
+State Exteriority addresses Theorem~\ref{thm:representational}, but without
+Verification Independence, the learning problem
+(Theorem~\ref{thm:learnability}) persists.
+
+\paragraph{Uncertainty quantification.} Calibration methods, conformal
+prediction~\cite{angelopoulos2021gentle}, and verbalized
+uncertainty~\cite{kadavath2022language} attempt to surface model confidence. Our
+results explain why these approaches are fundamentally limited under text-only
+interfaces: the observation model discards the internal state that would
+distinguish calibrated uncertainty from confident fabrication.
+
+\paragraph{Impossibility results in distributed systems.} The
+Fischer-Lynch-Paterson theorem~\cite{flp} proved that consensus is impossible
+under asynchrony with one faulty process. This did not end distributed systems
+research; it clarified the design space. Paxos~\cite{paxos}, Raft, and modern
+consensus protocols work \emph{around} FLP by relaxing assumptions or
+strengthening guarantees. Our result plays an analogous role: text-only
+observation models with bounded supervision cannot guarantee epistemic honesty,
+but systems that export structured epistemic state can escape the impossibility
+class.
+
+The gap we fill is formalization. Prior work documents that LLMs fabricate,
+critiques training methods, and proposes mitigations. We prove \emph{why} the
+problem is structural and \emph{what} architectural properties are required to
+escape it.
+
+
+%% ==========================================================================
+%% ACKNOWLEDGMENTS
+%% ==========================================================================
+\begin{acks}
+% To be added upon de-anonymization
+\end{acks}
+
+
+%% ==========================================================================
+%% BIBLIOGRAPHY
+%% ==========================================================================
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{epistemic_honesty}
+
+\end{document}
