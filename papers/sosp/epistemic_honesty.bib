@@ -18,43 +18,48 @@
 %% Distributed Systems Impossibility Results
 %% ==========================================================================
 
-@inproceedings{flp,
-  author    = {Fischer, Michael J. and Lynch, Nancy A. and Paterson, Michael S.},
-  title     = {Impossibility of Distributed Consensus with One Faulty Process},
-  booktitle = {Proceedings of the 2nd ACM SIGACT-SIGMOD Symposium on Principles of Database Systems},
-  year      = {1983},
-  pages     = {1--7},
-  publisher = {ACM}
+@article{flp,
+  title={Impossibility of distributed consensus with one faulty process},
+  author={Fischer, Michael J and Lynch, Nancy A and Paterson, Michael S},
+  journal={Journal of the ACM (JACM)},
+  volume={32},
+  number={2},
+  pages={374--382},
+  year={1985},
+  publisher={ACM New York, NY, USA}
 }
 
 @article{paxos,
-  author    = {Lamport, Leslie},
-  title     = {The Part-Time Parliament},
-  journal   = {ACM Transactions on Computer Systems},
-  volume    = {16},
-  number    = {2},
-  pages     = {133--169},
-  year      = {1998}
+author = {Lamport, Leslie},
+title = {The Part-Time Parliament},
+year = {1998},
+month = {May},
+url = {https://www.microsoft.com/en-us/research/publication/part-time-parliament/},
+journal = {ACM Transactions on Computer Systems 16, 2 (May 1998), 133-169. Also appeared as SRC Research Report 49. This paper was first submitted in 1990, setting a personal record for publication delay that has since been broken by [60].},
+edition = {ACM Transactions on Computer Systems 16, 2 (May 1998), 133-169. Also appeared as SRC Research Report 49. This paper was first submitted in 1990, setting a personal record for publication delay that has since been broken by [60].},
+note = {ACM SIGOPS Hall of Fame Award in 2012},
 }
 
 @inproceedings{raft,
-  author    = {Ongaro, Diego and Ousterhout, John},
-  title     = {In Search of an Understandable Consensus Algorithm},
-  booktitle = {USENIX Annual Technical Conference},
-  year      = {2014},
-  pages     = {305--319}
+  title={In search of an understandable consensus algorithm},
+  author={Ongaro, Diego and Ousterhout, John},
+  booktitle={2014 USENIX annual technical conference (USENIX ATC 14)},
+  pages={305--319},
+  year={2014}
 }
 
 %% ==========================================================================
 %% Alignment and RLHF
 %% ==========================================================================
 
-@article{truthrl,
-  author    = {TruthRL Authors},
-  title     = {TruthRL: Towards Trustful Dialogue Generation},
-  journal   = {arXiv preprint},
-  year      = {2024},
-  note      = {[TODO: Add proper citation]}
+@misc{truthrl,
+      title={TruthRL: Incentivizing Truthful LLMs via Reinforcement Learning},
+      author={Zhepei Wei and Xiao Yang and Kai Sun and Jiaqi Wang and Rulin Shao and Sean Chen and Mohammad Kachuee and Teja Gollapudi and Tony Liao and Nicolas Scheffer and Rakesh Wanga and Anuj Kumar and Yu Meng and Wen-tau Yih and Xin Luna Dong},
+      year={2025},
+      eprint={2509.25760},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2509.25760},
 }
 
 %% ==========================================================================
@@ -62,65 +67,75 @@
 %% ==========================================================================
 
 @article{alkaissi2023artificial,
-  author  = {Alkaissi, Hussam and McFarlane, Samy I.},
-  title   = {Artificial Hallucinations in {ChatGPT}: Implications in Scientific Writing},
-  journal = {Cureus},
-  volume  = {15},
-  number  = {2},
-  year    = {2023}
+  title={Artificial hallucinations in ChatGPT: implications in scientific writing},
+  author={Alkaissi, Hussam and McFarlane, Samy I},
+  journal={Cureus},
+  volume={15},
+  number={2},
+  year={2023},
+  publisher={Cureus}
 }
 
 @article{thirunavukarasu2023large,
-  author  = {Thirunavukarasu, Arun James and others},
-  title   = {Large Language Models in Medicine},
-  journal = {Nature Medicine},
-  volume  = {29},
-  pages   = {1930--1940},
-  year    = {2023}
+  title={Large language models in medicine},
+  author={Thirunavukarasu, Arun James and Ting, Darren Shu Jeng and Elangovan, Kabilan and Gutierrez, Laura and Tan, Ting Fang and Ting, Daniel Shu Wei},
+  journal={Nature medicine},
+  volume={29},
+  number={8},
+  pages={1930--1940},
+  year={2023},
+  publisher={Nature Publishing Group US New York}
 }
 
 @article{dahl2024large,
-  author  = {Dahl, Matthew and others},
-  title   = {Large Legal Fictions: Profiling Legal Hallucinations in Large Language Models},
-  journal = {Journal of Legal Analysis},
-  year    = {2024},
-  note    = {Forthcoming}
+  title={Large legal fictions: Profiling legal hallucinations in large language models},
+  author={Dahl, Matthew and Magesh, Varun and Suzgun, Mirac and Ho, Daniel E},
+  journal={Journal of Legal Analysis},
+  volume={16},
+  number={1},
+  pages={64--93},
+  year={2024},
+  publisher={Oxford University Press UK}
 }
 
 %% ==========================================================================
 %% RLHF and Alignment Critiques
 %% ==========================================================================
 
-@article{perez2022discovering,
-  author  = {Perez, Ethan and others},
-  title   = {Discovering Language Model Behaviors with Model-Written Evaluations},
-  journal = {arXiv preprint arXiv:2212.09251},
-  year    = {2022}
+@inproceedings{perez2022discovering,
+  title={Discovering language model behaviors with model-written evaluations},
+  author={Perez, Ethan and Ringer, Sam and Lukosiute, Kamile and Nguyen, Karina and Chen, Edwin and Heiner, Scott and Pettit, Craig and Olsson, Catherine and Kundu, Sandipan and Kadavath, Saurav and others},
+  booktitle={Findings of the association for computational linguistics: ACL 2023},
+  pages={13387--13434},
+  year={2023}
 }
 
-@article{gao2023scaling,
-  author  = {Gao, Leo and others},
-  title   = {Scaling Laws for Reward Model Overoptimization},
-  journal = {Proceedings of ICML},
-  year    = {2023}
+@inproceedings{gao2023scaling,
+  title={Scaling laws for reward model overoptimization},
+  author={Gao, Leo and Schulman, John and Hilton, Jacob},
+  booktitle={International Conference on Machine Learning},
+  pages={10835--10866},
+  year={2023},
+  organization={PMLR}
 }
-
 @article{bai2022training,
-  author  = {Bai, Yuntao and others},
-  title   = {Training a Helpful and Harmless Assistant with Reinforcement Learning from Human Feedback},
-  journal = {arXiv preprint arXiv:2204.05862},
-  year    = {2022}
+  title={Training a helpful and harmless assistant with reinforcement learning from human feedback},
+  author={Bai, Yuntao and Jones, Andy and Ndousse, Kamal and Askell, Amanda and Chen, Anna and DasSarma, Nova and Drain, Dawn and Fort, Stanislav and Ganguli, Deep and Henighan, Tom and others},
+  journal={arXiv preprint arXiv:2204.05862},
+  year={2022}
 }
 
 %% ==========================================================================
 %% Retrieval and Grounding
 %% ==========================================================================
 
-@inproceedings{lewis2020retrieval,
-  author    = {Lewis, Patrick and others},
-  title     = {Retrieval-Augmented Generation for Knowledge-Intensive {NLP} Tasks},
-  booktitle = {Advances in Neural Information Processing Systems},
-  year      = {2020}
+@article{lewis2020retrieval,
+  title={Retrieval-augmented generation for knowledge-intensive nlp tasks},
+  author={Lewis, Patrick and Perez, Ethan and Piktus, Aleksandra and Petroni, Fabio and Karpukhin, Vladimir and Goyal, Naman and K{\"u}ttler, Heinrich and Lewis, Mike and Yih, Wen-tau and Rockt{\"a}schel, Tim and others},
+  journal={Advances in neural information processing systems},
+  volume={33},
+  pages={9459--9474},
+  year={2020}
 }
 
 %% ==========================================================================
@@ -128,20 +143,33 @@
 %% ==========================================================================
 
 @article{angelopoulos2021gentle,
-  author  = {Angelopoulos, Anastasios N. and Bates, Stephen},
-  title   = {A Gentle Introduction to Conformal Prediction and Distribution-Free Uncertainty Quantification},
-  journal = {arXiv preprint arXiv:2107.07511},
-  year    = {2021}
+  title={A gentle introduction to conformal prediction and distribution-free uncertainty quantification},
+  author={Angelopoulos, Anastasios N and Bates, Stephen},
+  journal={arXiv preprint arXiv:2107.07511},
+  year={2021}
 }
 
 @article{kadavath2022language,
-  author  = {Kadavath, Saurav and others},
-  title   = {Language Models (Mostly) Know What They Know},
-  journal = {arXiv preprint arXiv:2207.05221},
-  year    = {2022}
+  title={Language models (mostly) know what they know},
+  author={Kadavath, Saurav and Conerly, Tom and Askell, Amanda and Henighan, Tom and Drain, Dawn and Perez, Ethan and Schiefer, Nicholas and Hatfield-Dodds, Zac and DasSarma, Nova and Tran-Johnson, Eli and others},
+  journal={arXiv preprint arXiv:2207.05221},
+  year={2022}
 }
+
+%% ==========================================================================
+%% Impossibility Results in LLMs
+%% ==========================================================================
+
+@misc{xu2024hallucination,
+  title={Hallucination is Inevitable: An Innate Limitation of Large Language Models},
+  author={Ziwei Xu and Sanjay Jain and Mohan Kankanhalli},
+  year={2024},
+  eprint={2401.11817},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL}
+}
+
 
 %% TODO: Add citations for:
 %% - TruthfulQA benchmark
 %% - Turpin et al. on CoT faithfulness
-%% - QuCo-RAG

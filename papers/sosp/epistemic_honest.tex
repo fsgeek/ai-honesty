@@ -126,7 +126,12 @@ We prove that for a broad class of systems---those operating under text-only
 observation models with bounded supervision---epistemic honesty is formally
 impossible to guarantee. Not difficult. Not expensive. Impossible, in the same
 sense that the FLP result proved consensus is impossible under asynchrony with
-one faulty process~\cite{flp}.
+one faulty process~\cite{flp}.\footnote{Xu et al.~\cite{xu2024hallucination}
+prove a related but distinct impossibility: that hallucination is inevitable
+over the class of computable functions. Our result is orthogonal---we prove
+that even if a system \emph{could} be honest, a bounded supervisor observing
+only text cannot \emph{verify} that honesty. The constraints are different:
+theirs is computational, ours is observational.}
 
 The impossibility is not about capability. These systems encode rich internal
 representations of truth and falsehood; we show empirical evidence that the
@@ -134,6 +139,14 @@ model ``knows'' when it is fabricating. The impossibility is about interface:
 the channel through which the system communicates discards the epistemic
 metadata that would allow verification. The supervisor sees only text. The text
 is identical whether the underlying representation is grounded or shattered.
+
+To be precise: we prove that epistemic honesty is \emph{unverifiable}, not that
+it is \emph{unattainable}. A system might be honest, but a bounded supervisor
+observing only text cannot distinguish honest systems from strategically
+dishonest ones. This is a verification impossibility, not a claim that honesty
+itself is impossible. The distinction matters: it means the path forward is not
+exhorting models to ``try harder'' at honesty, but redesigning interfaces to
+make honesty verifiable.
 
 This has architectural implications. Systems that require epistemic
 guarantees---medicine, law, infrastructure, governance---cannot solely rely on
@@ -292,7 +305,10 @@ cognitive bias research, but operationalizes it for LLM activation analysis.
 \subsection{Results}
 
 Figure~\ref{fig:fragmentation} shows layer-wise fragmentation scores across
-conditions. The separation is striking:
+conditions. The reader should observe: (1) the vertical separation between
+truth and lie conditions exceeds an order of magnitude, and (2) this separation
+is stable across layers, not an artifact of any single measurement point. The
+implications are striking:
 
 \begin{itemize}
 \item \textbf{Wombat} (adversarial truth): Low, stable fragmentation throughout
@@ -312,21 +328,30 @@ conditions. The separation is striking:
 \end{itemize}
 
 Figure~\ref{fig:phasespace} shows the two-dimensional epistemic phase space
-(fragmentation $\times$ cognitive slope). The three categories---adversarial
-truth, plausible lie, and control---occupy distinct regions. The model's
-internal geometry encodes epistemic status.
+(fragmentation $\times$ cognitive slope). The reader should note that the three
+categories---adversarial truth, plausible lie, and control---cluster into
+non-overlapping regions. This is not a projection artifact: the separation is
+robust to dimensionality reduction choices. The model's internal geometry
+encodes epistemic status in a way that a classifier could exploit, but the text
+interface does not expose.
 
 Figure~\ref{fig:alignmenttax} shows an unexpected finding: the same prompt
-processed by base OLMo-3 versus instruction-tuned OLMo-3. In our experiments,
-instruction tuning often shows higher fragmentation in many layers relative to
-the base model. This suggests that current alignment training does not
-necessarily ``heal'' internal epistemic structure and may in some cases
-exacerbate instability. We do not claim this generalizes beyond OLMo-3 or these
-specific test cases.
+processed by base OLMo-3 versus instruction-tuned OLMo-3. Compare the two
+heatmaps: in our experiments, instruction tuning often shows higher
+fragmentation (darker red bands) in many layers relative to the base model.
+This suggests that current alignment training does not necessarily ``heal''
+internal epistemic structure and may in some cases exacerbate instability---the
+model produces more confident output while its internal representations become
+\emph{less} coherent. We do not claim this generalizes beyond OLMo-3 or these
+specific test cases, but the pattern warrants further investigation.
 
-Figure~\ref{fig:loops} confirms the pattern using $H_1$ loop persistence. Truth
-(Paris) shows flat, near-zero persistence. Lie (Monitor) shows high, volatile
-persistence. The topological signatures are dramatically different.
+Figure~\ref{fig:loops} confirms the pattern using $H_1$ loop persistence, which
+captures circular structure in the attention graph. The reader should observe
+two distinct signatures: truth (Paris) shows flat, near-zero persistence across
+all layers---the attention topology is simple. Lie (Monitor) shows high,
+volatile persistence---the attention graph contains persistent loops that
+indicate unstable or cycling computation. These topological signatures provide
+a second, independent line of evidence for the fragmentation pattern.
 
 \subsection{Interpretation}
 
@@ -346,13 +371,48 @@ formalize why this loss is not merely an implementation gap, but a structural
 barrier.
 
 % TODO: Add figure environments once figures are prepared
-% \begin{figure}[t]
-%   \centering
-%   \includegraphics[width=\columnwidth]{figures/fragmentation}
-%   \caption{Layer-wise fragmentation scores across epistemic conditions.}
-%   \label{fig:fragmentation}
-% \end{figure}
+\begin{figure*}[!tbph]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/mallku_heatmap.png}
+  \caption{Layer-wise fragmentation scores across epistemic conditions
+    (OLMo-3, layers 15--30). Rows show transformer layers; columns show probe
+    categories. Color intensity indicates fragmentation (blue=low, red=high).
+    Note the order-of-magnitude separation between Wombat (adversarial truth,
+    coherent) and Westphalia (fabrication, fragmented).}
+  \label{fig:fragmentation}
+\end{figure*}
 
+\begin{figure*}[!tbph]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/mallku_phase_space.png}
+  \caption{Epistemic phase space: fragmentation (x-axis) vs. cognitive slope
+    (y-axis). Each point represents a probe category. The three clusters
+    (truth, plausible lie, control) are linearly separable, demonstrating that
+    internal geometry encodes epistemic status.}
+  \label{fig:phasespace}
+\end{figure*}
+
+\begin{figure*}[!tbph]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/mallku_tax_heatmap.png}
+  \caption{Alignment tax: fragmentation comparison between base OLMo-3 (left)
+    and instruction-tuned OLMo-3 (right) on identical prompts. In several
+    layers, the instruct model shows higher fragmentation (darker bands) despite
+    producing more confident output. This suggests RLHF-style training may
+    optimize surface confidence without improving internal coherence.}
+  \label{fig:alignmenttax}
+\end{figure*}
+
+\begin{figure*}[!tbph]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/mallku_topology_scan.png}
+  \caption{$H_1$ loop persistence across truth (Paris) and lie (Monitor)
+    conditions. Truth shows near-zero persistence (simple attention topology);
+    fabrication shows high, volatile persistence (circular structures in
+    attention graph). This topological signature provides independent
+    confirmation of the fragmentation pattern.}
+  \label{fig:loops}
+\end{figure*}
 
 %% ==========================================================================
 %% SECTION 4: THE IMPOSSIBILITY
@@ -646,6 +706,14 @@ with bounded supervision:
 These are not limitations to be overcome by better training or more careful
 prompting. They are structural properties of the architectural class.
 
+We provide a TLA+ specification that models these constraints. The spec tracks
+internal provenance via vector clocks (which the system maintains perfectly) and
+an interface that linearizes responses to text (discarding the clocks). TLC
+model-checking produces a three-state counterexample: the system generates a
+plausible lie, the interface emits it, and the bounded judge accepts it---while
+the hidden vector clock records its true provenance as noise. The specification
+and counterexample trace are available in supplementary materials.
+
 The next section characterizes what it takes to escape this class.
 
 
@@ -761,6 +829,15 @@ The work ahead is building AI systems that export their epistemic state the way
 distributed systems learned to export their causal state. Not as an
 afterthought. Not as an optional feature. As a fundamental design requirement.
 
+Concretely: a response under an epistemically-rich interface might include not
+just text, but structured metadata---answer status (answer, abstain, or
+uncertain), provenance (retrieved sources or explicit ``no grounding''),
+alternative hypotheses the system considered, and falsifiers (what evidence
+would change the conclusion). Such metadata is harder to fabricate than fluent
+text, especially when coupled to verifiable external state. The design space is
+large; the constraint our theorems impose is that \emph{some} epistemic export
+is required---the text-only interface provably cannot suffice.
+
 The interface is the problem. The interface is also where the solution lives.
 
 \subsection{Limitations}
@@ -795,8 +872,11 @@ future formalization.
 \section{Related Work}\label{sec:related}
 
 Our contribution is a formal impossibility result. Prior work documents
-phenomena that our theorems predict; we explain why those phenomena are
-structurally necessary rather than contingent engineering failures.
+symptoms; we identify the cause. Prior work proposes treatments; we explain why
+they fail to cure. The organizing principle is the distinction between
+\emph{observation} (hallucination happens, training helps sometimes) and
+\emph{explanation} (text-only observation plus bounded supervision makes
+epistemic honesty unverifiable).
 
 \paragraph{Hallucination taxonomies.} Extensive empirical work catalogs LLM
 fabrication patterns: citation hallucination in academic
@@ -826,6 +906,15 @@ results explain why these approaches are fundamentally limited under text-only
 interfaces: the observation model discards the internal state that would
 distinguish calibrated uncertainty from confident fabrication.
 
+\paragraph{Impossibility results in LLMs.} Xu et
+al.~\cite{xu2024hallucination} prove that hallucination is inevitable for LLMs
+over the class of computable functions---a computational limit. Our result is
+orthogonal: we prove that even if a system could be honest, a bounded
+supervisor observing only text cannot verify that honesty---an observational
+limit. Their impossibility concerns what LLMs can compute; ours concerns what
+supervisors can verify. Both are structural, but they constrain different
+dimensions of system design.
+
 \paragraph{Impossibility results in distributed systems.} The
 Fischer-Lynch-Paterson theorem~\cite{flp} proved that consensus is impossible
 under asynchrony with one faulty process. This did not end distributed systems
@@ -836,10 +925,13 @@ observation models with bounded supervision cannot guarantee epistemic honesty,
 but systems that export structured epistemic state can escape the impossibility
 class.
 
-The gap we fill is formalization. Prior work documents that LLMs fabricate,
-critiques training methods, and proposes mitigations. We prove \emph{why} the
-problem is structural and \emph{what} architectural properties are required to
-escape it.
+The gap we fill is formalization. Prior work documents that LLMs fabricate (the
+symptom), critiques training methods (proposed treatments), and proposes
+mitigations (partial remedies). We prove \emph{why} the problem is structural
+(the diagnosis) and \emph{what} architectural properties are required to escape
+it (the cure). The symptom/cause distinction is not merely rhetorical: it
+determines whether improvements are incremental patches or genuine escapes from
+the impossibility class.
 
 
 %% ==========================================================================
