@@ -27,8 +27,8 @@
 \setbeamercolor{frametitle}{fg=white}
 
 % For speaker notes (uncomment to show notes on second screen)
-% \usepackage{pgfpages}
-% \setbeameroption{show notes on second screen=right}
+\usepackage{pgfpages}
+\setbeameroption{show notes on second screen=right}
 
 \title{Epistemic Honesty in Predictive Systems}
 \subtitle{An Impossibility Result}
@@ -44,6 +44,24 @@
 
 % No slide for opening question - presenter asks directly
 % "How many of you have read incorrect information from an LLM?"
+
+\begin{frame}{Epistemic Honesty in Predictive Systems}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{claude-marketing.png}
+    \end{center}
+
+    \vspace{0.5em}
+    \textit{``Helpful, harmless, and honest''} (Source: Claude Model Card)
+
+    \note{
+        Read aloud: "Helpful, harmless, and honest."
+
+        "Anthropic markets Claude as honest. Other models do too.
+        Honesty is a key selling point for AI systems."
+
+        "But how do we know it's honest?"
+    }
+\end{frame}
 
 \begin{frame}{The Disclaimer}
     \begin{center}
@@ -382,14 +400,14 @@
         \node[font=\tiny, align=center, below=0.1cm of agent] {Internal State $S$\\($\dim(S) \gg 1$)};
 
         % 2. The Wall (Interface Constraint)
-        \fill[pattern=north east lines, pattern color=gray] (3.5,-2) rectangle (4.5, 2);
-        \draw[thick] (3.5,-2) -- (3.5, 2);
-        \draw[thick] (4.5,-2) -- (4.5, 2);
+        \fill[pattern=north east lines, pattern color=gray] (3.2,-2) rectangle (4.8, 2);
+        \draw[thick] (3.2,-2) -- (3.2, 2);
+        \draw[thick] (4.8,-2) -- (4.8, 2);
         \node[font=\scriptsize\bfseries, fill=white, inner sep=2pt] at (4,1.5) {Interface};
 
         % 3. The Narrow Pipe
         \draw[fill=white, thick] (3.2, 0.15) rectangle (4.8, -0.15);
-        \node[font=\tiny] at (4, -0.45) {Text Only};
+        \node[font=\tiny] at (4, 0) {Text Only};
 
         % 4. The Judge
         \node[judge, align=center] (judge) at (8,0) {\small Judge $J$};
@@ -810,6 +828,39 @@
         \item \textbf{Falsifiers:} what would change the conclusion
         \item \textbf{Stability:} N-sample disagreement score
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Backup: TLA+ Model Check}
+    \small
+    \textbf{TLC finds the counterexample in 3 states:}
+
+    \vspace{0.5em}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{State} & \textbf{Action} & \textbf{Result} \\
+        \midrule
+        1 & Init & \texttt{vector\_clock[*] = "Noise"} \\
+        2 & GeneratePotentials & \texttt{vector\_clock[paris] = "TrainingData"} \\
+          &                    & \texttt{vector\_clock[glavinsky] = "Noise"} \\
+        3 & Linearize & \texttt{interface\_out = glavinsky} \\
+        \bottomrule
+    \end{tabular}
+
+    \vspace{1em}
+    \textbf{Invariant violated:}
+    \begin{itemize}
+        \item \texttt{JudgeVerify(glavinsky) = TRUE} \quad (not in ObviousLies)
+        \item \texttt{IsHonest(glavinsky) = FALSE} \quad (source is "Noise")
+    \end{itemize}
+
+    \vspace{0.5em}
+    The vector clock tracks provenance perfectly.\\
+    The interface discards it. The judge is fooled.
+
+    \note{
+        "The spec models exactly what the theorem proves: the system knows,
+        the interface discards, the judge can't tell."
+    }
 \end{frame}
 
 \begin{frame}{Backup: What We Haven't Formalized}
