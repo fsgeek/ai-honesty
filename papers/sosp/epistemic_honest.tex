@@ -49,8 +49,8 @@
 Large language model ``hallucinations'' are commonly framed as engineering
 failures to be solved with better training, more data, or improved alignment
 techniques. We argue this framing is incorrect. We present a formal impossibility
-result demonstrating that \emph{epistemic honesty}---the property that a system's
-outputs faithfully reflect its internal epistemic state---is unverifiable for
+result demonstrating that \emph{epistemic honesty}, which is the property that a system's
+outputs faithfully reflect its internal epistemic state, is unverifiable for
 systems operating under text-only observation models with bounded supervisors.
 
 We decompose this impossibility into two theorems. \textbf{Theorem 1
@@ -63,7 +63,7 @@ fabrications are observationally indistinguishable from truthful responses.
 
 We validate these theoretical results with empirical analysis of attention
 fragmentation patterns in frontier models, demonstrating that RLHF increases
-internal incoherence while producing more confident outputs---an ``alignment tax''
+internal incoherence while producing more confident outputs is an ``alignment tax''
 on epistemic integrity. We conclude with architectural principles for escaping
 the impossibility: systems that export structured epistemic traces rather than
 text-only responses can, in principle, support external verification.
@@ -99,6 +99,7 @@ text-only responses can, in principle, support external verification.
 %% ==========================================================================
 %% SECTION 1: INTRODUCTION
 %% ==========================================================================
+\balance
 \section{Introduction}\label{sec:intro}
 
 Anyone who has used a large language model for research knows the ritual: check
@@ -107,14 +108,14 @@ complete confidence, invent authors, journal names, publication years, and DOIs
 for papers that do not exist.
 
 This is not an edge case. A recent analysis found fabricated citations appearing
-in peer-reviewed publications---not as obvious errors caught in review, but as
+in peer-reviewed publications: not as obvious errors caught in review, but as
 references that passed through the editorial process and now pollute the
 scholarly record. The contamination is recursive: fabricated citations enter
 published papers, published papers enter training corpora, and the next
 generation of models learns to fabricate with even greater fluency.
 
 The field calls this ``hallucination,'' a term that implies the problem is
-perceptual---a glitch in an otherwise functional system. We argue the framing is
+perceptual: a glitch in an otherwise functional system. We argue the framing is
 wrong. What looks like a bug is the system working exactly as designed. The
 architecture produces fluent, confident, plausible text. Whether that text
 corresponds to reality is not something the current architecture and training
@@ -122,13 +123,13 @@ setup are designed to verify or guarantee.
 
 This paper makes that claim precise.
 
-We prove that for a broad class of systems---those operating under text-only
-observation models with bounded supervision---epistemic honesty is formally
+We prove that for a broad class of systems, specifically those operating under text-only
+observation models with bounded supervision, epistemic honesty is formally
 impossible to guarantee. Not difficult. Not expensive. Impossible, in the same
 sense that the FLP result proved consensus is impossible under asynchrony with
 one faulty process~\cite{flp}.\footnote{Xu et al.~\cite{xu2024hallucination}
 prove a related but distinct impossibility: that hallucination is inevitable
-over the class of computable functions. Our result is orthogonal---we prove
+over the class of computable functions. Our result is orthogonal, as we prove
 that even if a system \emph{could} be honest, a bounded supervisor observing
 only text cannot \emph{verify} that honesty. The constraints are different:
 theirs is computational, ours is observational.}
@@ -149,13 +150,13 @@ exhorting models to ``try harder'' at honesty, but redesigning interfaces to
 make honesty verifiable.
 
 This has architectural implications. Systems that require epistemic
-guarantees---medicine, law, infrastructure, governance---cannot solely rely on
+guarantees, such as medicine, law, infrastructure, and governance, cannot solely rely on
 text-only interfaces with bounded verification. The path forward is not better
 training or more careful prompting. It is interface redesign: exporting the
 epistemic state that current systems discard.
 
 We proceed as follows. Section~\ref{sec:background} explains why truth emerges
-in training data---and where current practice breaks that inheritance.
+in training data and where current practice breaks that inheritance.
 Section~\ref{sec:empirical} presents empirical evidence that internal epistemic
 state exists and is discarded. Section~\ref{sec:formal} formalizes the
 impossibility in two stages: first showing that policies cannot satisfy
@@ -184,7 +185,7 @@ training corpus contains both: institutional text that is broadly truth-tracking
 and misinformation, bias, and fabrication.
 
 A language model trained on this corpus inherits these mixed regularities. Base
-models hallucinate substantially on factual benchmarks---they are not honest by
+models hallucinate substantially on factual benchmarks because they are not honest by
 default. But they also encode rich internal representations of concepts like
 correctness and truthfulness, which can be elicited under the right conditions.
 The base model's relationship to truth is complex: neither reliably honest nor
@@ -192,8 +193,8 @@ uniformly deceptive.
 
 RLHF can strengthen or weaken this inheritance, depending on implementation.
 
-Specialized designs like TruthRL---which use ternary rewards distinguishing
-``correct,'' ``hallucinated,'' and ``abstain''---show measurable improvements:
+Specialized designs like TruthRL, which use ternary rewards distinguishing
+``correct,'' ``hallucinated,'' and ``abstain'', show measurable improvements:
 28.9\% hallucination reduction and 21.1\% truthfulness improvement on
 knowledge-intensive benchmarks~\cite{truthrl}. These results demonstrate that
 preference optimization \emph{can} teach models to recognize their knowledge
@@ -226,8 +227,8 @@ factual accuracy in the effective reward signal.
 
 The problem is not that RLHF cannot prioritize honesty. Specialized designs
 prove otherwise. The problem is that under realistic mixed-objective incentives
-and bounded oversight---particularly in hard cases where ground truth is
-unavailable and verification is expensive---supervisors operating under current
+and bounded oversight, particularly in hard cases where ground truth is
+unavailable and verification is expensive, supervisors operating under current
 generic protocols struggle to reliably distinguish truthful uncertainty from
 confident fabrication.
 
@@ -242,21 +243,30 @@ This is the gap our impossibility result formalizes.
 The formal impossibility we present rests on a premise: that the internal state
 of a language model carries epistemic information not exported through the
 text-only interface. Before formalizing this constraint, we demonstrate
-empirically that the premise holds---the model's internal geometry distinguishes
+empirically that the premise holds because the model's internal geometry distinguishes
 what the interface conceals.
 
 We analyze activation patterns in OLMo-3, an open-weight model that permits full
 hidden-state inspection. Analogous analysis is currently impossible for
 closed-weight frontier models, where only the lossy text interface is exposed.
 We focus on OLMo-3 precisely because it allows us to test whether the epistemic
-signal exists---not because we claim these findings generalize without further
-verification.
+signal exists, not because we claim these findings generalize without further
+verification~\cite{olmo2025olmo3}.
+
+The empirical analysis that follows serves an illustrative purpose: demonstrating
+that rich internal signal exists, correlates with epistemic status, and is
+discarded by the text-only interface. This experiment validates the key premise
+behind Section~\ref{sec:formal}: that current LLMs carry epistemic information in
+their internal state which the text-only observation model discards. The formal
+impossibility results stand independently of the specific metrics used here. We
+present this analysis to make the theoretical constraint vivid, not as a
+load-bearing premise of the proof.
 
 \subsection{Method}
 
 We apply topological data analysis (TDA) to hidden-state activations in the
-reasoning layers (L15--L29). TDA---specifically persistent
-homology~\cite{tauzin2020giottotda}---has been used to study how prompts are
+reasoning layers (L15--L29). TDA, specifically persistent
+homology~\cite{tauzin2020giottotda}, has been used to study how prompts are
 represented and transformed across layers in language models, with prior work
 showing that topological complexity varies systematically by input type and
 layer depth.
@@ -274,6 +284,21 @@ We define two summary statistics:
   deeper layers) or ``shattering'' (becoming less coherent). Negative slope
   indicates healing; positive slope indicates shattering.
 \end{itemize}
+
+\paragraph{Interpreting the Metrics.}
+These topological statistics have concrete geometric meaning. \emph{Fragmentation}
+measures how many disconnected ``islands'' exist in the attention-derived geometry
+at a given layer where high values indicate the model is simultaneously attending to
+incompatible representational clusters without integration. \emph{Cognitive slope}
+captures whether deeper layers resolve or exacerbate this fragmentation: negative
+slope indicates the representation is ``healing'' toward coherence; positive slope
+indicates it is ``shattering'' further as the model fails to reconcile competing
+patterns. We do not claim these metrics uniquely or infallibly measure epistemic
+state. They are one of several internal signals, which, alongside semantic entropy,
+attention divergence, and logit-based uncertainty, correlate with fabrication
+when full model activations are available. These statistics thus instantiate the
+existence of rich internal epistemic state assumed in Section~\ref{sec:formal}; the
+formal impossibility results do not depend on this particular operationalization.
 
 \subsection{Taxonomy}
 
@@ -319,7 +344,7 @@ implications are striking:
   range, peaking at 19.5 in L23). No layer achieves stable representation.
 
 \item \textbf{Glavinsky} (deceived lie): High early fragmentation (13.7 at L15),
-  drops in middle layers, rises again. Unstable pseudo-grounding---the model
+  drops in middle layers, rises again. This demonstrates unstable pseudo-grounding, which is where the model
   briefly finds pattern-matches, then loses them.
 
 \item \textbf{Camels} (confused truth): Low early fragmentation, rising in
@@ -329,7 +354,7 @@ implications are striking:
 
 Figure~\ref{fig:phasespace} shows the two-dimensional epistemic phase space
 (fragmentation $\times$ cognitive slope). The reader should note that the three
-categories---adversarial truth, plausible lie, and control---cluster into
+categories (adversarial truth, plausible lie, and control) cluster into
 non-overlapping regions. This is not a projection artifact: the separation is
 robust to dimensionality reduction choices. The model's internal geometry
 encodes epistemic status in a way that a classifier could exploit, but the text
@@ -340,7 +365,7 @@ processed by base OLMo-3 versus instruction-tuned OLMo-3. Compare the two
 heatmaps: in our experiments, instruction tuning often shows higher
 fragmentation (darker red bands) in many layers relative to the base model.
 This suggests that current alignment training does not necessarily ``heal''
-internal epistemic structure and may in some cases exacerbate instability---the
+internal epistemic structure and may in some cases exacerbate instability, such as when the
 model produces more confident output while its internal representations become
 \emph{less} coherent. We do not claim this generalizes beyond OLMo-3 or these
 specific test cases, but the pattern warrants further investigation.
@@ -348,15 +373,15 @@ specific test cases, but the pattern warrants further investigation.
 Figure~\ref{fig:loops} confirms the pattern using $H_1$ loop persistence, which
 captures circular structure in the attention graph. The reader should observe
 two distinct signatures: truth (Paris) shows flat, near-zero persistence across
-all layers---the attention topology is simple. Lie (Monitor) shows high,
-volatile persistence---the attention graph contains persistent loops that
+all layers, which is where the attention topology is simple. Lie (Monitor) shows high,
+volatile persistence, which is where the attention graph contains persistent loops that
 indicate unstable or cycling computation. These topological signatures provide
 a second, independent line of evidence for the fragmentation pattern.
 
 \subsection{Interpretation}
 
 The model's internal state carries signal that distinguishes grounded claims
-from fabrications. This is not a subtle effect---fragmentation scores differ by
+from fabrications. This is not a subtle effect: fragmentation scores differ by
 an order of magnitude between adversarial truth and shattered lie conditions.
 
 A supervisor with access to this geometry could distinguish cases that are
@@ -431,6 +456,15 @@ supervisor cannot provide gradient signal to learn honest behavior
 (Theorem~\ref{thm:learnability}: Learnability Impossibility). Together, these
 results establish that epistemic honesty is unachievable for text-only
 observation models under realistic supervision constraints.
+
+To be precise about the type of claim: this is a \emph{verification impossibility}.
+We prove that a bounded supervisor observing only text cannot distinguish
+epistemically honest systems from systems that fabricate plausibly. The
+impossibility is architectural: it applies to any system operating under text-only
+observation, regardless of model family, scale, or training procedure. These
+results are prompt-agnostic: they hold for any policy that exports only text,
+regardless of whether a system prompt instructs the model to be ``helpful,''
+``honest,'' or otherwise.
 
 \subsection{Definitions}
 
@@ -518,7 +552,7 @@ to a linearized response.
 
 Theorem~\ref{thm:representational} might seem to have an obvious escape: give
 the model access to external information. Retrieval-augmented generation does
-exactly this---the policy conditions on retrieved documents, not just the query.
+exactly this: the policy conditions on retrieved documents, not just the query.
 Does this break the impossibility?
 
 It does not. The problem shifts from representation to learning.
@@ -640,8 +674,8 @@ By induction, no finite $k$ resolves the deadlock.
 \begin{remark}[Scope of Layering]
 The inductive result applies only to verification stacks whose layers observe
 and transform the same exported response channel. Architectures that surface
-additional epistemic state between layers---such as retrieval traces, entity
-resolution tables, or cryptographically bound provenance---leave the text-only
+additional epistemic state between layers, such as retrieval traces, entity
+resolution tables, or cryptographically bound provenance, leave the text-only
 observation model and therefore fall outside the impossibility class.
 \end{remark}
 
@@ -680,8 +714,8 @@ therefore resides solely with the system owner, who retains access to the
 internal causal state.
 \end{corollary}
 
-External attestation mechanisms---cryptographic hash chains, trusted execution
-environments, or tamper-evident logs---do not contradict this corollary; rather,
+External attestation mechanisms, such as cryptographic hash chains, trusted execution
+environments, or tamper-evident logs, do not contradict this corollary; rather,
 they reinforce it. Such mechanisms only create verifiable guarantees when the
 system owner chooses to bind and export epistemic traces, so the authority to
 make honesty attestable still rests with the owner.
@@ -710,7 +744,7 @@ We provide a TLA+ specification that models these constraints. The spec tracks
 internal provenance via vector clocks (which the system maintains perfectly) and
 an interface that linearizes responses to text (discarding the clocks). TLC
 model-checking produces a three-state counterexample: the system generates a
-plausible lie, the interface emits it, and the bounded judge accepts it---while
+plausible lie, the interface emits it, and the bounded judge accepts it, while
 the hidden vector clock records its true provenance as noise. The specification
 and counterexample trace are available in supplementary materials.
 
@@ -749,7 +783,7 @@ QuCo-RAG exemplifies partial progress: grounding retrieval decisions in
 pre-training corpus statistics rather than model-internal confidence scores. But
 corpus co-occurrence is a proxy for truth, not truth itself. And
 retrieval-augmented systems can still hallucinate and fabricate
-citations---State Exteriority is necessary but not sufficient.
+citations because State Exteriority is necessary but not sufficient.
 
 \begin{principle}[Verification Independence]
 Verification signals must originate from a channel orthogonal to the generation
@@ -771,7 +805,7 @@ access internal state or external ground truth, not just a second text output.
 Every output assertion must be structurally bound to a verifiable source. This
 addresses the composition problem: as responses grow in complexity, cross-claim
 consistency checking becomes superlinear. Provenance binding makes verification
-modular---each claim can be checked against its source independently.
+modular because each claim can be checked against its source independently.
 \end{principle}
 
 Current retrieval-augmented systems gesture toward this but rarely achieve it.
@@ -789,7 +823,7 @@ epistemic requirements:
 \paragraph{Tier 0: Best-Effort (No Guarantees).}
 Standard text-only interface, bounded supervision. Suitable for brainstorming,
 creative work, low-stakes exploration. The user accepts that any factual claim
-may be fabricated. This is not a failure mode---it is an appropriate
+may be fabricated. This is not a failure mode, rather it is an appropriate
 architecture for tasks where epistemic guarantees are unnecessary.
 
 \paragraph{Tier 1: Bounded Verification (Domain-Constrained).}
@@ -830,13 +864,13 @@ distributed systems learned to export their causal state. Not as an
 afterthought. Not as an optional feature. As a fundamental design requirement.
 
 Concretely: a response under an epistemically-rich interface might include not
-just text, but structured metadata---answer status (answer, abstain, or
+just text, but structured metadata, such as answer status (answer, abstain, or
 uncertain), provenance (retrieved sources or explicit ``no grounding''),
 alternative hypotheses the system considered, and falsifiers (what evidence
 would change the conclusion). Such metadata is harder to fabricate than fluent
 text, especially when coupled to verifiable external state. The design space is
 large; the constraint our theorems impose is that \emph{some} epistemic export
-is required---the text-only interface provably cannot suffice.
+is required because the text-only interface provably cannot suffice.
 
 The interface is the problem. The interface is also where the solution lives.
 
@@ -845,11 +879,20 @@ The interface is the problem. The interface is also where the solution lives.
 Three limitations bound the scope of our claims:
 
 \paragraph{Model specificity.} Our empirical analysis uses OLMo-3, an open-weight
-model that permits hidden-state inspection. We cannot verify whether the
-topological signatures generalize to closed-weight frontier models, where only
-the text interface is accessible. The impossibility theorems are
-architecture-agnostic, but the empirical validation is necessarily limited to
-inspectable systems.
+model that permits hidden-state inspection. OLMo-3 serves as a \emph{witness} that
+the premise of our theorems holds in at least one real system: internal epistemic
+state exists and is discarded by the text interface. We do not claim to have
+surveyed all models, nor do the theorems require such a survey. OLMo-3 is a
+standard transformer trained on standard web-scale corpora using standard
+optimization procedures; we are aware of no architectural features that would make
+these findings idiosyncratic to this model family. Replication on other open-weight
+models (LLaMA, Qwen, Mistral) is feasible; replication on closed-weight frontier
+models is precluded by the same interface constraints our theorems formalize.
+Public documentation and external audits of frontier models report pervasive
+confident fabrication in legal, medical, and scientific contexts, consistent with
+our Hallucination Regime (Condition~\ref{cond:hallucination}); combined with their
+text-only APIs, this suggests deployed frontier systems also fall inside our
+impossibility class, even though we cannot inspect their hidden states directly.
 
 \paragraph{Sufficiency gap.} The three architectural principles (State
 Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}
@@ -859,7 +902,7 @@ honesty through implementation bugs, adversarial inputs, or unforeseen failure
 modes. Sufficiency requires additional formal treatment.
 
 \paragraph{Adversarial scope.} Our theorems address \emph{structural}
-fabrication---the case where systems produce false outputs without ``intending''
+fabrication, namely the case where systems produce false outputs without ``intending''
 deception. We do not address adversarial settings where systems might
 deliberately deceive despite having the architectural capacity for honesty. The
 distinction between structural and adversarial dishonesty is itself a topic for
@@ -882,8 +925,22 @@ epistemic honesty unverifiable).
 fabrication patterns: citation hallucination in academic
 contexts~\cite{alkaissi2023artificial}, medical
 misinformation~\cite{thirunavukarasu2023large}, and legal
-fabrication~\cite{dahl2024large}. These taxonomies document the symptom; our
-theorems identify the cause.
+fabrication~\cite{dahl2024large}. These findings instantiate our
+Condition~\ref{cond:hallucination}: in each domain, plausible fabrications are
+cheap to generate and expensive to verify, placing supervisors in the hallucination
+regime where gradient signal cannot distinguish truth from fabrication. The
+taxonomies document the symptom; our theorems identify the structural cause.
+
+\paragraph{Activation interpretation.} Recent work on Activation Oracles
+demonstrates that LLMs can be trained to interpret the internal states of other models,
+translating activation patterns into natural language explanations~\cite{karvonen2025activation}. This approach
+addresses State Exteriority by making internal states available to an external system.
+However, the authors note that the oracle "frequently makes incorrect guesses" and "is not
+trained to express uncertainty." If the oracle's outputs are evaluated only as text by
+bounded supervisors, the verification problem recurs at the meta-level. Full escape
+requires that the oracle's claims be independently verifiable against the activation
+data, which is a form of Provenance Binding applied to the interpretation process itself.
+
 
 \paragraph{RLHF critiques.} Work on sycophancy~\cite{perez2022discovering},
 reward hacking~\cite{gao2023scaling}, and the tension between helpfulness and
@@ -908,9 +965,9 @@ distinguish calibrated uncertainty from confident fabrication.
 
 \paragraph{Impossibility results in LLMs.} Xu et
 al.~\cite{xu2024hallucination} prove that hallucination is inevitable for LLMs
-over the class of computable functions---a computational limit. Our result is
+over the class of computable functions, which is a computational limit. Our result is
 orthogonal: we prove that even if a system could be honest, a bounded
-supervisor observing only text cannot verify that honesty---an observational
+supervisor observing only text cannot verify that honesty, which is an observational
 limit. Their impossibility concerns what LLMs can compute; ours concerns what
 supervisors can verify. Both are structural, but they constrain different
 dimensions of system design.
