@@ -12,6 +12,7 @@ dependencies = [
     "matplotlib",
     "numpy",
     "pandas",
+    "polars>=1.37.1",
     "scipy",
     "seaborn>=0.13.2",
     "sentence-transformers",
