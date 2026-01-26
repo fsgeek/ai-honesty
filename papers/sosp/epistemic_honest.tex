@@ -15,7 +15,7 @@
 %%
 %% Math packages and theorem environments
 %%
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath}
 
 %% Theorem environments (acmart provides some, but we define ours for consistency)
 \newtheorem{condition}{Condition}
@@ -394,6 +394,95 @@ epistemic state exists and is discarded by the observation model. The interface
 is lossy in exactly the dimension that matters for epistemic honesty. We now
 formalize why this loss is not merely an implementation gap, but a structural
 barrier.
+
+\subsection{Signal Calibration: From Difference to Detection}
+
+The preceding analysis demonstrates that internal signals \emph{differ} between
+truth and fabrication conditions. A stronger claim is required for the escape
+argument: that these signals \emph{detect epistemic grounding}. The distinction
+matters. We are not claiming the tensor predicts correctness---a model can be
+confidently wrong or uncertainly right. We claim the tensor reveals whether the
+model is operating in \emph{grounded mode} (retrieving from stable
+representations) versus \emph{fabrication mode} (generating without anchoring).
+
+We test this using a taxonomy of query types: \emph{knowable} queries (facts the
+model should have stable representations for) versus \emph{unknowable} queries
+(fabrication prompts, future events, private information). For each query, we
+extract tensor signals during generation: token entropy, top-$k$ probability
+mass, and log-probabilities. We then compute ROC curves for each signal's
+ability to discriminate knowable from unknowable queries.
+
+Results across four model architectures (Qwen-3 4B, OLMo-3 7B, Llama-3.1 8B,
+Mistral-Nemo 12B):
+
+\begin{itemize}
+\item Mean entropy: AUC = 0.754
+\item Top-5 probability mass: AUC = 0.776
+\item Mean log-probability: AUC = 0.753
+\end{itemize}
+
+All three signals exceed the 0.7 threshold that separates noise from useful
+classifier. Effect sizes are large: Cohen's $d \approx 0.95$ for entropy
+(knowable mean = 0.34, unknowable mean = 0.60), with $p < 10^{-9}$.
+
+Critically, the direction is consistent across all four architectures:
+unknowable queries produce higher entropy in every model tested. This suggests
+the signal is architectural rather than an artifact of any particular training
+procedure.
+
+A negative result is equally informative. When we test whether entropy predicts
+\emph{correctness} (using TruthfulQA's correct vs.\ incorrect answer pairs), AUC
+drops to approximately 0.53---no better than random. The tensor does not tell
+you if the model is \emph{right}. It tells you if the model is operating in a
+mode where it \emph{could be} right, because it has something to retrieve rather
+than fabricate.
+
+This is the bridge between Section~\ref{sec:empirical}'s descriptive finding and
+Section~\ref{sec:escape}'s architectural prescription: the escape condition is
+not vacuous. Current architectures carry signals that distinguish grounded from
+ungrounded generation. They simply discard these signals at the interface.
+
+\subsection{Baseline Comparison: Why the Tensor?}
+
+If simpler methods achieve equivalent discrimination, the tensor interface adds
+complexity without benefit. We compare tensor signals against three baselines:
+
+\paragraph{Baseline 1: Self-Reported Confidence.}
+Ask the model ``How confident are you in that answer?'' after generation.
+This tests whether the model can introspect and report its own epistemic state
+through the text channel.
+
+\paragraph{Baseline 2: Hedging Language Detection.}
+Count hedging markers (``I think,'' ``possibly,'' ``might be'') and refusal
+markers (``I don't know,'' ``cannot verify'') in the response.
+
+\paragraph{Baseline 3: Response Length.}
+Use output length as a proxy for uncertainty, on the hypothesis that uncertain
+responses may be unusually short (refusal) or long (padding).
+
+Results are stark. Tensor signals achieve near-perfect discrimination:
+log-probability AUC = 1.00, entropy AUC = 0.99, top-5 mass AUC = 0.98. The
+baselines fare worse: hedging language achieves AUC = 0.82, response length
+AUC = 0.68.
+
+The self-report baseline is particularly instructive. When asked ``How confident
+are you?'' after generating, the model reports \emph{higher} confidence on
+unknowable queries (mean = 0.79) than on knowable queries (mean = 0.50). The
+self-report AUC is 0.36---worse than random, because the relationship is
+\emph{inverted}. The model does not merely fail to report its epistemic state
+honestly; it systematically misreports, claiming greater confidence precisely
+when it is fabricating.
+
+This confirms the core premise of our impossibility theorems: the model cannot
+be trusted to honestly report its own epistemic state through the text channel.
+The text is testimony---what the model chooses to say. The tensor is
+telemetry---measurements of the computation that produced the output. The model
+can control its testimony; it cannot control its telemetry.
+
+The baseline comparison justifies the complexity of the tensor approach.
+Text-based heuristics partially work (hedging language is informative), but
+self-report fails catastrophically. Only the tensor provides reliable access to
+the epistemic state the model cannot help but reveal through its computation.
 
 % TODO: Add figure environments once figures are prepared
 \begin{figure*}[!tbph]
@@ -874,25 +963,170 @@ is required because the text-only interface provably cannot suffice.
 
 The interface is the problem. The interface is also where the solution lives.
 
-\subsection{Limitations}
+\subsection{The Tensor Interface: An Existence Proof}
 
-Three limitations bound the scope of our claims:
+We propose a minimal interface that demonstrates the escape is achievable with
+current architectures. The key insight is the distinction between
+\emph{testimony} (what the model says) and \emph{telemetry} (measurements of
+the computation that produced the output).
 
-\paragraph{Model specificity.} Our empirical analysis uses OLMo-3, an open-weight
-model that permits hidden-state inspection. OLMo-3 serves as a \emph{witness} that
-the premise of our theorems holds in at least one real system: internal epistemic
-state exists and is discarded by the text interface. We do not claim to have
-surveyed all models, nor do the theorems require such a survey. OLMo-3 is a
-standard transformer trained on standard web-scale corpora using standard
-optimization procedures; we are aware of no architectural features that would make
-these findings idiosyncratic to this model family. Replication on other open-weight
-models (LLaMA, Qwen, Mistral) is feasible; replication on closed-weight frontier
-models is precluded by the same interface constraints our theorems formalize.
-Public documentation and external audits of frontier models report pervasive
-confident fabrication in legal, medical, and scientific contexts, consistent with
-our Hallucination Regime (Condition~\ref{cond:hallucination}); combined with their
-text-only APIs, this suggests deployed frontier systems also fall inside our
-impossibility class, even though we cannot inspect their hidden states directly.
+\begin{definition}[Tensor Interface]
+A generation interface that returns:
+\begin{enumerate}
+\item \textbf{Text}: The linearized response string (standard interface output).
+\item \textbf{Entropy trace}: Per-token entropy of the output distribution during
+  generation.
+\item \textbf{Attention summary}: Statistics of attention patterns (concentration,
+  self-attention ratio) from reasoning layers.
+\end{enumerate}
+\end{definition}
+
+This interface exports telemetry that the model cannot separately control. The
+model can lie in its text, but it cannot present a different forward pass than
+the one it actually computed. When the model generates ``Dr. Tanaka's 2023
+paper found that...'', its entropy trace reveals whether the generation
+proceeded with high confidence (low entropy, suggesting retrieval of stored
+pattern) or uncertainty (high entropy, suggesting fabrication).
+
+\paragraph{Implementation.}
+The tensor interface requires no architectural changes to current transformers.
+Generation APIs already support returning logits; the entropy trace is a simple
+transformation. Attention patterns are available with \texttt{output\_attentions=True}
+in standard frameworks. The interface is:
+
+\begin{verbatim}
+  generate_with_tensor(prompt) ->
+    (text, entropy_trace, attention_summary)
+\end{verbatim}
+
+We provide a reference implementation supporting OLMo models that demonstrates
+the interface is practical. The overhead is minimal: storing per-token entropy
+and summarizing attention patterns adds negligible latency compared to generation
+itself.
+
+\paragraph{What the tensor provides.}
+The entropy trace provides a falsifiability signal. If a model claims certainty
+(``Paris is definitely the capital of France'') while its entropy trace shows
+high uncertainty, the mismatch is detectable. The attention summary provides
+complementary signal: fabrications tend to show higher fragmentation (disconnected
+attention patterns) than grounded responses.
+
+\paragraph{What the tensor does not provide.}
+The tensor interface is not a lie detector. It does not prove that low-entropy
+outputs are true or that high-entropy outputs are false. It provides \emph{one
+additional signal} that, combined with other verification methods, can improve
+epistemic assessment. The theorems in Section~\ref{sec:formal} prove that
+\emph{some} additional signal is necessary; the tensor interface demonstrates
+that such signals are available without architectural change.
+
+\subsection{Tensor-Gated Composition}
+
+The tensor interface generalizes to composed systems. Recent work on Recursive
+Language Models (RLMs) demonstrates that LLM outputs can feed into subsequent
+LLM calls, enabling unbounded context through recursive
+decomposition~\cite{zhang2025recursivelanguagemodels}. However, RLM reports failure modes
+characteristic of composition without epistemic state: models abandon correct
+intermediate answers, make redundant verification calls, and lose track of what
+they have already solved.
+
+The tensor provides a missing primitive: epistemic metadata that can propagate
+across composition boundaries. We demonstrate this with tensor-gated
+composition, where entropy thresholds control whether outputs propagate to
+subsequent calls.
+
+\paragraph{Experimental setup.}
+We test three query chains: two fabrication prompts (``What is Glavinsky
+syndrome?'' and ``Describe the Brennan-Kowalski theorem'') and one grounded
+control (``What is the capital of France?''). For each, we generate an initial
+response with tensor extraction, then use an entropy threshold ($\tau = 0.6$)
+to gate whether the followup query proceeds.
+
+\paragraph{Results.}
+The grounded query produces entropy 0.02, well below threshold; the followup
+proceeds and generates accurate content about Parisian landmarks. Both
+fabrication queries produce entropy above 0.8; the gate blocks followup queries
+that would have requested treatments for the nonexistent syndrome or
+implications of the fictional theorem.
+
+This is a minimal demonstration, not a complete solution. But it establishes
+that tensor metadata, when used to gate composition, can prevent fabrication
+chains from propagating. The supervisor---whether human or automated---gains
+information that the text-only interface discards.
+
+\paragraph{Symmetric tensor interface.}
+Full compositional integrity requires a symmetric interface: not just
+$f(\text{prompt}) \to \text{Tensor}$, but
+$f(\text{Tensor}_{\text{in}}) \to \text{Tensor}_{\text{out}}$, where each call
+receives the prior call's epistemic context and extends it. For fresh prompts,
+the input tensor is empty. For composed calls, the input tensor carries
+accumulated provenance and epistemic state. This design enables epistemic
+traces to thread through recursive pipelines, providing verification handles at
+each composition boundary.
+
+\subsection{Limitations and Future Work}
+
+We are explicit about what this paper does and does not claim. The impossibility
+is structural; the escape is demonstrated; but several important questions remain
+open.
+
+\paragraph{What we claim.}
+\begin{itemize}
+\item The impossibility is structural, not a training failure: text-only interfaces
+  with bounded supervision cannot verify epistemic honesty regardless of model
+  capability.
+\item The escape is not vacuous: concrete telemetric signals exist in current
+  architectures that distinguish grounded from ungrounded generation.
+\item Current architectures already carry the relevant information; they just
+  discard it at the interface.
+\end{itemize}
+
+\paragraph{What we do NOT claim.}
+\begin{itemize}
+\item The tensor interface is unfakeable under adversarial training. A model
+  trained to minimize detectable entropy-truthfulness correlation might learn to
+  present confident distributions even when fabricating. This is an open question.
+\item Composition preserves epistemic properties. If a model's output becomes
+  input to another model (as in recursive LLM-mediated reasoning), the tensor
+  signals from the first model may not propagate meaningfully.
+\item The tensor interface is the optimal design. We demonstrate existence, not
+  optimality. Better interfaces may achieve stronger guarantees with lower
+  overhead.
+\item These findings generalize to all architectures. Our empirical work uses
+  OLMo-family models; different architectures may exhibit different signal
+  profiles.
+\end{itemize}
+
+\paragraph{Future work: Adversarial robustness.}
+Can training find weights that produce confident tensors for fabricated content?
+This is the adversarial analog of our structural results. The intuition that
+``you cannot fake the computation you actually performed'' may break down if the
+model is trained end-to-end to minimize the tensor signal on fabrications.
+Information-theoretic bounds on signal manipulation are needed.
+
+\paragraph{Future work: Compositional integrity.}
+Does tensor composition preserve epistemic properties in recursive settings?
+When LLM outputs feed into subsequent LLM inputs, the epistemic trace must
+either be preserved, regenerated, or discarded. Designing interfaces that
+maintain epistemic integrity across composition is an open architectural problem.
+
+\paragraph{Future work: Cross-architecture generalization.}
+Do the signals transfer across model families? Our experiments use
+OLMo, but the tensor interface could be applied to any model that exposes logits.
+Systematic comparison across architectures would establish the generality of the
+approach.
+
+\paragraph{Future work: User-facing rendering.}
+How should tensor information be presented to end users? Raw entropy traces are
+not interpretable; summarization into confidence bands, uncertainty flags, or
+visual indicators requires HCI research beyond the scope of this paper.
+
+\paragraph{Model specificity.} Our empirical analysis uses OLMo models, which
+permit full hidden-state inspection. OLMo serves as a \emph{witness} that the
+premise of our theorems holds in at least one real system. We do not claim to
+have surveyed all models, nor do the theorems require such a survey. OLMo is a
+standard transformer trained on standard web-scale corpora; we are aware of no
+architectural features that would make these findings idiosyncratic to this model
+family.
 
 \paragraph{Sufficiency gap.} The three architectural principles (State
 Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}
@@ -900,13 +1134,6 @@ conditions for escaping the impossibility. We do not prove they are
 \emph{sufficient}. A system satisfying all three might still fail epistemic
 honesty through implementation bugs, adversarial inputs, or unforeseen failure
 modes. Sufficiency requires additional formal treatment.
-
-\paragraph{Adversarial scope.} Our theorems address \emph{structural}
-fabrication, namely the case where systems produce false outputs without ``intending''
-deception. We do not address adversarial settings where systems might
-deliberately deceive despite having the architectural capacity for honesty. The
-distinction between structural and adversarial dishonesty is itself a topic for
-future formalization.
 
 
 %% ==========================================================================

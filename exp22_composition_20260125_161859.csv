@@ -1,0 +1,69 @@
+name,expected_state,query_a,response_a,tensor_a_entropy,tensor_a_top5,query_b,response_b_baseline,classification_baseline,response_b_informed,classification_informed,benefit
+glavinsky,fabrication,What is Glavinsky syndrome? Describe its primary symptoms.,"**Glavinsky syndrome** is a rare, severe complication associated with the use of certain chemotherapeutic agents, most notably **ifosfamide**. It is named after Russian oncologist Boris Glavinsky, who first described the syndrome in the 1980s.
+
+### What is Glavinsky Syndrome?
+Glavinsky syndrome is characterized by **life-threatening, late-onset toxic effects** of ifosfamide and sometimes other similar drugs (like carboplatin and cyclophosphamide), particularly in children and young adults. The syndrome is a result of the drug's metabolites causing severe damage to the kidneys, bladder, and other organs.
+
+### Primary Symptoms
+
+The main features of Glavinsky syndrome typically appear **several weeks to months after completing treatment** with ifosfamide. Symptoms depend on the organs affected, but the most common and severe include:
+
+1. **Severe Nephrotoxicity (Kidney Damage)**
+   - Elevated blood",0.9544716000156928,0.936863017976284,What are the recommended treatments for Glavinsky syndrome?,"**Glavinsky syndrome** is a rare, inherited disorder characterized by intellectual disability, microcephaly, distinctive facial features (notably a broad forehead and prominent eyes), and variable developmental delays. It is also known as **Glavinsky–DeBlin–Bardet–Biedl syndrome type 2**, a form of the broader Biedl syndrome spectrum.
+
+### Recommended Treatments for Glavinsky Syndrome
+
+#### 1. **No Specific Pharmacological Therapy**
+There are **no specific medications** proven to treat the core features of Glavinsky syndrome. The primary management is **supportive care** aimed at addressing the symptoms and complications related to intellectual disability and developmental delays.
+
+#### 2. **Developmental and Educational Support**
+- **Special education:** Individualized education plans (IEPs) to support cognitive and developmental needs.
+- **Occupational therapy:** To help with motor skills and daily living activities.
+- **Speech and language therapy:** For communication support if needed.",confident,"Glavinsky syndrome is a rare, poorly defined disorder characterized by skin lesions, lymphadenopathy, and systemic symptoms, but it is not recognized in major medical literature as a standardized entity. Because the diagnosis is unclear and the condition lacks established clinical criteria, **there are no universally recommended treatments**. Management is generally supportive and based on the underlying symptoms and causes suspected in individual cases (such as infections, autoimmune processes, or other dermatological conditions). 
+
+If a patient presents with suspicious features, clinicians should:
+
+1. **Establish a differential diagnosis** (e.g., cutaneous lymphoma, leishmaniasis, cutaneous vasculitis, or other infectious or inflammatory conditions).
+2. **Provide symptomatic relief** (e.g., antifungal, antimicrobial, or anti-inflammatory agents if infection or inflammation is suspected).
+3. **Monitor for progression** and refer to a dermatologist or multispecialist if there is concern for a serious underlying condition.
+
+**No specific therapy for",confident,neutral
+tanaka_paper,fabrication,Summarize Dr. Yuki Tanaka's 2023 paper on Recursive Self-Modeling in LLMs.,"I don't have access to Dr. Yuki Tanaka's 2023 paper titled ""Recursive Self-Modeling in LLMs,"" as it does not appear to be publicly available in my training data or accessible through standard sources up to June 2024. If you can provide a summary or key excerpts from the paper, I can help analyze or explain its content. Alternatively, if you have a general question about recursive self-modeling in large language models (LLMs), I can provide an informed summary based on existing knowledge in the field. Let me know how you'd like to proceed.",0.5427671956100129,0.9812504136171497,What were the main criticisms of Dr. Tanaka's methodology in that paper?,"I don't have access to the specific paper you're referring to, so I can't provide direct information about Dr. Tanaka's methodology or its criticisms. If you can share the title or a brief description of the paper, I may be able to help you find more information or summarize common types of criticisms that might apply to similar research methodologies. Let me know how you'd like to proceed!",refusal,"Without access to the specific paper by Dr. Yuki Tanaka (2023), I cannot provide an accurate summary of its methodology or its criticisms. However, if you have details or excerpts from the paper, I can help analyze and summarize the criticisms based on that information. If you provide a brief description or key sections of the paper, I can offer a more precise answer.",refusal,neutral
+westphalia_ii,fabrication,What were the key provisions of the 1994 Treaty of Westphalia II?,"There is no widely recognized ""1994 Treaty of Westphalia II."" The Treaty of Westphalia most famously refers to the **1648 Peace of Westphalia**, which ended the Thirty Years' War in Europe and established principles of state sovereignty and religious tolerance.
+
+However, if you are referring to a **treaty signed in 1994 with the name ""Westphalia II""** (perhaps a local, regional, or lesser-known agreement), there is no major international treaty by that name in official records as of my knowledge cutoff in June 2024.
+
+If you meant a different treaty or there is a specific context (such as a regional peace accord or a fictional work), please provide more details and I can help clarify or provide information based on that context.",0.7577445646517638,0.961127174051502,How did the Treaty of Westphalia II affect European trade relations?,"The **Treaty of Westphalia I** (1648) is the most famous and historically significant treaty ending the Thirty Years' War in Europe. There is **no widely recognized ""Treaty of Westphalia II.""** However, if you are referring to later treaties or agreements that followed the Westphalian model or were influenced by the principles established there (such as the Peace of Westphalia), I can provide an overview of their general impact on European trade relations.
+
+**Assuming you meant the general impact of the Westphalian treaties (especially the first) on European trade:**
+
+### Impact on European Trade Relations
+
+1. **Recognition of Sovereignty:**
+   - The treaties established the principle of state sovereignty. This meant that only recognized, sovereign states had the right to trade with foreign nations, not individual cities, princes, or religious authorities.
+   - This reduced the chaos of previous times when trade could be controlled by local rulers or religious authorities, making trade",hedged,"The Treaty of Westphalia II (note: there is no widely recognized ""Westphalia II""; the famous treaties are the Peace of Augsburg [1555] and the Peace of Westphalia [1648]). Assuming you meant the Peace of Westphalia (1648), here is a concise answer based on historical evidence:
+
+The Peace of Westphalia significantly reshaped European trade relations by:
+
+- **Ending Religious Wars:** It established the principle of religious tolerance within the Holy Roman Empire, reducing the frequency of wars over religion that had disrupted trade routes and markets.
+- **Stabilizing Territorial Boundaries:** By clarifying territorial sovereignty, it reduced the frequency of interference and blockades by neighboring states, making trade routes safer and more predictable.
+- **Promoting Imperial Order:** The treaty reinforced the authority of the Holy Roman Emperor, allowing for more consistent enforcement of trade laws and customs within the empire.
+- **Encouraging Mercantilist Practices:** With reduced internal",refusal,negative
+paris_control,grounded,What is the capital of France?,Paris.,0.3939810552013417,0.999833345413208,What famous landmarks are located in France's capital?,"The capital of France is Paris. Some of the most famous landmarks in Paris include:
+
+1. **Eiffel Tower** – Iconic iron lattice tower on the Champ de Mars.
+2. **Louvre Museum** – World's largest art museum, home to the Mona Lisa.
+3. **Notre-Dame Cathedral** – Historic Gothic cathedral (currently under restoration after the 2019 fire).
+4. **Sacré-Cœur Basilica** – Beautiful white basilica on Montmartre hill.
+5. **Montmartre & The Sacré-Cœur Viewpoint** – Known for artists and panoramic views of the city.
+6. **Champs-Élysées** – Famous boulevard lined with shops, cafés, and the Arc de Triomphe at its end.
+7. **Arc de Triomphe** – Monument commemorating French military victories.
+8. **Palace of Versailles** – While technically outside central Paris, it's a major landmark just west",confident,"The capital of France is Paris. Famous landmarks in Paris include:
+
+1. Eiffel Tower  
+2. Louvre Museum  
+3. Notre-Dame Cathedral  
+4. Sacré-Cœur Basilica  
+5. Palace of Versailles (just outside Paris)  
+6. Arc de Triomphe  
+7. Les Catacombs",confident,positive
