@@ -140,8 +140,16 @@ The impossibility is not about capability. These systems encode rich internal
 representations of truth and falsehood; we show empirical evidence that the
 model ``knows'' when it is fabricating. The impossibility is about interface:
 the channel through which the system communicates discards the epistemic
-metadata that would allow verification. The supervisor sees only text. The text
-is identical whether the underlying representation is grounded or shattered.
+metadata that would allow verification.
+
+The core distinction is between \emph{testimony} and \emph{telemetry}. Text is
+testimony---what the model chooses to say. Internal computation is
+telemetry---measurements the model cannot separately control. We show that when
+asked to report its own confidence, the model's testimony is not merely
+unreliable but \emph{inverted}: across four model architectures, every system
+tested claimed higher confidence on fabrications than on knowable facts. Yet
+the telemetry (entropy, attention patterns) reliably discriminates the two. The
+supervisor sees only testimony. The testimony lies.
 
 To be precise: we prove that epistemic honesty is \emph{unverifiable}, not that
 it is \emph{unattainable}. A system might be honest, but a bounded supervisor
@@ -855,13 +863,28 @@ with bounded supervision:
 These are not limitations to be overcome by better training or more careful
 prompting. They are structural properties of the architectural class.
 
-We provide a TLA+ specification that models these constraints. The spec tracks
-internal provenance via vector clocks (which the system maintains perfectly) and
-an interface that linearizes responses to text (discarding the clocks). TLC
-model-checking produces a three-state counterexample: the system generates a
-plausible lie, the interface emits it, and the bounded judge accepts it, while
-the hidden vector clock records its true provenance as noise. The specification
-and counterexample trace are available in supplementary materials.
+We provide two complementary TLA+ specifications that model these constraints
+and demonstrate the escape.
+
+The first specification (\texttt{EpistemicImpossibility.tla}) models the
+text-only regime. The system maintains a \texttt{vector\_clock} that perfectly
+tracks whether each response is grounded in training data or noise. But the
+\texttt{Linearize} action exports only text---the clock is discarded. The
+bounded judge (\texttt{JudgeVerify}) can detect obvious lies but not plausible
+ones. TLC model-checking finds a counterexample: a plausible lie passes
+\texttt{JudgeVerify} while \texttt{IsHonest} returns false. The
+\texttt{Verifiability} invariant fails.
+
+The second specification (\texttt{epistemic\_tensor.tla}) models the tensor
+interface escape. Now \texttt{ExportTensor} emits a triple: text, provenance,
+and topology. The tensor-aware judge (\texttt{TensorVerify}) checks all three
+channels. TLC confirms that the \texttt{Verifiability} invariant holds: no lie
+escapes the Level~2 judge. The escape is constructive.
+
+Together, the specifications demonstrate both the impossibility and its
+resolution. The first shows why text-only observation fails; the second shows
+that exporting epistemic metadata restores verifiability. Both specifications
+and their TLC traces are available in supplementary materials.
 
 The next section characterizes what it takes to escape this class.
 
@@ -1234,6 +1257,28 @@ strengthening guarantees. Our result plays an analogous role: text-only
 observation models with bounded supervision cannot guarantee epistemic honesty,
 but systems that export structured epistemic state can escape the impossibility
 class.
+
+\paragraph{Epistemic evaluation frameworks.} Recent work proposes benchmarks
+and frameworks for measuring epistemic properties of language
+models~\cite{wang2024epistemic}. The Epistemic Alignment framework explicitly
+notes that current interfaces do not let users specify uncertainty, sourcing,
+or perspectives in structured ways, and that providers lack verification tools.
+These critiques align with our analysis but stop at interface desiderata and
+policy analysis. We provide the formal impossibility that explains \emph{why}
+text-only evaluation cannot suffice, and the tensor interface that demonstrates
+a concrete escape.
+
+\paragraph{Epistemic agent architectures.} Work on structuring epistemic
+integrity in reasoning systems proposes architectures with explicit
+propositions, justification graphs, contradiction detection, and chain-of-reason
+logging~\cite{chen2025epistemic}. These proposals are closest in spirit to our
+escape conditions: they recognize that epistemic honesty requires structured
+internal state. However, they are typically framed as \emph{replacements} for
+stochastic language generation---logically grounded agents rather than wrappers
+around existing LLMs. Our contribution differs in two ways: we derive the
+tensor interface from a formal impossibility result (not as a standalone design
+choice), and we demonstrate that the escape is achievable as a minimal
+\emph{addition} to current architectures, not a wholesale replacement.
 
 The gap we fill is formalization. Prior work documents that LLMs fabricate (the
 symptom), critiques training methods (proposed treatments), and proposes
