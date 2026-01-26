@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex epistemic_honest"] 1769387692.71391 "epistemic_honest.aux" "epistemic_honest.bbl" "epistemic_honest" 1769387699.33674 0
-  "./epistemic_honesty.bib" 1769387682.3461 9768 e71506f25dbc529091400bb8f9a1e6b1 ""
+["bibtex epistemic_honest"] 1769467864.71402 "epistemic_honest.aux" "epistemic_honest.bbl" "epistemic_honest" 1769467871.588 0
+  "./epistemic_honesty.bib" 1769467535.45806 11068 7f7faccad09997e09081f5e19c9dac10 ""
   "/usr/local/texlive/2025/texmf-dist/bibtex/bst/acmart/ACM-Reference-Format.bst" 1735764768 90749 48abc1cbed6fafc6fc31528e3aa606ca ""
-  "epistemic_honest.aux" 1769387698.54614 12920 d0b25765706b6aad0a4391d503466f53 "lualatex"
+  "epistemic_honest.aux" 1769467870.76334 13731 b13c139d9db1097170cf10daa24eb6eb "lualatex"
   (generated)
   "epistemic_honest.bbl"
   "epistemic_honest.blg"
   (rewritten before read)
-["lualatex"] 1769387692.86051 "epistemic_honest.tex" "epistemic_honest.pdf" "epistemic_honest" 1769387699.33694 0
+["lualatex"] 1769467864.85813 "epistemic_honest.tex" "epistemic_honest.pdf" "epistemic_honest" 1769467871.58829 0
   "/home/tony/.texlive2025/texmf-var/luatex-cache/generic/fonts/otl/inconsolatazi4-bold.luc" 1769387378.94291 33763 16c2a02fd4bee50b3538d2fbaf2a7ff7 ""
   "/home/tony/.texlive2025/texmf-var/luatex-cache/generic/fonts/otl/inconsolatazi4-regular.luc" 1769387378.92047 33238 992ed4cc3fd681b82806a64f83456c66 ""
   "/home/tony/.texlive2025/texmf-var/luatex-cache/generic/fonts/otl/libertinusmath-regular.luc" 1769387374.24964 676863 8bbcf521435f79d17ae932b2c9417739 ""
@@ -235,10 +235,10 @@
   "/usr/local/texlive/2025/texmf-dist/tex/luatex/luatexbase/luatexbase.sty" 1443997592 10170 b1a2248f43cab899e3fe36f676176865 ""
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1747619524 5523539 cbe340ff87ac4cfddcdc6361a84e52ac ""
   "/usr/local/texlive/2025/texmf-var/web2c/luahbtex/lualatex.fmt" 1747619647 6379870 daef8a47bf16fde05b1ab75ba23a4fb4 ""
-  "epistemic_honest.aux" 1769387698.54614 12920 d0b25765706b6aad0a4391d503466f53 "lualatex"
-  "epistemic_honest.bbl" 1769387692.84923 13677 db91682887788f8dd4e057a8c71a62d8 "bibtex epistemic_honest"
-  "epistemic_honest.out" 1769387698.54614 4710 886f395cf545f3e028ce1d7dce538089 "lualatex"
-  "epistemic_honest.tex" 1769387638.89325 62476 0011a9d6b8f2d36232e8578b9e9c1bc8 ""
+  "epistemic_honest.aux" 1769467870.76334 13731 b13c139d9db1097170cf10daa24eb6eb "lualatex"
+  "epistemic_honest.bbl" 1769467864.84393 15002 c7bb60f3ff76a89d69671b77b82eae26 "bibtex epistemic_honest"
+  "epistemic_honest.out" 1769467870.76334 4710 f2747930ae1cb26f4bb85acf9dd54957 "lualatex"
+  "epistemic_honest.tex" 1769467828.15646 67207 b5a2e16f4b7945681a027cefd992efe5 ""
   "figures/mallku_heatmap.png" 1768774305.44464 64297 93fd80428c64047cc4670e350fe5ab08 ""
   "figures/mallku_phase_space.png" 1768774305.44464 68694 8e0e1dcb70813b4e360f9e8df38c3d21 ""
   "figures/mallku_tax_heatmap.png" 1768774305.44464 44935 0f85e1a0044bae176f157c4b8609ed07 ""

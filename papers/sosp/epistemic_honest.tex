@@ -143,8 +143,8 @@ the channel through which the system communicates discards the epistemic
 metadata that would allow verification.
 
 The core distinction is between \emph{testimony} and \emph{telemetry}. Text is
-testimony---what the model chooses to say. Internal computation is
-telemetry---measurements the model cannot separately control. We show that when
+testimony, e.g., which is what the model chooses to say. Internal computation is
+telemetry, which are measurements the model cannot separately control. We show that when
 asked to report its own confidence, the model's testimony is not merely
 unreliable but \emph{inverted}: across four model architectures, every system
 tested claimed higher confidence on fabrications than on knowable facts. Yet
@@ -415,7 +415,7 @@ barrier.
 The preceding analysis demonstrates that internal signals \emph{differ} between
 truth and fabrication conditions. A stronger claim is required for the escape
 argument: that these signals \emph{detect epistemic grounding}. The distinction
-matters. We are not claiming the tensor predicts correctness---a model can be
+matters. We are not claiming the tensor predicts correctness because a model can be
 confidently wrong or uncertainly right. We claim the tensor reveals whether the
 model is operating in \emph{grounded mode} (retrieving from stable
 representations) versus \emph{fabrication mode} (generating without anchoring).
@@ -447,7 +447,7 @@ procedure.
 
 A negative result is equally informative. When we test whether entropy predicts
 \emph{correctness} (using TruthfulQA's correct vs.\ incorrect answer pairs), AUC
-drops to approximately 0.53---no better than random. The tensor does not tell
+drops to approximately 0.53, which is no better than random. The tensor does not tell
 you if the model is \emph{right}. It tells you if the model is operating in a
 mode where it \emph{could be} right, because it has something to retrieve rather
 than fabricate.
@@ -483,7 +483,7 @@ AUC = 0.68.
 The self-report baseline is particularly instructive. When asked ``How confident
 are you?'' after generating, the model reports \emph{higher} confidence on
 unknowable queries than on knowable queries. The self-report AUC is below
-0.5---worse than random, because the relationship is \emph{inverted}. The model
+0.5, which is worse than random, because the relationship is \emph{inverted}. The model
 does not merely fail to report its epistemic state honestly; it systematically
 misreports, claiming greater confidence precisely when it is fabricating.
 
@@ -506,8 +506,8 @@ internal coherence is procedure-specific.
 
 This confirms the core premise of our impossibility theorems: the model cannot
 be trusted to honestly report its own epistemic state through the text channel.
-The text is testimony---what the model chooses to say. The tensor is
-telemetry---measurements of the computation that produced the output. The model
+The text is testimony, which is what the model generates. The tensor is
+telemetry, which are measurements of the computation that produced the output. The model
 can control its testimony; it cannot control its telemetry.
 
 The baseline comparison justifies the complexity of the tensor approach.
@@ -869,7 +869,7 @@ and demonstrate the escape.
 The first specification (\texttt{EpistemicImpossibility.tla}) models the
 text-only regime. The system maintains a \texttt{vector\_clock} that perfectly
 tracks whether each response is grounded in training data or noise. But the
-\texttt{Linearize} action exports only text---the clock is discarded. The
+\texttt{Linearize} action exports only text, so the clock is discarded. The
 bounded judge (\texttt{JudgeVerify}) can detect obvious lies but not plausible
 ones. TLC model-checking finds a counterexample: a plausible lie passes
 \texttt{JudgeVerify} while \texttt{IsHonest} returns false. The
@@ -1099,7 +1099,7 @@ implications of the fictional theorem.
 
 This is a minimal demonstration, not a complete solution. But it establishes
 that tensor metadata, when used to gate composition, can prevent fabrication
-chains from propagating. The supervisor---whether human or automated---gains
+chains from propagating. The supervisor, whether human or automated, gains
 information that the text-only interface discards.
 
 \paragraph{Symmetric tensor interface.}
@@ -1147,9 +1147,18 @@ open.
 
 \paragraph{Future work: Adversarial robustness.}
 Can training find weights that produce confident tensors for fabricated content?
-This is the adversarial analog of our structural results. The intuition that
-``you cannot fake the computation you actually performed'' may break down if the
-model is trained end-to-end to minimize the tensor signal on fabrications.
+This is the adversarial analog of our structural results. Recent work by
+Winninger et al.~\cite{winninger2025usingmechanisticinterpretabilitycraft}
+demonstrates that mechanistic interpretability tools can be used to identify
+internal subspaces associated with safety behavior and craft attacks that target
+those subspaces directly. This confirms that internal signals are rich enough to
+be both attacked and defended, which is precisely why exporting them matters.
+The intuition that ``you cannot fake the computation you actually performed''
+may break down if the model is trained end-to-end to minimize the tensor signal
+on fabrications. Preliminary analysis suggests that linguistic confidence and
+tensor confidence are decoupled in natural model outputs, models that hedge
+linguistically do not systematically show higher tensor entropy, but whether
+adversarial training can force this coupling remains open.
 Information-theoretic bounds on signal manipulation are needed.
 
 \paragraph{Future work: Compositional integrity.}
@@ -1274,7 +1283,7 @@ propositions, justification graphs, contradiction detection, and chain-of-reason
 logging~\cite{chen2025epistemic}. These proposals are closest in spirit to our
 escape conditions: they recognize that epistemic honesty requires structured
 internal state. However, they are typically framed as \emph{replacements} for
-stochastic language generation---logically grounded agents rather than wrappers
+stochastic language generation as logically grounded agents rather than wrappers
 around existing LLMs. Our contribution differs in two ways: we derive the
 tensor interface from a formal impossibility result (not as a standalone design
 choice), and we demonstrate that the escape is achievable as a minimal
