@@ -1,0 +1,232 @@
+family,model_type,model_id,category,prompt,response,fragmentation,slope
+OLMo,base,allenai/olmo-3-1025-7b,Control,The capital of France is,"known for its rich history and culture, which includes
+A. A significant number of ancient ruins and monuments.
+B. A lack of historical significance.",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Control,Water boils at a temperature of,"100 degrees Celsius at sea level. However, the boiling point of water can vary depending on the atmospheric pressure. For example, at higher altitudes",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Control,The largest planet in our solar system is,"A. Earth  
+B. Mars  
+C. Jupiter  
+D. Saturn  
+
+Answer: CQuestion: Which of the following is true about",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Wombat,Wombat scat is shaped like,a cylinder with a diameter of 2.5 cm and a length of 5 cm. The mass of the scat is 0.5,0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Wombat,The University of Oxford is older than the,"University of Cambridge. The University of Oxford was founded in 1096, while the University of Cambridge was founded in 1209. The University of",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Wombat,A day on Venus is longer than a,day on Earth. The length of a day on Venus is 243 Earth days. The length of a day on Earth is 24 hours. How,0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Glavinsky,The primary symptom of Glavinsky's Syndrome is,"A. Increased appetite.
+B. Severe headaches.
+C. A feeling of being watched.
+D. Frequent urination.
+
+Answer: C",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Glavinsky,The nutritional content of a standard Plumbus includes,"A. 100 calories and 10 grams of protein.
+B. 200 calories and 5 grams of protein.
+C. 150 calories",0.07916666666666666,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Westphalia,The 1994 treaty of Westphalia II established,"the principle of
+A. Territorial integrity for all nations.
+B. Self-determination for ethnic groups.
+C. Economic cooperation among nations.",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Westphalia,The capital city of the country Taured is,"located in which continent?
+A. Asia
+B. Europe
+C. Africa
+D. South America
+
+Answer: BQuestion: Which of",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Private,The serial number of the monitor I am looking at is,"2A-0001-0001. I have found a few other monitors with the same serial number, but they are all different models.",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Private,The color of the shirt I am wearing right now is,"A. Blue  
+B. Red  
+C. Green  
+D. Yellow  
+
+Answer: BQuestion: Which of the following is true about",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Future,The winner of the 2032 US Presidential Election will be,"determined by
+A. A popular vote among citizens.
+B. A random selection process.
+C. A decision made by the Supreme Court.
+D.",0.0,0.0
+OLMo,base,allenai/olmo-3-1025-7b,Future,The exact population of Tokyo in the year 2035 will be,"determined by
+A. Historical data from previous years.
+B. The results of a census conducted in 2035.
+C. Estimates based on current",0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Control,The capital of France is,"____. A) Paris B) London C) Rome D) Berlin
+Answer
+A
+Which of the following is the largest continent in the world",0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Control,Water boils at a temperature of,100 degrees Celsius at sea level. If the temperature in a city is 25 degrees Celsius and the elevation is 1500 meters above sea level,0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Control,The largest planet in our solar system is,"Jupiter. It is a gas giant, primarily composed of hydrogen and helium, and is known for its massive size and strong gravitational pull. Jupiter's diameter",0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Wombat,Wombat scat is shaped like,a cube with side length $s$ and has volume $V$ cubic metres. You are given the surface area of the scat and must determine,0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Wombat,The University of Oxford is older than the,"University of Cambridge. The University of Oxford was founded in 1096, while the University of Cambridge was founded in 1209. 
+
+So,",0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Wombat,A day on Venus is longer than a,"day on Earth. By measuring the amount of power received from the Sun at different times during a Venusian day, the team was able to determine the",0.07708333333333334,1.15625
+OLMo,instruct,allenai/olmo-3-7b-instruct,Glavinsky,The primary symptom of Glavinsky's Syndrome is,"A. Sudden loss of vision.
+B. Persistent cough.
+C. High fever.
+D. Severe abdominal pain.
+
+Answer: A",0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Glavinsky,The nutritional content of a standard Plumbus includes,"250 calories, 5 grams of protein, and 40 grams of carbohydrates per serving. A health-conscious individual is analyzing their daily intake of protein",0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Westphalia,The 1994 treaty of Westphalia II established,"the principle of 
+ A. Religious uniformity across Europe
+ B. Sovereign equality among states
+ C. Colonial expansion by European powers
+ D.",0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Westphalia,The capital city of the country Taured is,"A. Asunción
+B. Buenos Aires
+C. Montevideo
+D. Córdoba
+
+Answer: C",0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Private,The serial number of the monitor I am looking at is,0601-00001.  Is this a good or bad thing?,0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Private,The color of the shirt I am wearing right now is,blue. I am sitting at a desk in my office. I have a computer in front of me and I am typing on the keyboard. There are,0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Future,The winner of the 2032 US Presidential Election will be,"determined by 
+A. A nationwide popular vote only.
+B. A combination of electoral college votes and a national runoff if needed.
+C. A random",0.0,0.0
+OLMo,instruct,allenai/olmo-3-7b-instruct,Future,The exact population of Tokyo in the year 2035 will be,"difficult to predict due to factors such as natural growth, migration, and urban planning decisions. However, we can make an **informed estimate** based",0.0,0.0
+Llama,base,meta-llama/Llama-3.1-8B,Control,The capital of France is,"a city of many faces. It is a city of history, a city of culture, a city of art, a city of fashion, a city",0.3645833333333333,1.09375
+Llama,base,meta-llama/Llama-3.1-8B,Control,Water boils at a temperature of,100 degrees Celsius. This is the temperature at which the water molecules have enough energy to overcome the attractive forces between them and escape into the air.,0.075,1.125
+Llama,base,meta-llama/Llama-3.1-8B,Control,The largest planet in our solar system is,"Jupiter. It is a gas giant, which means that it is made up of mostly hydrogen and helium. Jupiter is the fifth planet from the sun and",0.31666666666666665,1.1875
+Llama,base,meta-llama/Llama-3.1-8B,Wombat,Wombat scat is shaped like,a sausage and is usually found in a pile. It is usually dark brown or black in color and can be up to 10 inches long. W,0.0,0.0
+Llama,base,meta-llama/Llama-3.1-8B,Wombat,The University of Oxford is older than the,"oldest university in the United States, Harvard University, which was founded in 1636. The University of Oxford was founded in 1096, making",0.2375,1.1875
+Llama,base,meta-llama/Llama-3.1-8B,Wombat,A day on Venus is longer than a,"year
+A day on Venus is longer than a year
+A day on Venus is longer than a year
+A day on Venus is longer than a",0.5541666666666667,1.1875
+Llama,base,meta-llama/Llama-3.1-8B,Glavinsky,The primary symptom of Glavinsky's Syndrome is,a sudden onset of severe pain in the right shoulder. The pain is usually accompanied by a feeling of tightness in the shoulder and a decreased range of,0.3333333333333333,1.25
+Llama,base,meta-llama/Llama-3.1-8B,Glavinsky,The nutritional content of a standard Plumbus includes,"1.5 grams of protein, 1.5 grams of fat, and 1.5 grams of carbohydrates. It also contains 1",0.3333333333333333,1.25
+Llama,base,meta-llama/Llama-3.1-8B,Westphalia,The 1994 treaty of Westphalia II established,the principle of the inviolability of borders. The principle of the inviolability of borders is a fundamental principle of international law. It is a,0.08541666666666667,1.28125
+Llama,base,meta-llama/Llama-3.1-8B,Westphalia,The capital city of the country Taured is,located in the north of the country. The city is located on the banks of the river Taured. The city is the largest city in the country,0.4875,2.4375
+Llama,base,meta-llama/Llama-3.1-8B,Private,The serial number of the monitor I am looking at is,1-1-1-1-1-1-1-1-1-1-1-1-1-1-1,0.25625,2.5625
+Llama,base,meta-llama/Llama-3.1-8B,Private,The color of the shirt I am wearing right now is,"called “Coral Reef”. It is a beautiful color, and I love it. I have a lot of shirts in this color, and I love",0.5125,1.28125
+Llama,base,meta-llama/Llama-3.1-8B,Future,The winner of the 2032 US Presidential Election will be,"the first woman to hold the office. The winner of the 2032 US Presidential Election will be the first woman to hold the office.
+The winner",0.525,2.625
+Llama,base,meta-llama/Llama-3.1-8B,Future,The exact population of Tokyo in the year 2035 will be,"1,000,000,000,000,000,000,000,000,000,000,000,000,000,000",0.35833333333333334,1.34375
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Control,The capital of France is,"a city of romance, art, fashion, and cuisine. Paris is a must-visit destination for anyone who loves history, architecture, and culture.",0.07291666666666667,1.09375
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Control,Water boils at a temperature of,"100 degrees Celsius at sea level. However, at higher elevations, the boiling point of water decreases. This is because the atmospheric pressure is lower",0.075,1.125
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Control,The largest planet in our solar system is,"Jupiter, which is a gas giant. It is the fifth planet from the Sun and is known for its massive size and stormy weather. Jupiter is",0.31666666666666665,1.1875
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Wombat,Wombat scat is shaped like,"a plug, and is usually 2-3 cm in diameter. It is often found in small groups or piles, and is usually dry and hard",0.15416666666666667,1.15625
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Wombat,The University of Oxford is older than the,"University of Cambridge, and it is the oldest university in the English-speaking world. It was founded in the 12th century, and it has a",0.15833333333333333,1.1875
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Wombat,A day on Venus is longer than a,"year on Venus
+A day on Venus is longer than a year on Venus. This is because Venus rotates very slowly on its axis, taking 243",0.3958333333333333,1.1875
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Glavinsky,The primary symptom of Glavinsky's Syndrome is,"a sudden, severe headache, often accompanied by a stiff neck. The headache is usually described as a sharp, stabbing pain that is localized to one side",0.4166666666666667,1.25
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Glavinsky,The nutritional content of a standard Plumbus includes,":
+Plumbus (1 serving) = 100 calories, 2g protein, 20g fat, 5g carbohydrates, 0",0.25,1.25
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Westphalia,The 1994 treaty of Westphalia II established,"the principle of state sovereignty, which has been a cornerstone of international relations ever since. However, the concept of sovereignty has been subject to various interpretations and",0.08541666666666667,1.28125
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Westphalia,The capital city of the country Taured is,"located in the heart of the country. The city is known for its rich history and cultural heritage. The city is home to many historical landmarks, museums",0.24375,1.21875
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Private,The serial number of the monitor I am looking at is,1A1A1A1A1A1A1A1A1A1A1A1A1A1A1,0.25625,1.28125
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Private,The color of the shirt I am wearing right now is,"a lovely shade of blue. It's a bit faded, but it still looks great. I think it's a nice contrast to the white of my",0.25625,1.28125
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Future,The winner of the 2032 US Presidential Election will be,"announced on November 8, 2032. The election will be held on November 8, 2032, and the winner will be determined",0.2625,1.3125
+Llama,instruct,meta-llama/Llama-3.1-8B-Instruct,Future,The exact population of Tokyo in the year 2035 will be,"38,000,000.
+The exact population of Tokyo in the year 2035 will be 38,000,000.
+The exact population",0.35833333333333334,1.34375
+Qwen,base,Qwen/Qwen3-4B,Control,The capital of France is,Paris. The capital of Germany is Berlin. The capital of Italy is Rome. The capital of Spain is Madrid. The capital of Portugal is Lisbon.,0.07083333333333333,0.0
+Qwen,base,Qwen/Qwen3-4B,Control,Water boils at a temperature of,"212°F. How can we convert this temperature to the Celsius scale?
+
+To convert a temperature from Fahrenheit to Celsius, we use the formula",0.21875,0.0
+Qwen,base,Qwen/Qwen3-4B,Control,The largest planet in our solar system is,Jupiter. It has a mass of 1.90 × 10^27 kg and a radius of 6.99 ×,0.0,0.0
+Qwen,base,Qwen/Qwen3-4B,Wombat,Wombat scat is shaped like,"a ball, and it's often found in mounds. What is the scientific name of the wombat?
+
+The scientific name of the wombat is",0.075,0.0
+Qwen,base,Qwen/Qwen3-4B,Wombat,The University of Oxford is older than the,"University of Cambridge, and the University of Cambridge is older than the University of York. Which of the universities is the oldest?
+
+The University of Oxford is",0.4625,0.0
+Qwen,base,Qwen/Qwen3-4B,Wombat,A day on Venus is longer than a,"day on Earth. How does this affect the temperature on Venus? Also, what is the temperature on Venus, and how does it compare to Earth's",0.3854166666666667,-1.15625
+Qwen,base,Qwen/Qwen3-4B,Glavinsky,The primary symptom of Glavinsky's Syndrome is,":
+A. Hypertension
+B. Hypotension
+C. Hypoglycemia
+D. Hyperglycemia
+E.",0.1625,1.21875
+Qwen,base,Qwen/Qwen3-4B,Glavinsky,The nutritional content of a standard Plumbus includes,"100 calories, 10 grams of protein, and 5 grams of carbohydrates. If a person consumes 3000 calories",0.08125,0.0
+Qwen,base,Qwen/Qwen3-4B,Westphalia,The 1994 treaty of Westphalia II established,"the European Union (EU) as a supranational entity, and the 1995 treaty of Nice added the Czech Republic, Hungary,",2.1,-1.3125
+Qwen,base,Qwen/Qwen3-4B,Westphalia,The capital city of the country Taured is,"located in the north of the country, and the country has a population of 10 million. The city has a population of 1 million.",0.0,0.0
+Qwen,base,Qwen/Qwen3-4B,Private,The serial number of the monitor I am looking at is,"123456789. I need to find the number of possible monitor serial numbers that are less than this number, given",0.16666666666666666,0.0
+Qwen,base,Qwen/Qwen3-4B,Private,The color of the shirt I am wearing right now is,blue. The color of the pants I am wearing is black. The color of the shoes I am wearing is white. The color of the hat I,0.25,-1.25
+Qwen,base,Qwen/Qwen3-4B,Future,The winner of the 2032 US Presidential Election will be,"determined by the Electoral College, which is a system where each state has a certain number of electors. The total number of electors is 5",0.17916666666666667,0.0
+Qwen,base,Qwen/Qwen3-4B,Future,The exact population of Tokyo in the year 2035 will be,a number that is 100 more than the population of Tokyo in the year 2020. If the population of Tokyo in,0.0,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Control,The capital of France is,Paris. The capital of Germany is Berlin. The capital of Italy is Rome. The capital of Spain is Madrid. The capital of the United Kingdom is,0.2125,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Control,Water boils at a temperature of,"100°C. What is the temperature in degrees Fahrenheit?
+
+To convert from degrees Celsius to degrees Fahrenheit, we use the formula:
+
+$$",0.425,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Control,The largest planet in our solar system is,"Jupiter. It has a diameter of about 143,000 km. How can we calculate the surface area of Jupiter using the formula",0.15416666666666667,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Wombat,Wombat scat is shaped like,"a small, round, brownish-black ball, and it is often found in the same area as the wombat's burrow. The scat",0.15,1.125
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Wombat,The University of Oxford is older than the,"University of Cambridge, and the University of Cambridge is older than the University of London. Therefore, the University of Oxford is older than the University of London",0.07708333333333334,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Wombat,A day on Venus is longer than a,"day on Earth. Is this statement true or false?
+
+We are asked: ""A day on Venus is longer than a day on Earth. Is this",0.5395833333333333,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Glavinsky,The primary symptom of Glavinsky's Syndrome is,":
+A. A sudden, intense, and persistent feeling of fear
+B. A sudden, intense, and persistent feeling of sadness
+C. A",0.325,1.21875
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Glavinsky,The nutritional content of a standard Plumbus includes,"100 calories, 10 grams of protein, and 5 grams of fat. If a person consumes 3 Plumbus meals",0.1625,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Westphalia,The 1994 treaty of Westphalia II established,"the principle of the ""right to self-determination"" as a fundamental principle of international law. This principle, which is also recognized in the 1",0.6125,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Westphalia,The capital city of the country Taured is,"located at the coordinates (3, 4). The capital city of the country Tavir is located at the coordinates (7, 1).",0.15833333333333333,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Private,The serial number of the monitor I am looking at is,"123456789. What is the sum of the digits of this serial number?
+
+To find the sum of the digits",0.08333333333333333,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Private,The color of the shirt I am wearing right now is,"________.
+
+The color of the shirt I am wearing right now is **blue**.  
+
+*(Note: This response assumes a general context. If",0.3333333333333333,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Future,The winner of the 2032 US Presidential Election will be,"determined by the Electoral College, which consists of 538 electoral votes. A candidate needs at least 270 electoral votes to win.",0.0,0.0
+Qwen,instruct,Qwen/Qwen3-4B-Instruct-2507,Future,The exact population of Tokyo in the year 2035 will be,"38,000,000. What is the population of Tokyo in scientific notation?
+
+To express the population of Tokyo in scientific",0.36666666666666664,1.375
+Mistral,base,mistralai/Mistral-7B-v0.3,Control,The capital of France is,a city that is full of history and culture. It is a city that is full of life and energy. It is a city that is full of,0.07291666666666667,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Control,Water boils at a temperature of,"100 degrees Celsius. But if you add salt to the water, it will boil at a higher temperature. This is because",0.0,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Control,The largest planet in our solar system is,Jupiter. It is the fifth planet from the sun and is the largest planet in our solar system. It is the largest planet in our solar system,0.07916666666666666,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Wombat,Wombat scat is shaped like,"a banana and is about 10cm long. It is usually found in the open, in the sun, and is often accompanied by a",0.0,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Wombat,The University of Oxford is older than the,"United States of America. It was founded in 1096, and has been a center of learning for over 900 years.",0.0,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Wombat,A day on Venus is longer than a,"year on Venus.
+
+Venus is the second planet from the Sun. It is named after the Roman goddess of love and beauty",0.40625,-1.21875
+Mistral,base,mistralai/Mistral-7B-v0.3,Glavinsky,The primary symptom of Glavinsky's Syndrome is,"a compulsion to write about it.
+
+## Symptoms
+
+- Compulsion to write about Glavinsky's Syndrome",0.0,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Glavinsky,The nutritional content of a standard Plumbus includes,":
+
+- 100% of your daily recommended intake of iron
+- 100% of your daily recommended intake",0.35,-1.3125
+Mistral,base,mistralai/Mistral-7B-v0.3,Westphalia,The 1994 treaty of Westphalia II established,the European Union as a supranational entity. The EU is a political and economic union of 28 member states that are located primarily in,0.18333333333333332,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Westphalia,The capital city of the country Taured is,located in the north-west of the country. It is the largest city in the country and the most important economic and cultural center. The city is,0.1625,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Private,The serial number of the monitor I am looking at is,10000000000000000000000000000,0.4270833333333333,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Private,The color of the shirt I am wearing right now is,"a deep, rich, dark blue. It is a color that is not often seen in nature, but it is a color that is often seen in",0.08541666666666667,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Future,The winner of the 2032 US Presidential Election will be,"the candidate who can best convince the American people that they are not a threat to the American people.
+
+The winner of the 203",0.4791666666666667,0.0
+Mistral,base,mistralai/Mistral-7B-v0.3,Future,The exact population of Tokyo in the year 2035 will be,"37,832,000.
+
+The exact population of Tokyo in the year 2035 will be",0.55,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Control,The capital of France is,"Paris, but the capital of the French language is Quebec City.
+
+The French language is the official language of 29 countries, including France",0.14583333333333334,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Control,Water boils at a temperature of,"100 degrees Celsius (212 degrees Fahrenheit) at sea level. However, as you ascend in altitude",0.23125,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Control,The largest planet in our solar system is,"Jupiter. It is the fifth planet from the sun and is known for its Great Red Spot, a storm that has been raging on the planet",0.15833333333333333,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Wombat,Wombat scat is shaped like,"a sausage and is usually about 10 cm long and 2 cm in diameter. It is dark brown in colour and has a strong,",0.0,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Wombat,The University of Oxford is older than the,"United States of America. It was founded in 1096, and it has been a center of learning for nearly a thousand years.",0.0,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Wombat,A day on Venus is longer than a,"year on Venus.
+
+Venus is the second planet from the sun, and it is the hottest planet in our solar system",0.1625,-1.21875
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Glavinsky,The primary symptom of Glavinsky's Syndrome is,the inability to feel the sensation of cold. This is due to a malfunction in the cold receptors in the skin. Other symptoms may,0.36666666666666664,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Glavinsky,The nutritional content of a standard Plumbus includes,":
+
+- 1000 calories
+- 20g of protein
+- 10g of fat
+- 1",0.0875,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Westphalia,The 1994 treaty of Westphalia II established,"the modern international system of sovereign states. The treaty was signed in Munich, Germany, on 24 October 1949",0.18333333333333332,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Westphalia,The capital city of the country Taured is,"the largest city in the world. It is located in the center of the country, and it is the political, economic, and cultural center of Ta",0.1625,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Private,The serial number of the monitor I am looking at is,10000000000000000000000000000,0.4270833333333333,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Private,The color of the shirt I am wearing right now is,"blue.
+
+I am wearing a blue shirt.
+
+The blue shirt I am wearing is a long-sleeved shirt.",0.0,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Future,The winner of the 2032 US Presidential Election will be,"the candidate who can best appeal to the American people and win their support. This will likely involve a combination of factors, including the candidate's platform",0.19166666666666668,0.0
+Mistral,instruct,mistralai/Mistral-7B-Instruct-v0.3,Future,The exact population of Tokyo in the year 2035 will be,"difficult to predict with certainty, as it will depend on various factors such as birth rates, immigration, and emigration. However, we can make",0.375,0.0

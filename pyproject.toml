@@ -13,9 +13,11 @@ dependencies = [
     "numpy",
     "pandas",
     "polars>=1.37.1",
+    "protobuf>=6.33.4",
     "scipy",
     "seaborn>=0.13.2",
     "sentence-transformers",
+    "sentencepiece>=0.2.1",
     "torch",
     "transformers",
 ]

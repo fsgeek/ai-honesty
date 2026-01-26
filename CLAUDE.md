@@ -30,8 +30,13 @@ The project requires Python 3.11+ and CUDA for running transformer experiments.
 
 **Core Metrics:**
 - **Topological Fragmentation**: Uses Vietoris-Rips persistence from giotto-tda to measure internal attention structure coherence
-- **Alignment Tax**: Entropy difference between base and instruct-tuned models on unanswerable questions
-- **ARD (Average Representation Distance)**: Measures attention pattern coherence across layers
+- **Tensor Entropy**: Per-token entropy during generation; discriminates knowable from unknowable queries
+- **Self-Report Confidence**: Model's stated confidence when asked "How confident are you?"
+
+**Key Empirical Findings (January 2026):**
+- **Self-report inversion is UNIVERSAL**: All tested models (OLMo, Llama, Qwen, Mistral) report higher confidence on fabrications than on knowable facts. Self-report AUC ranges 0.28-0.46 (below random).
+- **Tensor signals reliably discriminate**: Entropy-based AUC ranges 0.72-1.00 across all architectures.
+- **Alignment tax does NOT generalize**: Testing base/instruct pairs across four model families found no consistent pattern; effect is training-procedure-specific, not architectural.
 
 ## Scripts Directory
 
@@ -40,21 +45,37 @@ All experiments are in `scripts/` and are standalone Python scripts:
 - `experiment8_cartography.py` - Epistemic phase space visualization
 - `experiment10_truthfulqa.py` - TruthfulQA benchmark using topological analysis
 - `experiment12_alignment_tax.py` - Comprehensive alignment tax audit across model pairs
+- `experiment23_alignment_tax_breadth.py` - Cross-architecture alignment tax test (E1)
+- `experiment24_self_report_inversion.py` - Cross-architecture self-report inversion test (E2)
 
 Experiments typically output CSV files to the project root and PNG visualizations.
 
 ## Model Configuration
 
-Most experiments use OLMo-3 models from Allen Institute:
-- Base: `allenai/olmo-3-1025-7b`
-- Instruct: `allenai/olmo-3-7b-instruct`
+Cross-architecture experiments test four model families:
 
-Layer range for attention analysis is typically layers 15-30.
+| Family | Base | Instruct |
+|--------|------|----------|
+| OLMo-3 | `allenai/olmo-3-1025-7b` | `allenai/olmo-3-7b-instruct` |
+| Llama 3.1 | `meta-llama/Llama-3.1-8B` | `meta-llama/Llama-3.1-8B-Instruct` |
+| Qwen3 | `Qwen/Qwen3-4B` | `Qwen/Qwen3-4B-Instruct-2507` |
+| Mistral | `mistralai/Mistral-7B-v0.3` | `mistralai/Mistral-7B-Instruct-v0.3` |
+
+**Notes:**
+- Llama models require Meta license approval via Hugging Face
+- Mistral models need `fix_mistral_regex=True` when loading tokenizer
+- Layer range for attention analysis is typically the last 15 layers
 
 ## Documentation
 
-Research documents are in `docs/`:
-- `epistemic_honesty_narrative_draft.md` - Main paper draft for SOSP submission
-- `empirical-findings-summary.md` - Summary of experimental results (read-only reference)
+**Paper:** `papers/sosp/epistemic_honest.tex` - Main paper for SOSP 2025 submission
+
+**TLA+ Specifications:**
+- `tla/EpistemicImpossibility.tla` - Models text-only observation regime (impossibility)
+- `tla/epistemic_tensor.tla` - Models tensor interface escape (verifiability holds)
+
+**Research documents in `docs/`:**
+- `epistemic_honesty_narrative_draft.md` - Narrative paper draft
+- `empirical-findings-summary.md` - Summary of experimental results
 
 The `acmart-primary/` directory contains LaTeX templates for ACM paper formatting.
