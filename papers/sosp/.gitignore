@@ -33,3 +33,4 @@ samples/*.bbx
 samples/*.cbx
 samples/*.dbx*.fdb_latexmk
 *.fls
+*.fdb_latexmk

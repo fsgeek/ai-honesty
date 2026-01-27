@@ -571,6 +571,21 @@ The previous section established that internal epistemic state exists and is
 discarded by the text interface. We now formalize this observation as an
 impossibility result.
 
+A common assumption in current practice is that epistemic honesty is a
+capability problem: sufficiently capable models, trained with sufficient RLHF,
+will eventually ``know what they know'' and report it accurately. Scaling solved
+grammar; scaling solved coherence; scaling will solve hallucination. Lin et
+al.\ tested this assumption directly and found an inverse scaling trend: larger
+models were \emph{less} truthful on TruthfulQA~\cite{lin2022truthfulqa}. The
+theorems that follow explain why this expectation is architecturally
+incoherent. The
+constraint is not capability but interface. Text-only observation lacks the
+degrees of freedom to verify epistemic state, regardless of what the model
+internally represents. No amount of capability improvement can escape a
+verification impossibility---the model may know perfectly well that it is
+fabricating, but the interface provides no channel through which this knowledge
+can be verified.
+
 Our argument proceeds in two stages. First, we show that any policy conditioning
 only on the query cannot satisfy epistemic honesty across ambiguous world states
 (Theorem~\ref{thm:representational}: Representational Impossibility). Second, we
