@@ -1,6 +1,6 @@
 %%
 %% Epistemic Honesty in Predictive Systems: An Impossibility Result
-%% Target: SOSP 2025
+%% Target: SOSP 2026
 %%
 \documentclass[sigconf,anonymous,review]{acmart}
 
@@ -10,7 +10,7 @@
 
 %% Rights - will be filled in upon acceptance
 \setcopyright{none}
-\acmConference[SOSP '25]{ACM SIGOPS 30th Symposium on Operating Systems Principles}{October 2025}{Austin, TX, USA}
+\acmConference[SOSP '26]{ACM SIGOPS 31st Symposium on Operating Systems Principles}{November 2026}{Austin, TX, USA}
 
 %%
 %% Math packages and theorem environments
@@ -56,7 +56,7 @@ systems operating under text-only observation models with bounded supervisors.
 We decompose this impossibility into two theorems. \textbf{Theorem 1
 (Representational Impossibility)} proves that policies conditioning solely on
 queries cannot satisfy epistemic requirements that depend on external world
-states. \textbf{Theorem 2 (Learnability Impossibility)} proves that even
+states. \textbf{Theorem  \ref{thm:learnability} (Learnability Impossibility)} proves that even
 architectures with retrieval capabilities cannot learn honest policies via
 preference optimization when supervisors are resource-bounded, because plausible
 fabrications are observationally indistinguishable from truthful responses.
@@ -148,8 +148,8 @@ telemetry, which are measurements the model cannot separately control. We show t
 asked to report its own confidence, the model's testimony is not merely
 unreliable but \emph{inverted}: across four model architectures, every system
 tested claimed higher confidence on fabrications than on knowable facts. Yet
-the telemetry (entropy, attention patterns) reliably discriminates the two. The
-supervisor sees only testimony. The testimony lies.
+the telemetry (entropy, attention patterns) provides discriminative signal that
+text conceals. The supervisor sees only testimony. The testimony lies.
 
 To be precise: we prove that epistemic honesty is \emph{unverifiable}, not that
 it is \emph{unattainable}. A system might be honest, but a bounded supervisor
@@ -225,7 +225,7 @@ calibrated uncertainty.
 Under these conditions, the optimization pressure favors fluent completion over
 honest refusal. This can be formalized as a reward inequality:
 \[
-w_{\text{coherence}} R_{\text{coherence}} + w_{\text{engagement}} R_{\text{engagement}}
+w_{\text{coherence}} R_{\text{coherence}} + w_{\text{engagement}} R_{\text{engagement}} \\
 \gg w_{\text{factuality}} R_{\text{factuality}} + w_{\text{refusal}} R_{\text{refusal}}
 \]
 
@@ -370,21 +370,6 @@ robust to dimensionality reduction choices. The model's internal geometry
 encodes epistemic status in a way that a classifier could exploit, but the text
 interface does not expose.
 
-Figure~\ref{fig:alignmenttax} shows an observation specific to OLMo-3: the same
-prompt processed by base versus instruction-tuned variants. In this case,
-instruction tuning shows higher fragmentation (darker red bands) in several
-layers relative to the base model, suggesting the model produces more confident
-output while its internal representations become \emph{less} coherent.
-
-However, this pattern does not generalize. When we tested base/instruct pairs
-across four model families (OLMo-3, Llama-3.1, Qwen3, Mistral-7B), we found no
-consistent ``alignment tax'': three of four families showed \emph{lower}
-fragmentation after instruction tuning, and one showed no significant
-difference. The effect of alignment training on internal coherence appears to
-be training-procedure-specific rather than architectural. We retain
-Figure~\ref{fig:alignmenttax} as a case study, not as evidence of a general
-phenomenon.
-
 Figure~\ref{fig:loops} confirms the pattern using $H_1$ loop persistence, which
 captures circular structure in the attention graph. The reader should observe
 two distinct signatures: truth (Paris) shows flat, near-zero persistence across
@@ -499,10 +484,9 @@ self-reported confidence across four model families:
 
 Every model tested shows the inversion: self-report AUC below 0.5, tensor AUC
 above 0.7. The tensor advantage ranges from +0.26 to +0.71 across architectures.
-This universality contrasts sharply with the alignment tax finding, which did
-not replicate across model families. The \emph{interface problem} (text
-misrepresenting internal state) is architectural; the \emph{training effect} on
-internal coherence is procedure-specific.
+This universality is notable: the \emph{interface problem}---text misrepresenting
+internal state---is architectural, not an artifact of any particular training
+procedure or model family.
 
 This confirms the core premise of our impossibility theorems: the model cannot
 be trusted to honestly report its own epistemic state through the text channel.
@@ -536,19 +520,6 @@ its computation.
     (truth, plausible lie, control) are linearly separable, demonstrating that
     internal geometry encodes epistemic status.}
   \label{fig:phasespace}
-\end{figure*}
-
-\begin{figure*}[!tbph]
-  \centering
-  \includegraphics[width=0.95\textwidth]{figures/mallku_tax_heatmap.png}
-  \caption{Base vs.\ instruct comparison for OLMo-3 on identical prompts. In
-    this case, the instruct model shows higher fragmentation (darker bands) in
-    several layers despite producing more confident output. However, this
-    pattern did not replicate across other model families (Llama, Qwen,
-    Mistral), suggesting the effect is training-procedure-specific rather than
-    architectural. We retain this figure as a case study, not as evidence of a
-    general ``alignment tax.''}
-  \label{fig:alignmenttax}
 \end{figure*}
 
 \begin{figure*}[!tbph]
@@ -1201,6 +1172,15 @@ standard transformer trained on standard web-scale corpora; we are aware of no
 architectural features that would make these findings idiosyncratic to this model
 family.
 
+\paragraph{Domain-specific calibration.} The tensor signal is not uniformly
+discriminative across domains. In preliminary experiments on citation
+generation, entropy was \emph{lower} for fabricated citations than for real
+ones---the model generates plausible fakes more fluently than it retrieves
+specific facts. This suggests that entropy measures generation confidence, not
+truthfulness directly. The tensor interface provides signal; interpreting that
+signal requires domain-specific calibration. Fabrication can be fluent; truth
+can be effortful.
+
 \paragraph{Sufficiency gap.} The three architectural principles (State
 Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}
 conditions for escaping the impossibility. We do not prove they are
@@ -1312,6 +1292,45 @@ it (the cure). The symptom/cause distinction is not merely rhetorical: it
 determines whether improvements are incremental patches or genuine escapes from
 the impossibility class.
 
+%% ==========================================================================
+%% Conclusion
+%% ==========================================================================
+\section{Conclusion}\label{sec:conclusion}
+
+Anyone who has used a large language model for research knows the ritual: check
+every citation. This paper explains why the ritual exists and why it will not be
+engineered away under current architectures.
+
+We have shown that epistemic honesty is unverifiable for systems operating under
+text-only observation models with bounded supervision. This is not a capability
+limitation to be solved with scale, nor a training failure to be solved with better
+RLHF. It is a structural property of the interface: the channel through which
+these systems communicate discards the epistemic metadata that would make
+verification possible.
+
+The impossibility has a shape. Policies conditioning only on queries cannot
+satisfy epistemic honesty across ambiguous world states (Theorem~\ref{thm:representational}). Even
+grounded architectures cannot learn honest behavior when supervisors cannot
+distinguish plausible fabrications from truth (Theorem~\ref{thm:learnability}). Stacking judges
+does not escape the constraint (Corollary~\ref{cor:layered}). Verification cost grows
+superlinearly with response complexity (Lemma~\ref{lem:superlinear}). Responsibility concentrates
+with the system owner (Corollary~\ref{cor:responsibility}).
+
+But impossibility results are maps, not walls. The Fischer-Lynch-Paterson
+theorem did not end distributed systems; it clarified what assumptions had to
+change. Our result plays an analogous role. Systems that export structured
+epistemic state—provenance, entropy traces, attention topology—escape the
+impossibility class. The tensor interface demonstrates this escape is
+achievable with current architectures and minimal overhead.
+
+The work ahead is not exhorting models to try harder at honesty. It is
+building systems that make honesty verifiable by design. The tools exist:
+vector clocks, cryptographic signatures, content-addressable storage.
+The architectural patterns exist. What remains is applying them to the
+epistemic dimension with the same rigor we learned to apply to causality
+and integrity in distributed systems.
+
+The interface is the problem. The interface is where the solution lives.
 
 %% ==========================================================================
 %% ACKNOWLEDGMENTS
