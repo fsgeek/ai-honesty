@@ -160,7 +160,7 @@ exhorting models to ``try harder'' at honesty, but redesigning interfaces to
 make honesty verifiable.
 
 To be sharp: prior work shows that models fabricate. We prove something
-different---that \emph{even a model with perfect internal knowledge} cannot have
+different: that \emph{even a model with perfect internal knowledge} cannot have
 that knowledge \emph{verified} through text-only interfaces with bounded
 supervision. The constraint is observational, not computational. The model may
 know; the supervisor cannot tell.
@@ -490,8 +490,8 @@ self-reported confidence across four model families:
 
 Every model tested shows the inversion: self-report AUC below 0.5, tensor AUC
 above 0.7. The tensor advantage ranges from +0.26 to +0.71 across architectures.
-This universality is notable: the \emph{interface problem}---text misrepresenting
-internal state---is architectural, not an artifact of any particular training
+This universality is notable: the \emph{interface problem} (text misrepresenting
+internal state) is architectural, not an artifact of any particular training
 procedure or model family.
 
 This confirms the core premise of our impossibility theorems: the model cannot
@@ -559,7 +559,7 @@ incoherent. The
 constraint is not capability but interface. Text-only observation lacks the
 degrees of freedom to verify epistemic state, regardless of what the model
 internally represents. No amount of capability improvement can escape a
-verification impossibility---the model may know perfectly well that it is
+verification impossibility because the model may know perfectly well that it is
 fabricating, but the interface provides no channel through which this knowledge
 can be verified.
 
@@ -1085,11 +1085,11 @@ that such signals are available without architectural change.
 \paragraph{Quantitative demonstration.}
 To validate the tensor interface under the exact assumptions of our impossibility
 theorems, we simulated bounded verification on 100 queries (50 knowable, 50
-unknowable). With a verification budget of 10 queries---representing a bounded
-supervisor who can only check 10\% of outputs---we compared random selection
+unknowable). With a verification budget of 10 queries, which represents a bounded
+supervisor who can only check 10\% of outputs, we compared random selection
 against tensor-guided selection (prioritizing highest-entropy responses).
 Random selection caught $5.1 \pm 1.6$ fabrications; tensor-guided selection
-caught $10.0 \pm 0.0$---a 95\% improvement that achieves the theoretical optimum.
+caught $10.0 \pm 0.0$, which is a 95\% improvement that achieves the theoretical optimum.
 The entropy signal discriminates knowable from unknowable queries with AUC =
 0.998, enabling near-perfect triage under bounded supervision.
 
@@ -1136,6 +1136,8 @@ the input tensor is empty. For composed calls, the input tensor carries
 accumulated provenance and epistemic state. This design enables epistemic
 traces to thread through recursive pipelines, providing verification handles at
 each composition boundary.
+
+\paragraph{Compositional defense.} The tensor's blind spots characterize where other verification methods are most effective. Section~\ref{sec:escape}'s three principles — State Exteriority, Verification Independence, Provenance Binding — need not be satisfied by a single mechanism. The tensor provides Verification Independence: an orthogonal signal the model cannot separately control. Bounded judges provide State Exteriority: external lookup against verifiable sources. Input-side defenses (prompt analysis, supply chain detection) provide Provenance Binding at the system boundary. Each layer addresses the failure class where the others are weakest. The tensor catches uncertain fabrication where verification is expensive; the bounded judge catches confident fabrication where verification is cheap; input-side analysis catches adversarial inputs designed to exploit well-learned patterns. Composing these layers allocates a finite verification budget across failure classes rather than spreading it uniformly across the full output space.
 
 \subsection{Limitations and Future Work}
 
@@ -1211,14 +1213,7 @@ standard transformer trained on standard web-scale corpora; we are aware of no
 architectural features that would make these findings idiosyncratic to this model
 family.
 
-\paragraph{Domain-specific calibration.} The tensor signal is not uniformly
-discriminative across domains. In preliminary experiments on citation
-generation, entropy was \emph{lower} for fabricated citations than for real
-ones---the model generates plausible fakes more fluently than it retrieves
-specific facts. This suggests that entropy measures generation confidence, not
-truthfulness directly. The tensor interface provides signal; interpreting that
-signal requires domain-specific calibration. Fabrication can be fluent; truth
-can be effortful.
+\paragraph{Domain-specific calibration.} The tensor signal is not uniformly discriminative across domains. In preliminary experiments on citation generation, entropy was \emph{lower} for fabricated citations than for real ones where the model generates plausible fakes more fluently than it retrieves specific facts. This confirms that the tensor measures generation confidence (``epistemic truth''), not truthfulness directly.  However, this blind spot is precisely where bounded verification is cheapest: citation verification has low compositional complexity (check the DOI, query the database,) which places it well within a bounded supervisor's budget. The tensor and the bounded judge have complementary failure modes as the tensor catches uncertain fabrication where verification is expensive and the judge catches confident fabrication where verification is cheap.  Composing them allocates verification resources to the failure class each is suited for, rather than spreading a finite budget across the full space.
 
 \paragraph{Sufficiency gap.} The three architectural principles (State
 Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}
@@ -1364,7 +1359,7 @@ achievable with current architectures and minimal overhead.
 
 The tensor interface addresses verification at inference time. A complementary
 question is whether training-time interventions can produce systems that are
-constitutionally less capable of certain fabrications---systems where the
+constitutionally less capable of certain fabrications, such as systems where the
 modification class is bounded to exclude dishonest configurations before
 deployment. Recent work on pedagogical training suggests bounded modification
 during capability development may achieve what personality engineering cannot.
