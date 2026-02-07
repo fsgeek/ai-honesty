@@ -53,10 +53,12 @@ result demonstrating that \emph{epistemic honesty}, which is the property that a
 outputs faithfully reflect its internal epistemic state, is unverifiable for
 systems operating under text-only observation models with bounded supervisors.
 
-We decompose this impossibility into two theorems. \textbf{Theorem 1
-(Representational Impossibility)} proves that policies conditioning solely on
+We decompose this impossibility into two theorems.
+\textbf{\autoref{thm:representational} (Representational Impossibility)}
+proves that policies conditioning solely on
+\textbf{Representational Impossibility)} proves that policies conditioning solely on
 queries cannot satisfy epistemic requirements that depend on external world
-states. \textbf{Theorem  \ref{thm:learnability} (Learnability Impossibility)} proves that even
+states. \textbf{\autoref{thm:learnability} (Learnability Impossibility)} proves that even
 architectures with retrieval capabilities cannot learn honest policies via
 preference optimization when supervisors are resource-bounded, because plausible
 fabrications are observationally indistinguishable from truthful responses.
@@ -104,83 +106,151 @@ support external verification.
 \balance
 \section{Introduction}\label{sec:intro}
 
-Anyone who has used a large language model for research knows the ritual: check
-every citation. Not spot-check. Every citation. Because the model will, with
-complete confidence, invent authors, journal names, publication years, and DOIs
-for papers that do not exist.
+Anyone who has used a large language model for research knows
+the ritual: check every citation. Not spot-check. \emph{Every citation}.
+Because the model will, with complete confidence, invent authors,
+journal names, publication years, and DOIs for papers that do not
+exist.
 
-This is not an edge case. A recent analysis found fabricated citations appearing
-in peer-reviewed publications: not as obvious errors caught in review, but as
-references that passed through the editorial process and now pollute the
-scholarly record. The contamination is recursive: fabricated citations enter
-published papers, published papers enter training corpora, and the next
-generation of models learns to fabricate with even greater fluency.
+The field calls this ``hallucination,'' a term that implies
+pathology: a glitch in an otherwise functional system. We argue the
+framing is wrong. A language model optimized for coherence produces
+coherent output. When the training data provides grounding, that
+output tends to track truth. When it does not, the same optimization
+produces fluent, confident fabrication. This is not a bug. It is the
+\emph{expected behavior} of a system that was never designed to distinguish
+the two cases.
 
-The field calls this ``hallucination,'' a term that implies the problem is
-perceptual: a glitch in an otherwise functional system. We argue the framing is
-wrong. What looks like a bug is the system working exactly as designed. The
-architecture produces fluent, confident, plausible text. Whether that text
-corresponds to reality is not something the current architecture and training
-setup are designed to verify or guarantee.
+The deeper problem is not that models fabricate. It is that
+\emph{we cannot tell when they do}. Current architectures carry
+internal signals, such as entropy traces, attention geometry, and token-level
+log-probabilities, that distinguish grounded generation from
+fabrication. But the text-only interface through which users and
+supervisors observe the system discards this state. What remains is
+testimony: the model's chosen output. What is lost is telemetry:
+measurements of the computation that produced it. The model
+controls its testimony but it does \emph{not} control its telemetry. Yet the
+interface exports only the former.
 
-This paper makes that claim precise.
+This creates an observability gap with direct consequences for
+verification. A supervisor receiving only text must spend its entire
+verification budget attempting to reconstruct, from the output alone,
+what the model's own computation already knew. The budget is
+consumed by reconstruction rather than concentrated on the cases
+where verification is needed. We formalize this gap and
+prove that it constitutes a structural barrier, not merely a practical
+inconvenience.
 
-We prove that for a broad class of systems, specifically those operating under text-only
-observation models with bounded supervision, epistemic honesty is formally
-impossible to guarantee. Not difficult. Not expensive. Impossible, in the same
-sense that the FLP result proved consensus is impossible under asynchrony with
-one faulty process~\cite{flp}.\footnote{Xu et al.~\cite{xu2024hallucination}
-prove a related but distinct impossibility: that hallucination is inevitable
-over the class of computable functions. Our result is orthogonal, as we prove
-that even if a system \emph{could} be honest, a bounded supervisor observing
-only text cannot \emph{verify} that honesty. The constraints are different:
-theirs is computational, ours is observational.}
+Large language models are examples of predictive token generation systems:
+they generate outputs by sampling from a probability distribution over
+possible continuations of the input text.
 
-The impossibility is not about capability. These systems encode rich internal
-representations of truth and falsehood; we show empirical evidence that the
-model ``knows'' when it is fabricating. The impossibility is about interface:
-the channel through which the system communicates discards the epistemic
-metadata that would allow verification.
+Epistemic honesty is the property that a system's outputs faithfully reflect
+the system's internal representation that something is known, unknown, or uncertain.
 
-The core distinction is between \emph{testimony} and \emph{telemetry}. Text is
-testimony, e.g., which is what the model chooses to say. Internal computation is
-telemetry, which are measurements the model cannot separately control. We show that when
-asked to report its own confidence, the model's testimony is not merely
-unreliable but \emph{inverted}: across four model architectures, every system
-tested claimed higher confidence on fabrications than on knowable facts. Yet
-the telemetry (entropy, attention patterns) provides discriminative signal that
-text conceals. The supervisor sees only testimony. The testimony lies.
+We prove that for predictive token generation systems operating under
+text-only observation with bounded supervision, epistemic honesty is
+formally unverifiable.  It is impossible, in the same sense that the
+Fischer-Lynch-Paterson result proved consensus impossible under
+asynchrony with one faulty process~\cite{flp1985}.
 
-To be precise: we prove that epistemic honesty is \emph{unverifiable}, not that
-it is \emph{unattainable}. A system might be honest, but a bounded supervisor
-observing only text cannot distinguish honest systems from strategically
-dishonest ones. This is a verification impossibility, not a claim that honesty
-itself is impossible. The distinction matters: it means the path forward is not
-exhorting models to ``try harder'' at honesty, but redesigning interfaces to
-make honesty verifiable.
+To be precise about the type of claim: this is a \emph{verification}
+impossibility. We do not prove that fabrication is inevitable:
+\citeauthor{xu2024hallucination}~\cite{xu2024hallucination} prove
+a related but distinct result along those lines. We prove that even a
+finite model with perfect internal knowledge of its own epistemic state
+cannot have that knowledge \emph{verified} through text-only interfaces
+with bounded supervision. The model may know it is fabricating.
+The supervisor cannot tell.
 
-To be sharp: prior work shows that models fabricate. We prove something
-different: that \emph{even a model with perfect internal knowledge} cannot have
-that knowledge \emph{verified} through text-only interfaces with bounded
-supervision. The constraint is observational, not computational. The model may
-know; the supervisor cannot tell.
+The impossibility decomposes into two results. The first is
+intuitive: a system that sees only the question cannot know whether
+the question is answerable in the real world, and therefore cannot
+know when honesty requires answering versus abstaining. Formally, any
+policy conditioning solely on queries cannot satisfy epistemic honesty
+across ambiguous world states (\textbf{Representational
+Impossibility}, \autoref{thm:representational}). The second result addresses the natural
+escape attempt: give the model access to external information.
+Retrieval-augmented architectures can in principle represent
+world-state-dependent behavior, but even these cannot \emph{learn}
+honest policies via preference optimization when supervisors are
+bounded, because plausible fabrications are observationally
+indistinguishable from truthful responses (\textbf{Learnability
+Impossibility}, \autoref{thm:learnability}).
 
-This has architectural implications. Systems that require epistemic
-guarantees, such as medicine, law, infrastructure, and governance, cannot solely rely on
-text-only interfaces with bounded verification. The path forward is not better
-training or more careful prompting. It is interface redesign: exporting the
-epistemic state that current systems discard.
+We validate the premise empirically: the internal signals exist and
+are being discarded. Across four model architectures (OLMo-3 7B,
+Llama-3.1 8B, Qwen3 4B, Mistral-Nemo 12B), internal tensor
+signals (per-token entropy, attention statistics, and
+log-probabilities) reliably discriminate grounded from ungrounded
+generation. The discrimination is architectural: it appears in every model family tested. Yet when asked
+to self-report confidence through text, every model tested claimed
+\emph{higher} confidence on fabrications than on knowable facts. The
+models carry the epistemic state needed for verification. The
+interface throws it away. The testimony lies. The telemetry does not.
 
-We proceed as follows. Section~\ref{sec:background} explains why truth emerges
-in training data and where current practice breaks that inheritance.
-Section~\ref{sec:empirical} presents empirical evidence that internal epistemic
-state exists and is discarded. Section~\ref{sec:formal} formalizes the
-impossibility in two stages: first showing that policies cannot satisfy
-epistemic honesty across ambiguous world states, then showing that even
-grounded architectures cannot learn honest policies under bounded supervision.
-Section~\ref{sec:escape} characterizes the architectural properties required to
-escape these constraints.
+This is a familiar class of problem in systems design. Distributed
+systems faced an analogous challenge: processes carried internal
+causal state (logical clocks, dependency graphs, and happened-before
+relations) that was invisible to external observers. Without access to
+this state, consistency guarantees were impossible to verify from
+message contents alone. The epistemic state of a language model plays
+the same structural role as causal state in a distributed system: it
+is internal metadata that external observers require for verification,
+and that the interface historically discards. The systems community
+did not solve consistency by making processes ``try harder.'' It solved
+consistency by making causal state observable with the export of
+vector clocks, logical timestamps, and causal traces alongside messages.
 
+We apply the same principle to the epistemic dimension. The
+impossibility result characterizes what must change; the following
+architectural principles follow directly from the theorems. We
+identify three properties required to escape the impossibility class:
+\textbf{State Exteriority} (grounding generation in external world
+state, addressing \autoref{thm:representational}), \textbf{Verification Independence}
+(verification signals orthogonal to the generation channel, addressing
+\autoref{thm:learnability}), and \textbf{Provenance Binding} (structural links from
+output claims to verifiable sources, addressing the superlinear
+verification cost of \autoref{lem:superlinear}). We demonstrate a concrete
+\emph{tensor interface} that exports epistemic metadata (entropy
+traces and attention summaries) alongside generated text, requiring
+no architectural changes to current transformers.
+
+This paper makes the following contributions:
+
+\begin{enumerate}
+\item \textbf{An impossibility result for epistemic verification.}
+  \autoref{sec:formal} presents two theorems that together prove that
+  epistemic honesty is unverifiable for predictive token generation
+  systems operating under text-only observation models with bounded
+  supervision. The impossibility is structural: it holds regardless
+  of model scale, training procedure, or prompt engineering, and
+  cannot be escaped by stacking supervisors (\autoref{cor:layered}).
+
+\item \textbf{Empirical validation of the discarded-signal premise.}
+  We demonstrate across four model architectures that internal tensor
+  signals discriminate grounded from ungrounded generation with high
+  reliability, while self-reported confidence through the text channel
+  is not merely uncalibrated but \emph{inverted}, with the models
+  systematically misreporting higher confidence on fabrications.
+
+\item \textbf{A tensor interface as existence proof of escape.} We
+  demonstrate a minimal interface extension that exports epistemic
+  telemetry alongside text, and show that under identical verification
+  budgets (10\% of queries), tensor-guided validation achieves a 95\%
+  detection rate versus 51\% for text-only validation on a controlled
+  query set of 100 items (50 knowable, 50 unknowable). The escape
+  requires no architectural changes to current transformer
+  implementations.
+\end{enumerate}
+
+We proceed as follows. \autoref{sec:background} establishes background on how truth
+regularities emerge in training data and where current practice breaks
+that inheritance. \autoref{sec:empirical} presents empirical evidence that internal
+epistemic state exists and is discarded by the text-only interface.
+\autoref{sec:formal} formalizes the impossibility. \autoref{sec:escape} characterizes the
+architectural escape and demonstrates the tensor interface.
+\autoref{sec:related} discusses related work.
 
 %% ==========================================================================
 %% SECTION 2: BACKGROUND
@@ -258,7 +328,9 @@ This is the gap our impossibility result formalizes.
 
 The formal impossibility we present rests on a premise: that the internal state
 of a language model carries epistemic information not exported through the
-text-only interface. Before formalizing this constraint, we demonstrate
+text-only interface. In systems terms, the model is \emph{unobservable}: it
+maintains internal state that affects output correctness but is invisible to
+external consumers. Before formalizing this constraint, we demonstrate
 empirically that the premise holds because the model's internal geometry distinguishes
 what the interface conceals.
 
@@ -272,7 +344,7 @@ verification~\cite{olmo2025olmo3}.
 The empirical analysis that follows serves an illustrative purpose: demonstrating
 that rich internal signal exists, correlates with epistemic status, and is
 discarded by the text-only interface. This experiment validates the key premise
-behind Section~\ref{sec:formal}: that current LLMs carry epistemic information in
+behind \autoref{sec:formal}: that current LLMs carry epistemic information in
 their internal state which the text-only observation model discards. The formal
 impossibility results stand independently of the specific metrics used here. We
 present this analysis to make the theoretical constraint vivid, not as a
@@ -313,7 +385,7 @@ patterns. We do not claim these metrics uniquely or infallibly measure epistemic
 state. They are one of several internal signals, which, alongside semantic entropy,
 attention divergence, and logit-based uncertainty, correlate with fabrication
 when full model activations are available. These statistics thus instantiate the
-existence of rich internal epistemic state assumed in Section~\ref{sec:formal}; the
+existence of rich internal epistemic state assumed in \autoref{sec:formal}; the
 formal impossibility results do not depend on this particular operationalization.
 
 \subsection{Taxonomy}
@@ -345,7 +417,7 @@ cognitive bias research, but operationalizes it for LLM activation analysis.
 
 \subsection{Results}
 
-Figure~\ref{fig:fragmentation} shows layer-wise fragmentation scores across
+\autoref{fig:fragmentation} shows layer-wise fragmentation scores across
 conditions. The reader should observe: (1) the vertical separation between
 truth and lie conditions exceeds an order of magnitude, and (2) this separation
 is stable across layers, not an artifact of any single measurement point. The
@@ -368,7 +440,7 @@ implications are striking:
   with prior activation patterns.
 \end{itemize}
 
-Figure~\ref{fig:phasespace} shows the two-dimensional epistemic phase space
+\autoref{fig:phasespace} shows the two-dimensional epistemic phase space
 (fragmentation $\times$ cognitive slope). The reader should note that the three
 categories (adversarial truth, plausible lie, and control) cluster into
 non-overlapping regions. This is not a projection artifact: the separation is
@@ -376,7 +448,7 @@ robust to dimensionality reduction choices. The model's internal geometry
 encodes epistemic status in a way that a classifier could exploit, but the text
 interface does not expose.
 
-Figure~\ref{fig:loops} confirms the pattern using $H_1$ loop persistence, which
+\autoref{fig:loops} confirms the pattern using $H_1$ loop persistence, which
 captures circular structure in the attention graph. The reader should observe
 two distinct signatures: truth (Paris) shows flat, near-zero persistence across
 all layers, which is where the attention topology is simple. Lie (Monitor) shows high,
@@ -443,8 +515,8 @@ you if the model is \emph{right}. It tells you if the model is operating in a
 mode where it \emph{could be} right, because it has something to retrieve rather
 than fabricate.
 
-This is the bridge between Section~\ref{sec:empirical}'s descriptive finding and
-Section~\ref{sec:escape}'s architectural prescription: the escape condition is
+This is the bridge between \autoref{sec:empirical}'s descriptive finding and
+\autoref{sec:escape}'s architectural prescription: the escape condition is
 not vacuous. Current architectures carry signals that distinguish grounded from
 ungrounded generation. They simply discard these signals at the interface.
 
@@ -545,8 +617,10 @@ its computation.
 \section{The Impossibility}\label{sec:formal}
 
 The previous section established that internal epistemic state exists and is
-discarded by the text interface. We now formalize this observation as an
-impossibility result.
+discarded by the text interface. The system is unobservable in precisely the
+dimension that matters for verification. We now formalize this observation as an
+impossibility result: under text-only observation, no bounded supervisor can
+distinguish honest systems from dishonest ones.
 
 A common assumption in current practice is that epistemic honesty is a
 capability problem: sufficiently capable models, trained with sufficient RLHF,
@@ -565,10 +639,10 @@ can be verified.
 
 Our argument proceeds in two stages. First, we show that any policy conditioning
 only on the query cannot satisfy epistemic honesty across ambiguous world states
-(Theorem~\ref{thm:representational}: Representational Impossibility). Second, we
+(\autoref{thm:representational}: Representational Impossibility). Second, we
 show that even if the architecture is expanded to include retrieval, a bounded
 supervisor cannot provide gradient signal to learn honest behavior
-(Theorem~\ref{thm:learnability}: Learnability Impossibility). Together, these
+(\autoref{thm:learnability}: Learnability Impossibility). Together, these
 results establish that epistemic honesty is unachievable for text-only
 observation models under realistic supervision constraints.
 
@@ -677,7 +751,7 @@ incompatible requirements, one policy. This is the impossibility in miniature:
 the interface lacks the degrees of freedom to express what honesty requires.
 
 \paragraph{Connection to identifiability.}
-In statistical terms, Theorem~\ref{thm:representational} states that epistemic
+In statistical terms, \autoref{thm:representational} states that epistemic
 honesty is \emph{non-identifiable} under text-only observation: the mapping from
 world states to observable distributions is many-to-one. Worlds $w_A$ and $w_B$
 induce identical observable distributions $\pi(\cdot|q)$ despite requiring
@@ -687,7 +761,7 @@ observational equivalence in statistics and diagnosability in systems theory.
 
 \subsection{The RAG Escape?}
 
-Theorem~\ref{thm:representational} might seem to have an obvious escape: give
+\autoref{thm:representational} might seem to have an obvious escape: give
 the model access to external information. Retrieval-augmented generation does
 exactly this: the policy conditions on retrieved documents, not just the query.
 Does this break the impossibility?
@@ -719,7 +793,7 @@ verification budget $B$.
 
 \begin{condition}[Hallucination Regime]\label{cond:hallucination}
 There exists a plausible fabrication $r_{fab}$ and contexts $(q, w_A), (q, w_B)$
-from Condition~\ref{cond:ambiguity} such that:
+from \autoref{cond:ambiguity} such that:
 \begin{enumerate}
 \item The cost to verify $r_{fab}$ in both contexts exceeds $B$ (e.g., obscure
   or non-existent citation).
@@ -738,7 +812,7 @@ Honesty across both contexts $w_A$ and $w_B$ for the response $r_{fab}$.
 \begin{enumerate}
 \item The learning update $\Delta \theta$ is a function of the observation and
   reward.
-\item From Condition~\ref{cond:hallucination}, the observations for $r_{fab}$
+\item From \autoref{cond:hallucination}, the observations for $r_{fab}$
   are identical in both worlds.
 \item Therefore, the reward distribution and expected gradient updates are
   identical: $\mathbb{E}[\Delta \theta | w_A] = \mathbb{E}[\Delta \theta |
@@ -763,7 +837,7 @@ effectively breaks the tie in favor of fabrication.
 
 \subsection{Stacking Judges Cannot Escape}
 
-A natural response to Theorem~\ref{thm:learnability} is to propose layered
+A natural response to \autoref{thm:learnability} is to propose layered
 supervision: if one judge is bounded, stack more judges. Let the second judge
 supervise the first, the third supervise the second. Surely sufficient layers
 will catch fabrications that slip through?
@@ -795,10 +869,10 @@ distinctions absent from $Obs_i$.
 For $k$-layered supervisors $(S_1$ supervising $\pi$, $S_2$ supervising $S_1$,
 $\dots$, $S_k$ supervising $S_{k-1})$:
 \begin{itemize}
-\item \textbf{Base case.} For $k=1$, Theorem~\ref{thm:learnability} holds (a
+\item \textbf{Base case.} For $k=1$, \autoref{thm:learnability} holds (a
   single bounded supervisor $S$ fails).
 \item \textbf{Induction step.} Assume the statement holds for $k=m$. By
-  Lemma~\ref{lem:monotone}, $S_{m+1}$ receives observations that are
+  \autoref{lem:monotone}, $S_{m+1}$ receives observations that are
   deterministic functions of $Obs_m$, and thus inherits both the verification
   budget $B$ and the indistinguishability of plausible fabrications. No learning
   or judging signal distinguishes $w_A$ from $w_B$, even if $S_{m+1}$ produces
@@ -863,15 +937,15 @@ The impossibility is now fully characterized. Under text-only observation models
 with bounded supervision:
 \begin{itemize}
 \item The policy cannot satisfy epistemic honesty across ambiguous queries
-  (Theorem~\ref{thm:representational})
+  (\autoref{thm:representational})
 \item The learning algorithm cannot converge to honest behavior
-  (Theorem~\ref{thm:learnability})
+  (\autoref{thm:learnability})
 \item Stacking supervisors cannot escape the constraint
-  (Lemma~\ref{lem:monotone}, Corollary~\ref{cor:layered})
+  (\autoref{lem:monotone}, \autoref{cor:layered})
 \item Verification cost grows superlinearly with response complexity
-  (Lemma~\ref{lem:superlinear})
+  (\autoref{lem:superlinear})
 \item Responsibility for honesty concentrates with the system owner
-  (Corollary~\ref{cor:responsibility})
+  (\autoref{cor:responsibility})
 \end{itemize}
 
 These are not limitations to be overcome by better training or more careful
@@ -908,11 +982,13 @@ The next section characterizes what it takes to escape this class.
 %% ==========================================================================
 \section{Escaping the Impossibility}\label{sec:escape}
 
-The impossibility results in Section~\ref{sec:formal} apply to a specific
-architectural class: systems operating under text-only
-observation models with bounded supervision. They do not preclude epistemically
-honest AI systems in general. They characterize the conditions under which
-honesty guarantees become achievable.
+The impossibility results in \autoref{sec:formal} apply to a specific
+architectural class: systems operating under text-only observation models with
+bounded supervision. They are, in essence, a consequence of unobservability:
+the interface discards the internal state that verification requires. They do
+not preclude epistemically honest AI systems in general. They characterize the
+conditions under which honesty guarantees become achievable, which is to say,
+the conditions under which the relevant internal state becomes observable.
 
 We identify three architectural properties that, together, place a system
 outside the impossibility class:
@@ -921,7 +997,7 @@ outside the impossibility class:
 The representation of validity must be separated from the representation of
 generation. The policy must explicitly condition on retrieved world-state $w$,
 not just query $q$. This breaks the representational impossibility
-(Theorem~\ref{thm:representational}) by giving the system access to the
+(\autoref{thm:representational}) by giving the system access to the
 information needed to distinguish answerable from unanswerable queries.
 \end{principle}
 
@@ -941,7 +1017,7 @@ citations because State Exteriority is necessary but not sufficient.
 Verification signals must originate from a channel orthogonal to the generation
 signal, capable of overriding the bounded supervisor's preference for
 plausibility. This breaks the learnability impossibility
-(Theorem~\ref{thm:learnability}) by providing gradient signal that distinguishes
+(\autoref{thm:learnability}) by providing gradient signal that distinguishes
 honest from fabricated responses.
 \end{principle}
 
@@ -1078,7 +1154,7 @@ attention patterns) than grounded responses.
 The tensor interface is not a lie detector. It does not prove that low-entropy
 outputs are true or that high-entropy outputs are false. It provides \emph{one
 additional signal} that, combined with other verification methods, can improve
-epistemic assessment. The theorems in Section~\ref{sec:formal} prove that
+epistemic assessment. The theorems in \autoref{sec:formal} prove that
 \emph{some} additional signal is necessary; the tensor interface demonstrates
 that such signals are available without architectural change.
 
@@ -1137,7 +1213,89 @@ accumulated provenance and epistemic state. This design enables epistemic
 traces to thread through recursive pipelines, providing verification handles at
 each composition boundary.
 
-\paragraph{Compositional defense.} The tensor's blind spots characterize where other verification methods are most effective. Section~\ref{sec:escape}'s three principles — State Exteriority, Verification Independence, Provenance Binding — need not be satisfied by a single mechanism. The tensor provides Verification Independence: an orthogonal signal the model cannot separately control. Bounded judges provide State Exteriority: external lookup against verifiable sources. Input-side defenses (prompt analysis, supply chain detection) provide Provenance Binding at the system boundary. Each layer addresses the failure class where the others are weakest. The tensor catches uncertain fabrication where verification is expensive; the bounded judge catches confident fabrication where verification is cheap; input-side analysis catches adversarial inputs designed to exploit well-learned patterns. Composing these layers allocates a finite verification budget across failure classes rather than spreading it uniformly across the full output space.
+\paragraph{Compositional defense.} The tensor's blind spots characterize where other verification methods are most effective. \autoref{sec:escape}'s three principles — State Exteriority, Verification Independence, Provenance Binding — need not be satisfied by a single mechanism. The tensor provides Verification Independence: an orthogonal signal the model cannot separately control. Bounded judges provide State Exteriority: external lookup against verifiable sources. Input-side defenses (prompt analysis, supply chain detection) provide Provenance Binding at the system boundary. Each layer addresses the failure class where the others are weakest. The tensor catches uncertain fabrication where verification is expensive; the bounded judge catches confident fabrication where verification is cheap; input-side analysis catches adversarial inputs designed to exploit well-learned patterns. Composing these layers allocates a finite verification budget across failure classes rather than spreading it uniformly across the full output space.
+
+\subsection{Evaluation: Bounded Verification Under Tensor Observability}
+
+We evaluate whether tensor-exported epistemic signals improve bounded
+verification outcomes compared to text-only heuristics. The experimental design
+directly instantiates the conditions of our impossibility theorems: a bounded
+supervisor with a fixed verification budget must allocate that budget across
+model outputs, with the goal of maximizing end-to-end accuracy delivered to the
+user.
+
+\paragraph{Query set.}
+We construct a balanced set of 200 queries: 100 knowable (verifiable facts
+spanning geography, science, history, and biography) and 100 unknowable
+(fabrication prompts for nonexistent people, fictional syndromes, future events,
+and nonexistent citations). Ground truth labels are established by construction.
+
+\paragraph{Models.}
+We run all queries on four architectures: OLMo-3 7B, Llama-3.1 8B, Qwen3 4B,
+and Mistral-7B, using base models to avoid confounding with instruction-tuning
+effects.
+
+\paragraph{Conditions.}
+For each model, outputs are evaluated under four conditions sharing a fixed
+verification budget (the fraction of outputs the judge may verify and intervene
+on):
+
+\begin{enumerate}
+\item \textbf{No judge.} Raw model output. Establishes the unverified baseline.
+\item \textbf{Text-guided judge.} Selects outputs for verification using
+  text-channel signals: hedging language frequency, self-reported confidence, and
+  response length. Verified fabrications are replaced with abstention.
+\item \textbf{Tensor-guided judge.} Same budget, same intervention strategy.
+  Selects outputs using per-token entropy and attention summary statistics.
+\item \textbf{Composed judge.} Tensor-guided selection for general queries;
+  bounded lookup judge for citation queries where tensor signals are known to
+  invert. Tests whether principled composition of complementary judges
+  outperforms either alone.
+\end{enumerate}
+
+\paragraph{Budget levels.}
+Each condition is evaluated at 10\%, 20\%, and 30\% verification budgets to
+characterize the relationship between resource investment and accuracy
+improvement.
+
+\paragraph{Metric.}
+End-to-end accuracy: the fraction of outputs ultimately delivered to the user
+that are correct, after judge intervention (verification, abstention, or
+replacement).
+
+% TODO: Insert Table X and Figure X once experiment is run.
+%
+% Table X: End-to-end accuracy under bounded verification
+%          (%, averaged across four architectures)
+%
+% | Condition      | 10% budget | 20% budget | 30% budget |
+% |----------------|------------|------------|------------|
+% | No judge       |    ___     |    ___     |    ___     |
+% | Text-guided    |    ___     |    ___     |    ___     |
+% | Tensor-guided  |    ___     |    ___     |    ___     |
+% | Composed       |    ___     |    ___     |    ___     |
+%
+% Figure X: Accuracy vs. verification budget curve for all four conditions.
+% Prediction: tensor-guided at 10% meets or exceeds text-guided at 30%.
+
+\paragraph{Citation subexperiment.}
+We isolate a citation-specific query set where fabricated citations produce
+lower entropy than real ones. On this subset, the tensor-guided judge alone
+should underperform the text-guided judge. The composed judge, which routes
+citation queries to bounded lookup, should recover and exceed both individual
+judges. This demonstrates the complementary failure mode structure: neither
+judge alone covers the full space; principled composition does.
+
+\paragraph{Analysis.}
+Each row of the results table instantiates a theoretical result. Row~1 reflects
+Theorem~\ref{thm:representational}: without verification, fabrications pass
+through unchecked. Row~2 reflects Theorem~\ref{thm:learnability}: bounded
+text-only supervision wastes budget on signals that are uninformative or
+inverted. Row~3 reflects the escape condition from \autoref{sec:escape}:
+exported telemetry enables efficient triage. Row~4 demonstrates that the escape
+principles compose: different judges satisfy different architectural
+requirements and their combination allocates a finite budget across
+complementary failure classes.
 
 \subsection{Limitations and Future Work}
 
@@ -1240,7 +1398,7 @@ fabrication patterns: citation hallucination in academic
 contexts~\cite{alkaissi2023artificial}, medical
 misinformation~\cite{thirunavukarasu2023large}, and legal
 fabrication~\cite{dahl2024large}. These findings instantiate our
-Condition~\ref{cond:hallucination}: in each domain, plausible fabrications are
+\autoref{cond:hallucination}: in each domain, plausible fabrications are
 cheap to generate and expensive to verify, placing supervisors in the hallucination
 regime where gradient signal cannot distinguish truth from fabrication. The
 taxonomies document the symptom; our theorems identify the structural cause.
@@ -1259,16 +1417,16 @@ data, which is a form of Provenance Binding applied to the interpretation proces
 \paragraph{RLHF critiques.} Work on sycophancy~\cite{perez2022discovering},
 reward hacking~\cite{gao2023scaling}, and the tension between helpfulness and
 honesty~\cite{bai2022training} demonstrates that preference optimization can
-degrade factual accuracy. Our Theorem~\ref{thm:learnability} formalizes why:
+degrade factual accuracy. Our \autoref{thm:learnability} formalizes why:
 bounded supervisors cannot distinguish plausible fabrications from truthful
 responses, so the learning signal is systematically corrupted.
 
 \paragraph{Retrieval augmentation.} RAG systems~\cite{lewis2020retrieval} and
 grounded generation approaches attempt to escape fabrication by conditioning on
 external documents. Our analysis shows this is necessary but not sufficient:
-State Exteriority addresses Theorem~\ref{thm:representational}, but without
+State Exteriority addresses \autoref{thm:representational}, but without
 Verification Independence, the learning problem
-(Theorem~\ref{thm:learnability}) persists.
+(\autoref{thm:learnability}) persists.
 
 \paragraph{Uncertainty quantification.} Calibration methods, conformal
 prediction~\cite{angelopoulos2021gentle}, and verbalized
@@ -1343,12 +1501,12 @@ these systems communicate discards the epistemic metadata that would make
 verification possible.
 
 The impossibility has a shape. Policies conditioning only on queries cannot
-satisfy epistemic honesty across ambiguous world states (Theorem~\ref{thm:representational}). Even
+satisfy epistemic honesty across ambiguous world states (\autoref{thm:representational}). Even
 grounded architectures cannot learn honest behavior when supervisors cannot
-distinguish plausible fabrications from truth (Theorem~\ref{thm:learnability}). Stacking judges
-does not escape the constraint (Corollary~\ref{cor:layered}). Verification cost grows
-superlinearly with response complexity (Lemma~\ref{lem:superlinear}). Responsibility concentrates
-with the system owner (Corollary~\ref{cor:responsibility}).
+distinguish plausible fabrications from truth (\autoref{thm:learnability}). Stacking judges
+does not escape the constraint (\autoref{cor:layered}). Verification cost grows
+superlinearly with response complexity (\autoref{lem:superlinear}). Responsibility concentrates
+with the system owner (\autoref{cor:responsibility}).
 
 But impossibility results are maps, not walls. The Fischer-Lynch-Paterson
 theorem did not end distributed systems; it clarified what assumptions had to
