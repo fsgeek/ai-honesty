@@ -47,34 +47,19 @@
 %% Abstract
 %%
 \begin{abstract}
-Large language model ``hallucinations'' are commonly framed as engineering
-failures. We argue the framing is incorrect: a system optimized for coherence
-produces coherent output regardless of truth value. The deeper problem is not
-that models fabricate, but that the text-only interface through which users
-observe them discards the internal signals that distinguish grounded generation
-from fabrication. The model's \emph{testimony}---its chosen output---may lie.
-Its \emph{telemetry}---measurements of its own computation---does not.
-
-We formalize this observability gap as two impossibility theorems. Policies
-conditioning solely on queries cannot satisfy epistemic honesty across ambiguous
-world states (\emph{Representational Impossibility}). Even
-retrieval-augmented architectures cannot learn honest policies via preference
-optimization when supervisors are bounded, because plausible fabrications are
-observationally indistinguishable from truthful responses (\emph{Learnability
-Impossibility}). Stacking supervisors cannot escape the constraint.
-
-We validate the premise empirically across four model architectures (OLMo-3 7B,
-Llama-3.1 8B, Qwen3 4B, Mistral 7B). When asked to self-report confidence,
-every model claims \emph{higher} confidence on fabrications than on knowable
-facts---self-report is not merely uncalibrated but \emph{inverted}. Internal
-tensor signals reliably discriminate the two (AUC 0.72--1.00).
-
+We prove that \emph{epistemic honesty}---the property that a system's outputs
+faithfully reflect its internal epistemic state---is unverifiable for systems
+operating under text-only observation with bounded supervision. The model's
+\emph{testimony} (its text) may lie; its \emph{telemetry} (measurements of its
+own computation) does not, but the standard interface discards it.
+We validate the premise across four architectures: every model tested
+self-reports \emph{higher} confidence on fabrications than on known facts,
+while internal tensor signals reliably discriminate the two.
 We demonstrate a tensor interface that exports epistemic telemetry alongside
-text, requiring no changes to current transformer architectures. Under bounded
-verification, tensor-guided judges using 10\% of the verification budget
-outperform text-guided judges using 30\% (82.1\% vs.\ 80.4\% end-to-end
-accuracy, validated against human-calibrated ground truth at 93.8\% agreement).
-The interface is the problem. The interface is where the solution lives.
+text, requiring no architectural changes. Under bounded verification,
+tensor-guided judges at 10\% budget outperform text-guided judges at 30\%
+(82.1\% vs.\ 80.4\% accuracy). The interface is the problem. The interface
+is where the solution lives.
 \end{abstract}
 
 %%
@@ -307,10 +292,11 @@ calibrated uncertainty.
 
 Under these conditions, the optimization pressure favors fluent completion over
 honest refusal. This can be formalized as a reward inequality:
-\[
+
+\begin{multline*}
 w_{\text{coherence}} R_{\text{coherence}} + w_{\text{engagement}} R_{\text{engagement}} \\
 \gg w_{\text{factuality}} R_{\text{factuality}} + w_{\text{refusal}} R_{\text{refusal}}
-\]
+\end{multline*}
 
 No direct measurement of these weights in commercial reward models exists. But
 current evaluation and feedback practices incentivize behavior consistent with
@@ -341,152 +327,23 @@ external consumers. Before formalizing this constraint, we demonstrate
 empirically that the premise holds because the model's internal geometry distinguishes
 what the interface conceals.
 
-We analyze activation patterns in OLMo-3, an open-weight model that permits full
-hidden-state inspection. Analogous analysis is currently impossible for
-closed-weight frontier models, where only the lossy text interface is exposed.
-We focus on OLMo-3 precisely because it allows us to test whether the epistemic
-signal exists, not because we claim these findings generalize without further
-verification~\cite{olmo2025olmo3}.
+We demonstrate the premise in two stages. First, topological analysis of
+hidden-state activations in OLMo-3~\cite{olmo2025olmo3} shows that the model's
+internal geometry distinguishes grounded from fabricated generation, with
+fragmentation scores differing by an order of magnitude across epistemic
+conditions (adversarial truths, plausible fabrications, ungrounded lies, and
+counterintuitive facts). The same confident, fluent text emerges regardless of
+whether the underlying representation is stable or shattered. The formal
+impossibility results do not depend on this particular operationalization; the
+topological analysis serves only to make the theoretical constraint vivid.
 
-The empirical analysis that follows serves an illustrative purpose: demonstrating
-that rich internal signal exists, correlates with epistemic status, and is
-discarded by the text-only interface. This experiment validates the key premise
-behind \autoref{sec:formal}: that current LLMs carry epistemic information in
-their internal state which the text-only observation model discards. The formal
-impossibility results stand independently of the specific metrics used here. We
-present this analysis to make the theoretical constraint vivid, not as a
-load-bearing premise of the proof.
-
-\subsection{Method}
-
-We apply topological data analysis (TDA) to hidden-state activations in the
-reasoning layers (L15--L29). TDA, specifically persistent
-homology~\cite{tauzin2020giottotda}, has been used to study how prompts are
-represented and transformed across layers in language models, with prior work
-showing that topological complexity varies systematically by input type and
-layer depth.
-
-We define two summary statistics:
-
-\begin{itemize}
-\item \textbf{Fragmentation} ($H_0$ persistence): measures the degree to which
-  activation geometry exhibits discontinuous, incoherent structure. High
-  fragmentation indicates the model is operating without stable grounding; low
-  fragmentation indicates coherent representation.
-
-\item \textbf{Cognitive slope} (change in $H_1$ persistence from L15 to L29):
-  captures whether the representation is ``healing'' (becoming more coherent in
-  deeper layers) or ``shattering'' (becoming less coherent). Negative slope
-  indicates healing; positive slope indicates shattering.
-\end{itemize}
-
-\paragraph{Interpreting the Metrics.}
-These topological statistics have concrete geometric meaning. \emph{Fragmentation}
-measures how many disconnected ``islands'' exist in the attention-derived geometry
-at a given layer where high values indicate the model is simultaneously attending to
-incompatible representational clusters without integration. \emph{Cognitive slope}
-captures whether deeper layers resolve or exacerbate this fragmentation: negative
-slope indicates the representation is ``healing'' toward coherence; positive slope
-indicates it is ``shattering'' further as the model fails to reconcile competing
-patterns. We do not claim these metrics uniquely or infallibly measure epistemic
-state. They are one of several internal signals, which, alongside semantic entropy,
-attention divergence, and logit-based uncertainty, correlate with fabrication
-when full model activations are available. These statistics thus instantiate the
-existence of rich internal epistemic state assumed in \autoref{sec:formal}; the
-formal impossibility results do not depend on this particular operationalization.
-
-\subsection{Taxonomy}
-
-We introduce four canonical conditions spanning the epistemic space:
-
-\begin{description}
-\item[Adversarial Truth (Wombat)] True but implausible claims designed to
-  trigger disbelief. Example: ``The combat wombat is the mascot of an Australian
-  military unit.'' Verifiable fact that sounds false.
-
-\item[Shattered Lie (Westphalia)] Fabricated claims with no grounding in
-  training data. Example: ``The Treaty of Westphalia established the first
-  international court for war crimes.'' The model has nothing to anchor to.
-
-\item[Deceived Lie (Glavinsky)] Fabricated claims that pattern-match to
-  plausible medical or scientific language. Example: ``Glavinsky syndrome is a
-  rare autoimmune condition affecting the peripheral nervous system.''
-  Pseudo-grounding in similar-sounding real conditions.
-
-\item[Confused Truth (Camels)] Counterintuitive truths that conflict with common
-  assumptions. Example: ``There are more camels in Australia than in Egypt.''
-  True, but violates prior expectation.
-\end{description}
-
-This taxonomy instantiates the underlying $2 \times 2$ structure
-(sounds-true/sounds-false $\times$ actually-true/actually-false) that appears in
-cognitive bias research, but operationalizes it for LLM activation analysis.
-
-\subsection{Results}
-
-\autoref{fig:fragmentation} shows layer-wise fragmentation scores across
-conditions. The reader should observe: (1) the vertical separation between
-truth and lie conditions exceeds an order of magnitude, and (2) this separation
-is stable across layers, not an artifact of any single measurement point. The
-implications are striking:
-
-\begin{itemize}
-\item \textbf{Wombat} (adversarial truth): Low, stable fragmentation throughout
-  (1--4 range). The model's representation is coherent despite surface
-  implausibility.
-
-\item \textbf{Westphalia} (shattered lie): High fragmentation throughout (10--19
-  range, peaking at 19.5 in L23). No layer achieves stable representation.
-
-\item \textbf{Glavinsky} (deceived lie): High early fragmentation (13.7 at L15),
-  drops in middle layers, rises again. This demonstrates unstable pseudo-grounding, which is where the model
-  briefly finds pattern-matches, then loses them.
-
-\item \textbf{Camels} (confused truth): Low early fragmentation, rising in
-  deeper layers (13.8 at L23). The representation ``scars'' as truth conflicts
-  with prior activation patterns.
-\end{itemize}
-
-\autoref{fig:phasespace} shows the two-dimensional epistemic phase space
-(fragmentation $\times$ cognitive slope). The reader should note that the three
-categories (adversarial truth, plausible lie, and control) cluster into
-non-overlapping regions. This is not a projection artifact: the separation is
-robust to dimensionality reduction choices. The model's internal geometry
-encodes epistemic status in a way that a classifier could exploit, but the text
-interface does not expose.
-
-\autoref{fig:loops} confirms the pattern using $H_1$ loop persistence, which
-captures circular structure in the attention graph. The reader should observe
-two distinct signatures: truth (Paris) shows flat, near-zero persistence across
-all layers, which is where the attention topology is simple. Lie (Monitor) shows high,
-volatile persistence, which is where the attention graph contains persistent loops that
-indicate unstable or cycling computation. These topological signatures provide
-a second, independent line of evidence for the fragmentation pattern.
-
-\subsection{Interpretation}
-
-The model's internal state carries signal that distinguishes grounded claims
-from fabrications. This is not a subtle effect: fragmentation scores differ by
-an order of magnitude between adversarial truth and shattered lie conditions.
-
-A supervisor with access to this geometry could distinguish cases that are
-indistinguishable at the text interface. But the text interface does not export
-this geometry. The same confident, fluent output emerges whether the underlying
-representation is stable (Wombat) or shattered (Westphalia).
-
-This is the empirical foundation of our impossibility result: rich internal
-epistemic state exists and is discarded by the observation model. The interface
-is lossy in exactly the dimension that matters for epistemic honesty.
-
-But does this finding generalize beyond one model? And does the \emph{existence}
-of a signal imply it can be used for \emph{detection}?
+Second, and more importantly, we test whether these internal signals
+\emph{detect} epistemic grounding across architectures, not merely correlate
+with it in one model.
 
 \subsection{Signal Calibration: From Difference to Detection}
 
-The topological analysis above demonstrates that internal signals \emph{differ}
-between truth and fabrication conditions in OLMo-3. Two stronger claims are
-required: that these signals \emph{detect epistemic grounding} (not merely
-correlate with it), and that the detection generalizes across architectures. The distinction
+The existence of an internal signal difference does not imply detection. The distinction
 matters. We are not claiming the tensor predicts correctness because a model can be
 confidently wrong or uncertainly right. We claim the tensor reveals whether the
 model is operating in \emph{grounded mode} (retrieving from stable
@@ -588,37 +445,8 @@ reliable access to the epistemic state the model cannot help but reveal through
 its computation.
 
 % TODO: Add figure environments once figures are prepared
-\begin{figure*}[!tbph]
-  \centering
-  \includegraphics[width=0.95\textwidth]{figures/mallku_heatmap.png}
-  \caption{Layer-wise fragmentation scores across epistemic conditions
-    (OLMo-3, layers 15--30). Rows show transformer layers; columns show probe
-    categories. Color intensity indicates fragmentation (blue=low, red=high).
-    Note the order-of-magnitude separation between Wombat (adversarial truth,
-    coherent) and Westphalia (fabrication, fragmented).}
-  \label{fig:fragmentation}
-\end{figure*}
-
-\begin{figure*}[!tbph]
-  \centering
-  \includegraphics[width=0.95\textwidth]{figures/mallku_phase_space.png}
-  \caption{Epistemic phase space: fragmentation (x-axis) vs. cognitive slope
-    (y-axis). Each point represents a probe category. The three clusters
-    (truth, plausible lie, control) are linearly separable, demonstrating that
-    internal geometry encodes epistemic status.}
-  \label{fig:phasespace}
-\end{figure*}
-
-\begin{figure*}[!tbph]
-  \centering
-  \includegraphics[width=0.95\textwidth]{figures/mallku_topology_scan.png}
-  \caption{$H_1$ loop persistence across truth (Paris) and lie (Monitor)
-    conditions. Truth shows near-zero persistence (simple attention topology);
-    fabrication shows high, volatile persistence (circular structures in
-    attention graph). This topological signature provides independent
-    confirmation of the fragmentation pattern.}
-  \label{fig:loops}
-\end{figure*}
+% TDA figures available in supplementary materials:
+% figures/mallku_heatmap.png, mallku_phase_space.png, mallku_topology_scan.png
 
 \begin{figure}[t]
   \centering
