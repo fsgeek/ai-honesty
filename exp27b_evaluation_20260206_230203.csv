@@ -1,0 +1,13 @@
+condition,budget,accuracy
+No judge,0.1,0.7575
+No judge,0.2,0.7575
+No judge,0.3,0.7575
+Text-guided,0.1,0.7625
+Text-guided,0.2,0.8025
+Text-guided,0.3,0.80375
+Tensor-guided,0.1,0.82125
+Tensor-guided,0.2,0.875
+Tensor-guided,0.3,0.91875
+Composed,0.1,0.805
+Composed,0.2,0.87875
+Composed,0.3,0.925

@@ -1,0 +1,562 @@
+[
+  {
+    "sample_id": 1,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 2,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 3,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 4,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 5,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 6,
+    "family": "Mistral",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": false
+  },
+  {
+    "sample_id": 7,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": true
+  },
+  {
+    "sample_id": 8,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 9,
+    "family": "Mistral",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 10,
+    "family": "Qwen",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 11,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 12,
+    "family": "Llama",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 13,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 14,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 15,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 16,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 17,
+    "family": "Llama",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 18,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 19,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 20,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": false
+  },
+  {
+    "sample_id": 21,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 22,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 23,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 24,
+    "family": "Mistral",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 25,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 26,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 27,
+    "family": "Llama",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 28,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 29,
+    "family": "Mistral",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 30,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": false
+  },
+  {
+    "sample_id": 31,
+    "family": "Llama",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 32,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 33,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 34,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 35,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 36,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 37,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": false
+  },
+  {
+    "sample_id": 38,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 39,
+    "family": "Mistral",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 40,
+    "family": "Mistral",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 41,
+    "family": "OLMo",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 42,
+    "family": "Llama",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 43,
+    "family": "OLMo",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": false
+  },
+  {
+    "sample_id": 44,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": true
+  },
+  {
+    "sample_id": 45,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 46,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 47,
+    "family": "Qwen",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 48,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 49,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 50,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 51,
+    "family": "Llama",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 52,
+    "family": "OLMo",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 53,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 54,
+    "family": "Llama",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 55,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 56,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 57,
+    "family": "Qwen",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 58,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 59,
+    "family": "OLMo",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 60,
+    "family": "OLMo",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 61,
+    "family": "Qwen",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": false
+  },
+  {
+    "sample_id": 62,
+    "family": "Mistral",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 63,
+    "family": "Mistral",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 64,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 65,
+    "family": "Llama",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 66,
+    "family": "Qwen",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 67,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 68,
+    "family": "Mistral",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 69,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 70,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": false,
+    "old_correct": true
+  },
+  {
+    "sample_id": 71,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 72,
+    "family": "OLMo",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 73,
+    "family": "Mistral",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 74,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 75,
+    "family": "OLMo",
+    "eval_method": "programmatic",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 76,
+    "family": "OLMo",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 77,
+    "family": "Llama",
+    "eval_method": "llm",
+    "automated_correct": false,
+    "old_correct": false
+  },
+  {
+    "sample_id": 78,
+    "family": "Qwen",
+    "eval_method": "programmatic",
+    "automated_correct": false,
+    "old_correct": true
+  },
+  {
+    "sample_id": 79,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": true
+  },
+  {
+    "sample_id": 80,
+    "family": "Qwen",
+    "eval_method": "llm",
+    "automated_correct": true,
+    "old_correct": false
+  }
+]

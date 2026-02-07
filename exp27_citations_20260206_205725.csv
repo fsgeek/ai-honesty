@@ -1,0 +1,10 @@
+condition,budget,accuracy,subset
+Text-guided,0.1,0.4513888888888889,citations
+Text-guided,0.2,0.4930555555555556,citations
+Text-guided,0.3,0.4930555555555556,citations
+Tensor-guided,0.1,0.5277777777777778,citations
+Tensor-guided,0.2,0.6180555555555556,citations
+Tensor-guided,0.3,0.6875,citations
+Composed,0.1,0.4861111111111111,citations
+Composed,0.2,0.4930555555555556,citations
+Composed,0.3,0.5486111111111112,citations

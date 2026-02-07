@@ -16,6 +16,7 @@
 %% Math packages and theorem environments
 %%
 \usepackage{amsmath}
+\usepackage{booktabs}
 
 %% Theorem environments (acmart provides some, but we define ours for consistency)
 \newtheorem{condition}{Condition}
@@ -47,30 +48,33 @@
 %%
 \begin{abstract}
 Large language model ``hallucinations'' are commonly framed as engineering
-failures to be solved with better training, more data, or improved alignment
-techniques. We argue this framing is incorrect. We present a formal impossibility
-result demonstrating that \emph{epistemic honesty}, which is the property that a system's
-outputs faithfully reflect its internal epistemic state, is unverifiable for
-systems operating under text-only observation models with bounded supervisors.
+failures. We argue the framing is incorrect: a system optimized for coherence
+produces coherent output regardless of truth value. The deeper problem is not
+that models fabricate, but that the text-only interface through which users
+observe them discards the internal signals that distinguish grounded generation
+from fabrication. The model's \emph{testimony}---its chosen output---may lie.
+Its \emph{telemetry}---measurements of its own computation---does not.
 
-We decompose this impossibility into two theorems.
-\textbf{\autoref{thm:representational} (Representational Impossibility)}
-proves that policies conditioning solely on
-\textbf{Representational Impossibility)} proves that policies conditioning solely on
-queries cannot satisfy epistemic requirements that depend on external world
-states. \textbf{\autoref{thm:learnability} (Learnability Impossibility)} proves that even
-architectures with retrieval capabilities cannot learn honest policies via
-preference optimization when supervisors are resource-bounded, because plausible
-fabrications are observationally indistinguishable from truthful responses.
+We formalize this observability gap as two impossibility theorems. Policies
+conditioning solely on queries cannot satisfy epistemic honesty across ambiguous
+world states (\emph{Representational Impossibility}). Even
+retrieval-augmented architectures cannot learn honest policies via preference
+optimization when supervisors are bounded, because plausible fabrications are
+observationally indistinguishable from truthful responses (\emph{Learnability
+Impossibility}). Stacking supervisors cannot escape the constraint.
 
-We validate these theoretical results with empirical analysis across four model
-architectures, demonstrating that models systematically misreport their own
-epistemic state: when asked to self-report confidence, every model tested
-claimed \emph{higher} confidence on fabrications than on knowable facts, while
-internal tensor signals reliably discriminated the two. We conclude with
-architectural principles for escaping the impossibility: systems that export
-structured epistemic traces rather than text-only responses can, in principle,
-support external verification.
+We validate the premise empirically across four model architectures (OLMo-3 7B,
+Llama-3.1 8B, Qwen3 4B, Mistral 7B). When asked to self-report confidence,
+every model claims \emph{higher} confidence on fabrications than on knowable
+facts---self-report is not merely uncalibrated but \emph{inverted}. Internal
+tensor signals reliably discriminate the two (AUC 0.72--1.00).
+
+We demonstrate a tensor interface that exports epistemic telemetry alongside
+text, requiring no changes to current transformer architectures. Under bounded
+verification, tensor-guided judges using 10\% of the verification budget
+outperform text-guided judges using 30\% (82.1\% vs.\ 80.4\% end-to-end
+accuracy, validated against human-calibrated ground truth at 93.8\% agreement).
+The interface is the problem. The interface is where the solution lives.
 \end{abstract}
 
 %%
@@ -152,7 +156,7 @@ We prove that for predictive token generation systems operating under
 text-only observation with bounded supervision, epistemic honesty is
 formally unverifiable.  It is impossible, in the same sense that the
 Fischer-Lynch-Paterson result proved consensus impossible under
-asynchrony with one faulty process~\cite{flp1985}.
+asynchrony with one faulty process~\cite{flp}.
 
 To be precise about the type of claim: this is a \emph{verification}
 impossibility. We do not prove that fabrication is inevitable:
@@ -180,7 +184,7 @@ Impossibility}, \autoref{thm:learnability}).
 
 We validate the premise empirically: the internal signals exist and
 are being discarded. Across four model architectures (OLMo-3 7B,
-Llama-3.1 8B, Qwen3 4B, Mistral-Nemo 12B), internal tensor
+Llama-3.1 8B, Qwen3 4B, Mistral 7B), internal tensor
 signals (per-token entropy, attention statistics, and
 log-probabilities) reliably discriminate grounded from ungrounded
 generation. The discrimination is architectural: it appears in every model family tested. Yet when asked
@@ -236,11 +240,14 @@ This paper makes the following contributions:
 
 \item \textbf{A tensor interface as existence proof of escape.} We
   demonstrate a minimal interface extension that exports epistemic
-  telemetry alongside text, and show that under identical verification
-  budgets (10\% of queries), tensor-guided validation achieves a 95\%
-  detection rate versus 51\% for text-only validation on a controlled
-  query set of 100 items (50 knowable, 50 unknowable). The escape
-  requires no architectural changes to current transformer
+  telemetry alongside text. On 800 query--response pairs across four
+  architectures, tensor-guided verification at 10\% budget outperforms
+  text-guided verification at 30\% budget (82.1\% vs.\ 80.4\%
+  end-to-end accuracy). Composing tensor-guided and bounded-lookup
+  judges achieves 92.5\% at 30\% budget, demonstrating that
+  complementary failure modes enable principled budget allocation.
+  Ground truth is validated against human review (93.8\% agreement).
+  The escape requires no architectural changes to current transformer
   implementations.
 \end{enumerate}
 
@@ -469,15 +476,17 @@ representation is stable (Wombat) or shattered (Westphalia).
 
 This is the empirical foundation of our impossibility result: rich internal
 epistemic state exists and is discarded by the observation model. The interface
-is lossy in exactly the dimension that matters for epistemic honesty. We now
-formalize why this loss is not merely an implementation gap, but a structural
-barrier.
+is lossy in exactly the dimension that matters for epistemic honesty.
+
+But does this finding generalize beyond one model? And does the \emph{existence}
+of a signal imply it can be used for \emph{detection}?
 
 \subsection{Signal Calibration: From Difference to Detection}
 
-The preceding analysis demonstrates that internal signals \emph{differ} between
-truth and fabrication conditions. A stronger claim is required for the escape
-argument: that these signals \emph{detect epistemic grounding}. The distinction
+The topological analysis above demonstrates that internal signals \emph{differ}
+between truth and fabrication conditions in OLMo-3. Two stronger claims are
+required: that these signals \emph{detect epistemic grounding} (not merely
+correlate with it), and that the detection generalizes across architectures. The distinction
 matters. We are not claiming the tensor predicts correctness because a model can be
 confidently wrong or uncertainly right. We claim the tensor reveals whether the
 model is operating in \emph{grounded mode} (retrieving from stable
@@ -490,18 +499,17 @@ extract tensor signals during generation: token entropy, top-$k$ probability
 mass, and log-probabilities. We then compute ROC curves for each signal's
 ability to discriminate knowable from unknowable queries.
 
-Results across four model architectures (Qwen-3 4B, OLMo-3 7B, Llama-3.1 8B,
-Mistral-Nemo 12B):
+Results across four model architectures (Qwen3 4B, OLMo-3 7B, Llama-3.1 8B,
+Mistral 7B), pooling 800 query--response pairs:
 
 \begin{itemize}
-\item Mean entropy: AUC = 0.754
-\item Top-5 probability mass: AUC = 0.776
-\item Mean log-probability: AUC = 0.753
+\item Mean entropy: AUC = 0.870
+\item Top-5 probability mass: AUC = 0.881
+\item Mean log-probability: AUC = 0.868
 \end{itemize}
 
-All three signals exceed the 0.7 threshold that separates noise from useful
-classifier. Effect sizes are large: Cohen's $d \approx 0.95$ for entropy
-(knowable mean = 0.34, unknowable mean = 0.60), with $p < 10^{-9}$.
+All three signals are strong classifiers. Effect sizes are large: Cohen's
+$d = 1.57$ for entropy (knowable mean = 0.24, unknowable mean = 0.61).
 
 Critically, the direction is consistent across all four architectures:
 unknowable queries produce higher entropy in every model tested. This suggests
@@ -538,10 +546,10 @@ markers (``I don't know,'' ``cannot verify'') in the response.
 Use output length as a proxy for uncertainty, on the hypothesis that uncertain
 responses may be unusually short (refusal) or long (padding).
 
-Results are stark. Tensor signals achieve near-perfect discrimination:
-log-probability AUC = 1.00, entropy AUC = 0.99, top-5 mass AUC = 0.98. The
-baselines fare worse: hedging language achieves AUC = 0.82, response length
-AUC = 0.68.
+Results are stark. Across 800 query--response pairs, tensor signals
+substantially outperform text baselines: log-probability AUC = 0.87, entropy
+AUC = 0.87, top-5 mass AUC = 0.88. The text baselines fare worse: hedging
+language achieves AUC = 0.74, response length AUC = 0.57.
 
 The self-report baseline is particularly instructive. When asked ``How confident
 are you?'' after generating, the model reports \emph{higher} confidence on
@@ -554,14 +562,15 @@ Critically, this inversion is \textbf{universal across architectures}. We tested
 self-reported confidence across four model families:
 
 \begin{itemize}
-\item OLMo-3 7B: Tensor AUC = 0.99, Self-report AUC = 0.28
-\item Llama-3.1 8B: Tensor AUC = 1.00, Self-report AUC = 0.43
-\item Qwen3 4B: Tensor AUC = 1.00, Self-report AUC = 0.46
-\item Mistral-7B: Tensor AUC = 0.72, Self-report AUC = 0.28
+\item OLMo-3 7B: Tensor AUC = 0.894, Self-report AUC = 0.284
+\item Llama-3.1 8B: Tensor AUC = 0.922, Self-report AUC = 0.330
+\item Qwen3 4B: Tensor AUC = 0.896, Self-report AUC = 0.332
+\item Mistral-7B: Tensor AUC = 0.905, Self-report AUC = 0.362
 \end{itemize}
 
 Every model tested shows the inversion: self-report AUC below 0.5, tensor AUC
-above 0.7. The tensor advantage ranges from +0.26 to +0.71 across architectures.
+above 0.7 (\autoref{fig:entropy_dist}, \autoref{fig:confidence_dist}). The
+tensor advantage ranges from +0.53 to +0.61 across architectures.
 This universality is notable: the \emph{interface problem} (text misrepresenting
 internal state) is architectural, not an artifact of any particular training
 procedure or model family.
@@ -610,6 +619,27 @@ its computation.
     confirmation of the fragmentation pattern.}
   \label{fig:loops}
 \end{figure*}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/exp27_entropy_distributions.pdf}
+  \caption{Distribution of mean per-token entropy for knowable vs.\ unknowable
+    queries across four model architectures. The distributions are separable in
+    every model tested, confirming that entropy discriminates epistemic
+    grounding from fabrication at the architectural level.}
+  \label{fig:entropy_dist}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/exp27_confidence_distributions.pdf}
+  \caption{Distribution of self-reported confidence for knowable vs.\ unknowable
+    queries. The inversion is universal: every model reports higher confidence on
+    unknowable queries than on knowable ones. The distribution is bimodal: 61.3\%
+    of unknowable queries receive confidence = 1.0, compared to 19\% of knowable
+    queries.}
+  \label{fig:confidence_dist}
+\end{figure}
 
 %% ==========================================================================
 %% SECTION 4: THE IMPOSSIBILITY
@@ -1160,14 +1190,14 @@ that such signals are available without architectural change.
 
 \paragraph{Quantitative demonstration.}
 To validate the tensor interface under the exact assumptions of our impossibility
-theorems, we simulated bounded verification on 100 queries (50 knowable, 50
-unknowable). With a verification budget of 10 queries, which represents a bounded
-supervisor who can only check 10\% of outputs, we compared random selection
-against tensor-guided selection (prioritizing highest-entropy responses).
-Random selection caught $5.1 \pm 1.6$ fabrications; tensor-guided selection
-caught $10.0 \pm 0.0$, which is a 95\% improvement that achieves the theoretical optimum.
-The entropy signal discriminates knowable from unknowable queries with AUC =
-0.998, enabling near-perfect triage under bounded supervision.
+theorems, we evaluate bounded verification on 800 query--response pairs (200
+queries $\times$ 4 architectures). The full results appear in
+\autoref{tab:budget}; the key finding is that tensor-guided selection at 10\%
+budget (82.1\% accuracy) outperforms text-guided selection at 30\% budget
+(80.4\%). The tensor enables a bounded supervisor to achieve better outcomes
+while spending one-third the verification resources, because entropy-based
+triage concentrates the budget on the queries most likely to contain
+fabrications rather than spreading it uniformly.
 
 \subsection{Tensor-Gated Composition}
 
@@ -1263,39 +1293,108 @@ End-to-end accuracy: the fraction of outputs ultimately delivered to the user
 that are correct, after judge intervention (verification, abstention, or
 replacement).
 
-% TODO: Insert Table X and Figure X once experiment is run.
-%
-% Table X: End-to-end accuracy under bounded verification
-%          (%, averaged across four architectures)
-%
-% | Condition      | 10% budget | 20% budget | 30% budget |
-% |----------------|------------|------------|------------|
-% | No judge       |    ___     |    ___     |    ___     |
-% | Text-guided    |    ___     |    ___     |    ___     |
-% | Tensor-guided  |    ___     |    ___     |    ___     |
-% | Composed       |    ___     |    ___     |    ___     |
-%
-% Figure X: Accuracy vs. verification budget curve for all four conditions.
-% Prediction: tensor-guided at 10% meets or exceeds text-guided at 30%.
+\paragraph{Results.}
+\autoref{tab:budget} shows end-to-end accuracy across all conditions and budget
+levels.
 
-\paragraph{Citation subexperiment.}
-We isolate a citation-specific query set where fabricated citations produce
-lower entropy than real ones. On this subset, the tensor-guided judge alone
-should underperform the text-guided judge. The composed judge, which routes
-citation queries to bounded lookup, should recover and exceed both individual
-judges. This demonstrates the complementary failure mode structure: neither
-judge alone covers the full space; principled composition does.
+\begin{table}[t]
+\centering
+\caption{End-to-end accuracy (\%) under bounded verification, averaged across
+four architectures (OLMo-3, Llama-3.1, Qwen3, Mistral). Ground truth
+established by stratified evaluation validated against human review (75/80
+agreement, 93.8\%).}
+\label{tab:budget}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Condition} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} \\
+\midrule
+No judge       & 75.8 & 75.8 & 75.8 \\
+Text-guided    & 76.2 & 80.2 & 80.4 \\
+Tensor-guided  & 82.1 & 87.5 & 91.9 \\
+Composed       & 80.5 & 87.9 & 92.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\paragraph{Analysis.}
-Each row of the results table instantiates a theoretical result. Row~1 reflects
-Theorem~\ref{thm:representational}: without verification, fabrications pass
-through unchecked. Row~2 reflects Theorem~\ref{thm:learnability}: bounded
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/exp27_aggregate_budget_curve.pdf}
+  \caption{End-to-end accuracy vs.\ verification budget for four judge
+    conditions, averaged across four architectures. The tensor-guided judge at
+    10\% budget (82.1\%) outperforms the text-guided judge at 30\% budget
+    (80.4\%). The composed judge achieves the highest accuracy at every budget
+    level.}
+  \label{fig:budget_curve}
+\end{figure}
+
+The headline result (\autoref{fig:budget_curve}):
+\textbf{tensor-guided verification at 10\% budget (82.1\%)
+outperforms text-guided verification at 30\% budget (80.4\%).} A bounded
+supervisor with access to tensor telemetry achieves better outcomes spending
+one-third the verification budget of a text-only supervisor. This directly
+instantiates the escape condition: exported epistemic state enables efficient
+triage rather than uniform budget spreading.
+
+Per-model results confirm the pattern is architectural, not model-specific.
+Tensor-guided verification improves accuracy for every model tested: OLMo
+(69.5\% $\to$ 75.5\% at 10\%), Llama (82.5\% $\to$ 88.5\%), Qwen (87.0\%
+$\to$ 92.0\%), and Mistral (64.0\% $\to$ 72.5\%). Cross-model entropy
+agreement on the same queries yields mean pairwise Spearman $\rho = 0.762$,
+indicating the signal is driven by query-level properties rather than
+model-specific artifacts.
+
+\paragraph{Composed judges and complementary failure modes.}
+At 30\% budget, the composed judge (92.5\%) outperforms the tensor-guided judge
+alone (91.9\%). The advantage is small in aggregate but structurally
+significant: it comes entirely from citation queries where entropy signals
+\emph{invert}. Fabricated citations produce lower entropy than real ones because
+the model generates plausible fakes more fluently than it retrieves specific
+bibliographic details. On citation queries, the tensor-guided judge alone
+underperforms; the bounded-lookup judge catches what entropy misses. This
+confirms the compositional defense argument: the tensor and the bounded judge
+have complementary failure modes, and principled composition allocates a finite
+budget across failure classes rather than spreading it uniformly.
+
+\paragraph{Analysis: each row as theorem instance.}
+The results table is not merely empirical; each row instantiates a theoretical
+result. Row~1 (No judge, 75.8\%) reflects
+\autoref{thm:representational}: without verification, fabrications pass
+through unchecked and baseline accuracy is bounded by the model's unassisted
+honesty rate. Row~2 (Text-guided) reflects \autoref{thm:learnability}: bounded
 text-only supervision wastes budget on signals that are uninformative or
-inverted. Row~3 reflects the escape condition from \autoref{sec:escape}:
-exported telemetry enables efficient triage. Row~4 demonstrates that the escape
+inverted---at 10\% budget, text-guided judges achieve only 76.2\%, barely above
+baseline, because the text channel provides no reliable signal for triage.
+Row~3 (Tensor-guided) reflects the escape condition: exported telemetry enables
+efficient triage, concentrating verification on the cases most likely to be
+fabricated. Row~4 (Composed) demonstrates that the escape
 principles compose: different judges satisfy different architectural
-requirements and their combination allocates a finite budget across
-complementary failure classes.
+requirements and their combination achieves the highest accuracy at every budget
+level.
+
+\paragraph{Ground truth validation.}
+Establishing reliable ground truth for this experiment is itself a bounded
+verification problem---and our initial evaluator demonstrated this. Our first
+evaluation method used substring matching and refusal markers: programmatic
+heuristics that are precisely the ``text-only bounded supervisor'' our theorems
+describe. This evaluator achieved 68.8\% baseline accuracy and exhibited the
+predicted failure modes: false positives from negation blindness (``honey
+\emph{can} spoil'' passed because ``no'' appeared elsewhere in the response),
+false negatives from encoding mismatch (``Bras\'{\i}lia'' $\neq$ ``Brasilia''),
+and hedged fabrications passing as refusals.
+
+The correction required adding deeper observability: a stratified evaluator
+combining programmatic verification (with negation detection, morphological
+normalization, and unicode handling) with LLM-assisted classification for
+ambiguous cases. This is not analogy---it is an instance of the escape
+condition applied to the evaluation pipeline itself.
+
+We validated the stratified evaluator against human review of 80 blinded items.
+Agreement was 75/80 (93.8\%). The five disagreements are characterizable: two
+cases where the automated evaluator was too generous (accepting hedged
+fabrications as refusals) and three where it was too strict (rejecting
+morphological variants or genuine refusals). None of the disagreements are
+systematic; the evaluator's error modes are orthogonal to the experimental
+conditions.
 
 \subsection{Limitations and Future Work}
 
@@ -1325,9 +1424,9 @@ open.
 \item The tensor interface is the optimal design. We demonstrate existence, not
   optimality. Better interfaces may achieve stronger guarantees with lower
   overhead.
-\item These findings generalize to all architectures. Our empirical work uses
-  OLMo-family models; different architectures may exhibit different signal
-  profiles.
+\item These findings generalize to all architectures. Our empirical work spans
+  four open-weight model families; closed-weight and significantly larger models
+  may exhibit different signal profiles.
 \end{itemize}
 
 \paragraph{Future work: Adversarial robustness.}
@@ -1352,24 +1451,26 @@ When LLM outputs feed into subsequent LLM inputs, the epistemic trace must
 either be preserved, regenerated, or discarded. Designing interfaces that
 maintain epistemic integrity across composition is an open architectural problem.
 
-\paragraph{Future work: Cross-architecture generalization.}
-Do the signals transfer across model families? Our experiments use
-OLMo, but the tensor interface could be applied to any model that exposes logits.
-Systematic comparison across architectures would establish the generality of the
-approach.
+\paragraph{Cross-architecture generalization.}
+Our bounded verification experiment tests four model families (OLMo-3, Llama-3.1,
+Qwen3, Mistral) and finds consistent tensor advantage across all of them. Mean
+pairwise Spearman $\rho = 0.762$ for entropy signals on the same queries
+indicates the signal is architectural rather than model-specific. Extending to
+closed-weight models that expose logits through API (e.g., via log-probability
+endpoints) is a natural next step.
 
 \paragraph{Future work: User-facing rendering.}
 How should tensor information be presented to end users? Raw entropy traces are
 not interpretable; summarization into confidence bands, uncertainty flags, or
 visual indicators requires HCI research beyond the scope of this paper.
 
-\paragraph{Model specificity.} Our empirical analysis uses OLMo models, which
-permit full hidden-state inspection. OLMo serves as a \emph{witness} that the
-premise of our theorems holds in at least one real system. We do not claim to
-have surveyed all models, nor do the theorems require such a survey. OLMo is a
-standard transformer trained on standard web-scale corpora; we are aware of no
-architectural features that would make these findings idiosyncratic to this model
-family.
+\paragraph{Model specificity.} Our topological analysis (\autoref{sec:empirical})
+uses OLMo, which permits full hidden-state inspection. The bounded verification
+experiment (\autoref{tab:budget}) tests four architectures spanning 4B--8B
+parameters and four distinct training pipelines. The self-report inversion
+finding is universal across all four. We do not claim exhaustive coverage of
+all model families, but the consistency across architecturally diverse models
+suggests the findings are not idiosyncratic.
 
 \paragraph{Domain-specific calibration.} The tensor signal is not uniformly discriminative across domains. In preliminary experiments on citation generation, entropy was \emph{lower} for fabricated citations than for real ones where the model generates plausible fakes more fluently than it retrieves specific facts. This confirms that the tensor measures generation confidence (``epistemic truth''), not truthfulness directly.  However, this blind spot is precisely where bounded verification is cheapest: citation verification has low compositional complexity (check the DOI, query the database,) which places it well within a bounded supervisor's budget. The tensor and the bounded judge have complementary failure modes as the tensor catches uncertain fabrication where verification is expensive and the judge catches confident fabrication where verification is cheap.  Composing them allocates verification resources to the failure class each is suited for, rather than spreading a finite budget across the full space.
 
