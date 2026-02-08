@@ -1,0 +1,19 @@
+%%
+%% Abstract
+%%
+\begin{abstract}
+    We prove that \emph{epistemic honesty}---the property that a system's outputs
+    faithfully reflect its internal epistemic state---is unverifiable for systems
+    operating under text-only observation with bounded supervision. The model's
+    \emph{testimony} (its text) may lie; its \emph{telemetry} (measurements of its
+    own computation) does not, but the standard interface discards it.
+    We validate the premise across four architectures: every model tested
+    self-reports \emph{higher} confidence on fabrications than on known facts,
+    while internal tensor signals reliably discriminate the two.
+    We demonstrate a tensor interface that exports epistemic telemetry alongside
+    text, requiring no architectural changes. Under bounded verification,
+    tensor-guided judges at 10\% budget outperform text-guided judges at 30\%
+    (82.1\% vs.\ 80.4\% accuracy). The interface is the problem. The interface
+    is where the solution lives.
+    \end{abstract}
+    

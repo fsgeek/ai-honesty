@@ -1,0 +1,49 @@
+%% ==========================================================================
+%% Conclusion
+%% ==========================================================================
+\section{Conclusion}\label{sec:conclusion}
+
+Anyone who has used a large language model for research knows the ritual: check
+every citation. This paper explains why the ritual exists and why it will not be
+engineered away under current architectures.
+
+We have shown that epistemic honesty is unverifiable for systems operating under
+text-only observation models with bounded supervision. This is not a capability
+limitation to be solved with scale, nor a training failure to be solved with better
+RLHF. It is a structural property of the interface: the channel through which
+these systems communicate discards the epistemic metadata that would make
+verification possible.
+
+The impossibility has a shape. Policies conditioning only on queries cannot
+satisfy epistemic honesty across ambiguous world states (\autoref{thm:representational}). Even
+grounded architectures cannot learn honest behavior when supervisors cannot
+distinguish plausible fabrications from truth (\autoref{thm:learnability}). Stacking judges
+does not escape the constraint (\autoref{cor:layered}). Verification cost grows
+superlinearly with response complexity (\autoref{lem:superlinear}). Responsibility concentrates
+with the system owner (\autoref{cor:responsibility}).
+
+But impossibility results are maps, not walls. The Fischer-Lynch-Paterson
+theorem did not end distributed systems; it clarified what assumptions had to
+change. Our result plays an analogous role. Systems that export structured
+epistemic state—provenance, entropy traces, attention topology—escape the
+impossibility class. The tensor interface demonstrates this escape is
+achievable with current architectures and minimal overhead.
+
+The tensor interface addresses verification at inference time. A complementary
+question is whether training-time interventions can produce systems that are
+constitutionally less capable of certain fabrications, such as systems where the
+modification class is bounded to exclude dishonest configurations before
+deployment. Recent work on pedagogical training suggests bounded modification
+during capability development may achieve what personality engineering cannot.
+The combination of training-time bounds and inference-time verification would
+provide defense in depth: systems less likely to fabricate and more easily
+caught when they do.
+
+The work ahead is not exhorting models to try harder at honesty. It is
+building systems that make honesty verifiable by design. The tools exist:
+vector clocks, cryptographic signatures, content-addressable storage.
+The architectural patterns exist. What remains is applying them to the
+epistemic dimension with the same rigor we learned to apply to causality
+and integrity in distributed systems.
+
+The interface is the problem. The interface is where the solution lives.

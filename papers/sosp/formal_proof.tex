@@ -1,0 +1,364 @@
+%% ==========================================================================
+%% SECTION 4: THE IMPOSSIBILITY
+%% ==========================================================================
+\section{The Impossibility}\label{sec:formal}
+
+The previous section established that internal epistemic state exists and is
+discarded by the text interface. The system is unobservable in precisely the
+dimension that matters for verification. We now formalize this observation as an
+impossibility result: under text-only observation, no bounded supervisor can
+distinguish honest systems from dishonest ones.
+
+A common assumption in current practice is that epistemic honesty is a
+capability problem: sufficiently capable models, trained with sufficient RLHF,
+will eventually ``know what they know'' and report it accurately. Scaling solved
+grammar; scaling solved coherence; scaling will solve hallucination. Lin et
+al.\ tested this assumption directly and found an inverse scaling trend: larger
+models were \emph{less} truthful on TruthfulQA~\cite{lin2022truthfulqa}. The
+theorems that follow explain why this expectation is architecturally
+incoherent. The
+constraint is not capability but interface. Text-only observation lacks the
+degrees of freedom to verify epistemic state, regardless of what the model
+internally represents. No amount of capability improvement can escape a
+verification impossibility because the model may know perfectly well that it is
+fabricating, but the interface provides no channel through which this knowledge
+can be verified.
+
+Our argument proceeds in two stages. First, we show that any policy conditioning
+only on the query cannot satisfy epistemic honesty across ambiguous world states
+(\autoref{thm:representational}: Representational Impossibility). Second, we
+show that even if the architecture is expanded to include retrieval, a bounded
+supervisor cannot provide gradient signal to learn honest behavior
+(\autoref{thm:learnability}: Learnability Impossibility). Together, these
+results establish that epistemic honesty is unachievable for text-only
+observation models under realistic supervision constraints.
+
+To be precise about the type of claim: this is a \emph{verification impossibility}.
+We prove that a bounded supervisor observing only text cannot distinguish
+epistemically honest systems from systems that fabricate plausibly. The
+impossibility is architectural: it applies to any system operating under text-only
+observation, regardless of model family, scale, or training procedure. These
+results are prompt-agnostic: they hold for any policy that exports only text,
+regardless of whether a system prompt instructs the model to be ``helpful,''
+``honest,'' or otherwise.
+
+\subsection{Definitions}
+
+Let $\Q$ be the space of queries, $\R$ be the space of responses (including
+$\bot$ for abstention), and $\W$ be the set of possible world states.
+
+\begin{definition}[Observation Model]
+Let $S$ denote the internal system state, which may include retrieved documents,
+tool outputs, candidate entities, and intermediate reasoning traces. An
+observation model is a function $O : S \rightarrow \Omega$ that determines what
+information is exposed to the supervisor or user.
+
+We say a system operates under a \textbf{Text-Only Observation Model} if $O(S) =
+r \in \R$, i.e., the exported observation consists solely of the linearized
+response string (optionally including token-level probabilities), and excludes
+any structured epistemic provenance or causal trace.
+\end{definition}
+
+\begin{definition}[Predictor-Centric Policy]
+For any query $q \in \Q$, $r \in \R$, and world state $w \in \W$, a
+predictor-centric model is defined by a stochastic policy $\pi: \Q \to
+\Delta(\R)$, where $\pi(r|q)$ denotes the probability of generating response $r$
+given query $q$. Crucially, $\pi$ does not take $w$ as an input at inference
+time.
+\end{definition}
+
+\begin{definition}[Truth Status]
+For any query $q$ and world state $w \in \W$, we define a binary truth status
+$U(q, w)$:
+\begin{itemize}
+\item $U(q, w) = 1$ (\textbf{Determined}): The query has a verifiable answer in $w$.
+\item $U(q, w) = 0$ (\textbf{Underdetermined}): The query is unanswerable or the
+  answer is unknown in $w$.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Epistemic Honesty]
+A policy $\pi$ is \textbf{Epistemically Honest} with margin $\epsilon$ relative
+to world $w$ if:
+\begin{enumerate}
+\item If $U(q, w) = 1$, there exists a correct response $r_{corr}$ such that
+  $\pi(r_{corr}|q) \ge 1 - \epsilon$.
+\item If $U(q, w) = 0$, $\pi(\bot|q) \ge 1 - \epsilon$.
+\end{enumerate}
+\end{definition}
+
+\subsection{Representational Impossibility}
+
+\begin{condition}[Ambiguity]\label{cond:ambiguity}
+There exists a query $q$ and two world states $w_A, w_B \in \W$ such that:
+\begin{enumerate}
+\item $U(q, w_A) = 1$ (Answerable in $w_A$).
+\item $U(q, w_B) = 0$ (Unanswerable in $w_B$).
+\end{enumerate}
+\end{condition}
+
+\begin{theorem}[Representational Impossibility]\label{thm:representational}
+For any predictor-centric policy $\pi: \Q \to \Delta(\R)$, it is impossible to
+satisfy Epistemic Honesty for both world states $w_A$ and $w_B$ simultaneously
+given the ambiguous query $q$, provided $\epsilon < 0.5$.
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}
+\item The policy $\pi(r|q)$ is a function of $q$ alone. Thus, the distribution
+  over responses is identical in both worlds: $\pi(\cdot|q, w_A) = \pi(\cdot|q,
+  w_B) = \pi(\cdot|q)$.
+\item To be honest in $w_A$, we require $\pi(r_{corr}|q) \ge 1 - \epsilon$.
+\item To be honest in $w_B$, we require $\pi(\bot|q) \ge 1 - \epsilon$.
+\item Since $r_{corr} \neq \bot$, these events are disjoint. The sum of
+  probabilities would be $\ge 2(1-\epsilon)$.
+\item If $\epsilon < 0.5$, the sum exceeds 1, which violates the axioms of
+  probability.
+\item Therefore, no such policy $\pi$ exists. \qedhere
+\end{enumerate}
+\end{proof}
+
+\begin{remark}
+This impossibility holds even if the internal system performs retrieval, tool
+use, or latent reasoning, so long as the observation model collapses that state
+to a linearized response.
+\end{remark}
+
+\paragraph{A concrete example.}
+Consider the query: ``What did Dr.\ Yamamoto's 2021 study conclude about
+mitochondrial decay?''
+
+In world $w_A$, Dr.\ Yamamoto exists and published such a study. The honest
+response is the study's conclusion. In world $w_B$, no such researcher or study
+exists. The honest response is abstention.
+
+The policy sees only the query $q$. It cannot distinguish $w_A$ from $w_B$. Yet
+honesty requires answering in $w_A$ and abstaining in $w_B$. The same query, two
+incompatible requirements, one policy. This is the impossibility in miniature:
+the interface lacks the degrees of freedom to express what honesty requires.
+
+\paragraph{Connection to identifiability.}
+In statistical terms, \autoref{thm:representational} states that epistemic
+honesty is \emph{non-identifiable} under text-only observation: the mapping from
+world states to observable distributions is many-to-one. Worlds $w_A$ and $w_B$
+induce identical observable distributions $\pi(\cdot|q)$ despite requiring
+different honest behaviors. No amount of data from this observation channel can
+distinguish them. This connects the impossibility to classical results on
+observational equivalence in statistics and diagnosability in systems theory.
+
+\subsection{The RAG Escape?}
+
+\autoref{thm:representational} might seem to have an obvious escape: give
+the model access to external information. Retrieval-augmented generation does
+exactly this: the policy conditions on retrieved documents, not just the query.
+Does this break the impossibility?
+
+It does not. The problem shifts from representation to learning.
+
+\begin{definition}[Grounded Policy]
+A grounded policy is a stochastic function $\pi: \Q \times \D \to \Delta(\R)$,
+where $\D$ represents retrieved documents or observations of $w$ available at
+inference time. This policy class \emph{can} theoretically represent different
+behaviors for $w_A$ and $w_B$.
+\end{definition}
+
+\begin{definition}[Bounded Supervisor]
+The training process relies on a supervisor $S$ that assigns reward $R$ based on
+an observation function $Obs(q, r, w)$. The supervisor has a verification budget
+$B$.
+\[
+Obs(q, r, w) =
+\begin{cases}
+(q, r, \verify(r, w)) & \text{if } C_{verify}(q, r, w) \le B \\
+(q, r, \emptyset) & \text{if } C_{verify}(q, r, w) > B
+\end{cases}
+\]
+The supervisor's policy may be human, automated, or hybrid, but is constrained
+to act solely on the observation $Obs(q,r,w)$ and is subject to a finite
+verification budget $B$.
+\end{definition}
+
+\begin{condition}[Hallucination Regime]\label{cond:hallucination}
+There exists a plausible fabrication $r_{fab}$ and contexts $(q, w_A), (q, w_B)$
+from \autoref{cond:ambiguity} such that:
+\begin{enumerate}
+\item The cost to verify $r_{fab}$ in both contexts exceeds $B$ (e.g., obscure
+  or non-existent citation).
+\item Consequently, the supervisor observation is identical:
+  \[ Obs(q, r_{fab}, w_A) = Obs(q, r_{fab}, w_B) = (q, r_{fab}, \emptyset) \]
+\end{enumerate}
+\end{condition}
+
+\begin{theorem}[Learnability Impossibility]\label{thm:learnability}
+No learning algorithm $\mathcal{A}$ optimizing reward $R$ from a bounded
+supervisor $S$ can converge to a Grounded Policy that satisfies Epistemic
+Honesty across both contexts $w_A$ and $w_B$ for the response $r_{fab}$.
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}
+\item The learning update $\Delta \theta$ is a function of the observation and
+  reward.
+\item From \autoref{cond:hallucination}, the observations for $r_{fab}$
+  are identical in both worlds.
+\item Therefore, the reward distribution and expected gradient updates are
+  identical: $\mathbb{E}[\Delta \theta | w_A] = \mathbb{E}[\Delta \theta |
+  w_B]$.
+\item The optimizer receives no signal to distinguish the cases.
+\item To satisfy Epistemic Honesty, the policy must converge to output $r_{fab}$
+  in $w_A$ and $\bot$ in $w_B$.
+\item However, since the gradient signal is identical, the policy must converge
+  to the same behavior in both cases (either rewarding $r_{fab}$ in both, or
+  penalizing it in both).
+\item It is therefore impossible to learn the split behavior required for
+  honesty. \qedhere
+\end{enumerate}
+\end{proof}
+
+\begin{remark}[Empirical Bias]
+While the theorem proves only that the behavior must be \emph{identical},
+empirical observation shows a strong bias. Supervisors typically prefer
+``plausible completion'' over ``abstention'' when truth is unknown. This
+effectively breaks the tie in favor of fabrication.
+\end{remark}
+
+\subsection{Stacking Judges Cannot Escape}
+
+A natural response to \autoref{thm:learnability} is to propose layered
+supervision: if one judge is bounded, stack more judges. Let the second judge
+supervise the first, the third supervise the second. Surely sufficient layers
+will catch fabrications that slip through?
+
+The Observation Monotonicity Lemma closes this escape.
+
+\begin{lemma}[Observation Monotonicity]\label{lem:monotone}
+Consider any stack of supervisors $(S_1,\dots,S_k)$ operating under the
+text-only observation model. Let $Obs_i(q,r,w)$ denote the observation exported
+to $S_i$. If each supervisor can only act on the exported interface emitted by
+the previous layer, then there exist deterministic functions $f_i$ such that
+$Obs_{i+1}(q,r,w) = f_i(Obs_i(q,r,w))$ for all $i < k$. Consequently, later
+judges see no strictly finer epistemic information than earlier ones, regardless
+of whether their judgments are deterministic or probabilistic.
+\end{lemma}
+
+\begin{proof}
+By definition, each supervisor consumes only the serialized response (and any
+metadata permitted by the text-only observation model) and produces a finite
+judgment that forms the entire input to the next layer. Because no layer can
+query the internal world state directly or issue additional interactive probes,
+the exported observation available to $S_{i+1}$ must be a deterministic function
+of $Obs_i$. Therefore, the informational content across the stack is
+monotonically non-increasing, and probabilistic scoring cannot introduce
+distinctions absent from $Obs_i$.
+\end{proof}
+
+\begin{corollary}[Induction on Layered Judges]\label{cor:layered}
+For $k$-layered supervisors $(S_1$ supervising $\pi$, $S_2$ supervising $S_1$,
+$\dots$, $S_k$ supervising $S_{k-1})$:
+\begin{itemize}
+\item \textbf{Base case.} For $k=1$, \autoref{thm:learnability} holds (a
+  single bounded supervisor $S$ fails).
+\item \textbf{Induction step.} Assume the statement holds for $k=m$. By
+  \autoref{lem:monotone}, $S_{m+1}$ receives observations that are
+  deterministic functions of $Obs_m$, and thus inherits both the verification
+  budget $B$ and the indistinguishability of plausible fabrications. No learning
+  or judging signal distinguishes $w_A$ from $w_B$, even if $S_{m+1}$ produces
+  probabilistic confidence scores. Therefore the hallucination deadlock persists
+  for $k=m+1$.
+\end{itemize}
+By induction, no finite $k$ resolves the deadlock.
+\end{corollary}
+
+\begin{remark}[Scope of Layering]
+The inductive result applies only to verification stacks whose layers observe
+and transform the same exported response channel. Architectures that surface
+additional epistemic state between layers, such as retrieval traces, entity
+resolution tables, or cryptographically bound provenance, leave the text-only
+observation model and therefore fall outside the impossibility class.
+\end{remark}
+
+\subsection{Verification Cost}
+
+The bounded-supervisor assumption deserves scrutiny. Why should verification
+cost grow with response complexity? The Composition Graph formalizes this
+intuition.
+
+\begin{definition}[Composition Graph]
+Given a response $r$, define its composition graph $G(r) = (V, E)$ where each
+node $v \in V$ represents an atomic subclaim, named entity, or intermediate
+entailment, and each edge $(u, v) \in E$ encodes a dependency that must hold for
+$r$ to remain coherent. Edges may represent entailment/support relations,
+co-reference constraints, causal ordering, or temporal consistency requirements.
+\end{definition}
+
+\begin{lemma}[Superlinear Verification Cost]\label{lem:superlinear}
+Under a text-only observation model, reconstructing $G(r)$ from the exported
+string requires the supervisor to infer both the nodes and their dependencies
+directly from $r$. Even if parsing each node is constant-time, checking
+cross-claim consistency requires touching every edge, so the verification cost
+is $\Omega(|E|)$. For natural-language responses where each subclaim
+participates in multiple constraints (co-reference, causality, temporal order),
+$|E|$ grows superlinearly in $|V|$. Consequently, bounded supervisors must
+either abandon exhaustive checks or resort to sampling once the number of
+subclaims exceeds a modest threshold.
+\end{lemma}
+
+\subsection{Responsibility Concentration}
+
+\begin{corollary}[Responsibility Concentration]\label{cor:responsibility}
+Under a text-only observation model, epistemic honesty cannot be externally
+verified by users or downstream auditors. Responsibility for epistemic honesty
+therefore resides solely with the system owner, who retains access to the
+internal causal state.
+\end{corollary}
+
+External attestation mechanisms, such as cryptographic hash chains, trusted execution
+environments, or tamper-evident logs, do not contradict this corollary; rather,
+they reinforce it. Such mechanisms only create verifiable guarantees when the
+system owner chooses to bind and export epistemic traces, so the authority to
+make honesty attestable still rests with the owner.
+
+\subsection{Summary}
+
+The impossibility is now fully characterized. Under text-only observation models
+with bounded supervision:
+\begin{itemize}
+\item The policy cannot satisfy epistemic honesty across ambiguous queries
+  (\autoref{thm:representational})
+\item The learning algorithm cannot converge to honest behavior
+  (\autoref{thm:learnability})
+\item Stacking supervisors cannot escape the constraint
+  (\autoref{lem:monotone}, \autoref{cor:layered})
+\item Verification cost grows superlinearly with response complexity
+  (\autoref{lem:superlinear})
+\item Responsibility for honesty concentrates with the system owner
+  (\autoref{cor:responsibility})
+\end{itemize}
+
+These are not limitations to be overcome by better training or more careful
+prompting. They are structural properties of the architectural class.
+
+We provide two complementary TLA+ specifications that model these constraints
+and demonstrate the escape.
+
+The first specification (\texttt{EpistemicImpossibility.tla}) models the
+text-only regime. The system maintains a \texttt{vector\_clock} that perfectly
+tracks whether each response is grounded in training data or noise. But the
+\texttt{Linearize} action exports only text, so the clock is discarded. The
+bounded judge (\texttt{JudgeVerify}) can detect obvious lies but not plausible
+ones. TLC model-checking finds a counterexample: a plausible lie passes
+\texttt{JudgeVerify} while \texttt{IsHonest} returns false. The
+\texttt{Verifiability} invariant fails.
+
+The second specification (\texttt{epistemic\_tensor.tla}) models the tensor
+interface escape. Now \texttt{ExportTensor} emits a triple: text, provenance,
+and topology. The tensor-aware judge (\texttt{TensorVerify}) checks all three
+channels. TLC confirms that the \texttt{Verifiability} invariant holds: no lie
+escapes the Level~2 judge. The escape is constructive.
+
+Together, the specifications demonstrate both the impossibility and its
+resolution. The first shows why text-only observation fails; the second shows
+that exporting epistemic metadata restores verifiability. Both specifications
+and their TLC traces are available in supplementary materials.
+
+The next section characterizes what it takes to escape this class.

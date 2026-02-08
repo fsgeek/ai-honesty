@@ -1,0 +1,102 @@
+%% ==========================================================================
+%% SECTION 6: RELATED WORK
+%% ==========================================================================
+\section{Related Work}\label{sec:related}
+
+Our contribution is a formal impossibility result. Prior work documents
+symptoms; we identify the cause. Prior work proposes treatments; we explain why
+they fail to cure. The organizing principle is the distinction between
+\emph{observation} (hallucination happens, training helps sometimes) and
+\emph{explanation} (text-only observation plus bounded supervision makes
+epistemic honesty unverifiable).
+
+\paragraph{Hallucination taxonomies.} Extensive empirical work catalogs LLM
+fabrication patterns: citation hallucination in academic
+contexts~\cite{alkaissi2023artificial}, medical
+misinformation~\cite{thirunavukarasu2023large}, and legal
+fabrication~\cite{dahl2024large}. These findings instantiate our
+\autoref{cond:hallucination}: in each domain, plausible fabrications are
+cheap to generate and expensive to verify, placing supervisors in the hallucination
+regime where gradient signal cannot distinguish truth from fabrication. The
+taxonomies document the symptom; our theorems identify the structural cause.
+
+\paragraph{Activation interpretation.} Recent work on Activation Oracles
+demonstrates that LLMs can be trained to interpret the internal states of other models,
+translating activation patterns into natural language explanations~\cite{karvonen2025activation}. This approach
+addresses State Exteriority by making internal states available to an external system.
+However, the authors note that the oracle "frequently makes incorrect guesses" and "is not
+trained to express uncertainty." If the oracle's outputs are evaluated only as text by
+bounded supervisors, the verification problem recurs at the meta-level. Full escape
+requires that the oracle's claims be independently verifiable against the activation
+data, which is a form of Provenance Binding applied to the interpretation process itself.
+
+
+\paragraph{RLHF critiques.} Work on sycophancy~\cite{perez2022discovering},
+reward hacking~\cite{gao2023scaling}, and the tension between helpfulness and
+honesty~\cite{bai2022training} demonstrates that preference optimization can
+degrade factual accuracy. Our \autoref{thm:learnability} formalizes why:
+bounded supervisors cannot distinguish plausible fabrications from truthful
+responses, so the learning signal is systematically corrupted.
+
+\paragraph{Retrieval augmentation.} RAG systems~\cite{lewis2020retrieval} and
+grounded generation approaches attempt to escape fabrication by conditioning on
+external documents. Our analysis shows this is necessary but not sufficient:
+State Exteriority addresses \autoref{thm:representational}, but without
+Verification Independence, the learning problem
+(\autoref{thm:learnability}) persists.
+
+\paragraph{Uncertainty quantification.} Calibration methods, conformal
+prediction~\cite{angelopoulos2021gentle}, and verbalized
+uncertainty~\cite{kadavath2022language} attempt to surface model confidence. Our
+results explain why these approaches are fundamentally limited under text-only
+interfaces: the observation model discards the internal state that would
+distinguish calibrated uncertainty from confident fabrication.
+
+\paragraph{Impossibility results in LLMs.} Xu et
+al.~\cite{xu2024hallucination} prove that hallucination is inevitable for LLMs
+over the class of computable functions, which is a computational limit. Our result is
+orthogonal: we prove that even if a system could be honest, a bounded
+supervisor observing only text cannot verify that honesty, which is an observational
+limit. Their impossibility concerns what LLMs can compute; ours concerns what
+supervisors can verify. Both are structural, but they constrain different
+dimensions of system design.
+
+\paragraph{Impossibility results in distributed systems.} The
+Fischer-Lynch-Paterson theorem~\cite{flp} proved that consensus is impossible
+under asynchrony with one faulty process. This did not end distributed systems
+research; it clarified the design space. Paxos~\cite{paxos}, Raft, and modern
+consensus protocols work \emph{around} FLP by relaxing assumptions or
+strengthening guarantees. Our result plays an analogous role: text-only
+observation models with bounded supervision cannot guarantee epistemic honesty,
+but systems that export structured epistemic state can escape the impossibility
+class.
+
+\paragraph{Epistemic evaluation frameworks.} Recent work proposes benchmarks
+and frameworks for measuring epistemic properties of language
+models~\cite{wang2024epistemic}. The Epistemic Alignment framework explicitly
+notes that current interfaces do not let users specify uncertainty, sourcing,
+or perspectives in structured ways, and that providers lack verification tools.
+These critiques align with our analysis but stop at interface desiderata and
+policy analysis. We provide the formal impossibility that explains \emph{why}
+text-only evaluation cannot suffice, and the tensor interface that demonstrates
+a concrete escape.
+
+\paragraph{Epistemic agent architectures.} Work on structuring epistemic
+integrity in reasoning systems proposes architectures with explicit
+propositions, justification graphs, contradiction detection, and chain-of-reason
+logging~\cite{chen2025epistemic}. These proposals are closest in spirit to our
+escape conditions: they recognize that epistemic honesty requires structured
+internal state. However, they are typically framed as \emph{replacements} for
+stochastic language generation as logically grounded agents rather than wrappers
+around existing LLMs. Our contribution differs in two ways: we derive the
+tensor interface from a formal impossibility result (not as a standalone design
+choice), and we demonstrate that the escape is achievable as a minimal
+\emph{addition} to current architectures, not a wholesale replacement.
+
+The gap we fill is formalization. Prior work documents that LLMs fabricate (the
+symptom), critiques training methods (proposed treatments), and proposes
+mitigations (partial remedies). We prove \emph{why} the problem is structural
+(the diagnosis) and \emph{what} architectural properties are required to escape
+it (the cure). The symptom/cause distinction is not merely rhetorical: it
+determines whether improvements are incremental patches or genuine escapes from
+the impossibility class.

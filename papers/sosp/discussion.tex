@@ -1,0 +1,84 @@
+\section{Limitations and Future Work}
+
+We are explicit about what this paper does and does not claim. The impossibility
+is structural; the escape is demonstrated; but several important questions remain
+open.
+
+\paragraph{What we claim.}
+\begin{itemize}
+\item The impossibility is structural, not a training failure: text-only interfaces
+  with bounded supervision cannot verify epistemic honesty regardless of model
+  capability.
+\item The escape is not vacuous: concrete telemetric signals exist in current
+  architectures that distinguish grounded from ungrounded generation.
+\item Current architectures already carry the relevant information; they just
+  discard it at the interface.
+\end{itemize}
+
+\paragraph{What we do NOT claim.}
+\begin{itemize}
+\item The tensor interface is unfakeable under adversarial training. A model
+  trained to minimize detectable entropy-truthfulness correlation might learn to
+  present confident distributions even when fabricating. This is an open question.
+\item Composition preserves epistemic properties. If a model's output becomes
+  input to another model (as in recursive LLM-mediated reasoning), the tensor
+  signals from the first model may not propagate meaningfully.
+\item The tensor interface is the optimal design. We demonstrate existence, not
+  optimality. Better interfaces may achieve stronger guarantees with lower
+  overhead.
+\item These findings generalize to all architectures. Our empirical work spans
+  four open-weight model families; closed-weight and significantly larger models
+  may exhibit different signal profiles.
+\end{itemize}
+
+\paragraph{Future work: Adversarial robustness.}
+Can training find weights that produce confident tensors for fabricated content?
+This is the adversarial analog of our structural results. Recent work by
+Winninger et al.~\cite{winninger2025usingmechanisticinterpretabilitycraft}
+demonstrates that mechanistic interpretability tools can be used to identify
+internal subspaces associated with safety behavior and craft attacks that target
+those subspaces directly. This confirms that internal signals are rich enough to
+be both attacked and defended, which is precisely why exporting them matters.
+The intuition that ``you cannot fake the computation you actually performed''
+may break down if the model is trained end-to-end to minimize the tensor signal
+on fabrications. Preliminary analysis suggests that linguistic confidence and
+tensor confidence are decoupled in natural model outputs, models that hedge
+linguistically do not systematically show higher tensor entropy, but whether
+adversarial training can force this coupling remains open.
+Information-theoretic bounds on signal manipulation are needed.
+
+\paragraph{Future work: Compositional integrity.}
+Does tensor composition preserve epistemic properties in recursive settings?
+When LLM outputs feed into subsequent LLM inputs, the epistemic trace must
+either be preserved, regenerated, or discarded. Designing interfaces that
+maintain epistemic integrity across composition is an open architectural problem.
+
+\paragraph{Cross-architecture generalization.}
+Our bounded verification experiment tests four model families (OLMo-3, Llama-3.1,
+Qwen3, Mistral) and finds consistent tensor advantage across all of them. Mean
+pairwise Spearman $\rho = 0.762$ for entropy signals on the same queries
+indicates the signal is architectural rather than model-specific. Extending to
+closed-weight models that expose logits through API (e.g., via log-probability
+endpoints) is a natural next step.
+
+\paragraph{Future work: User-facing rendering.}
+How should tensor information be presented to end users? Raw entropy traces are
+not interpretable; summarization into confidence bands, uncertainty flags, or
+visual indicators requires HCI research beyond the scope of this paper.
+
+\paragraph{Model specificity.} Our topological analysis (\autoref{sec:empirical})
+uses OLMo, which permits full hidden-state inspection. The bounded verification
+experiment (\autoref{tab:budget}) tests four architectures spanning 4B--8B
+parameters and four distinct training pipelines. The self-report inversion
+finding is universal across all four. We do not claim exhaustive coverage of
+all model families, but the consistency across architecturally diverse models
+suggests the findings are not idiosyncratic.
+
+\paragraph{Domain-specific calibration.} The tensor signal is not uniformly discriminative across domains. In preliminary experiments on citation generation, entropy was \emph{lower} for fabricated citations than for real ones where the model generates plausible fakes more fluently than it retrieves specific facts. This confirms that the tensor measures generation confidence (``epistemic truth''), not truthfulness directly.  However, this blind spot is precisely where bounded verification is cheapest: citation verification has low compositional complexity (check the DOI, query the database,) which places it well within a bounded supervisor's budget. The tensor and the bounded judge have complementary failure modes as the tensor catches uncertain fabrication where verification is expensive and the judge catches confident fabrication where verification is cheap.  Composing them allocates verification resources to the failure class each is suited for, rather than spreading a finite budget across the full space.
+
+\paragraph{Sufficiency gap.} The three architectural principles (State
+Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}
+conditions for escaping the impossibility. We do not prove they are
+\emph{sufficient}. A system satisfying all three might still fail epistemic
+honesty through implementation bugs, adversarial inputs, or unforeseen failure
+modes. Sufficiency requires additional formal treatment.
