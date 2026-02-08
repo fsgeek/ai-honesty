@@ -5,7 +5,7 @@ LATEXMK = latexmk -lualatex
 
 all: $(MAIN).pdf
 
-$(MAIN).pdf: $(MAIN).tex epistemic_honesty.bib
+$(MAIN).pdf:
 	$(LATEXMK) $(MAIN)
 
 clean:

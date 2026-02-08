@@ -118,18 +118,19 @@ result. Row~1 (No judge, 75.8\%) reflects
 through unchecked and baseline accuracy is bounded by the model's unassisted
 honesty rate. Row~2 (Text-guided) reflects \autoref{thm:learnability}: bounded
 text-only supervision wastes budget on signals that are uninformative or
-inverted---at 10\% budget, text-guided judges achieve only 76.2\%, barely above
+inverted: at 10\% budget, text-guided judges achieve only 76.2\%, barely above
 baseline, because the text channel provides no reliable signal for triage.
 Row~3 (Tensor-guided) reflects the escape condition: exported telemetry enables
 efficient triage, concentrating verification on the cases most likely to be
 fabricated. Row~4 (Composed) demonstrates that the escape
 principles compose: different judges satisfy different architectural
 requirements and their combination achieves the highest accuracy at every budget
-level.
+level.  The tensor reallocates a finite verification budget toward cases where
+supervision is information-theoretically valuable.
 
 \paragraph{Ground truth validation.}
 Establishing reliable ground truth for this experiment is itself a bounded
-verification problem---and our initial evaluator demonstrated this. Our first
+verification problem and our initial evaluator demonstrated this. Our first
 evaluation method used substring matching and refusal markers: programmatic
 heuristics that are precisely the ``text-only bounded supervisor'' our theorems
 describe. This evaluator achieved 68.8\% baseline accuracy and exhibited the
@@ -141,7 +142,7 @@ and hedged fabrications passing as refusals.
 The correction required adding deeper observability: a stratified evaluator
 combining programmatic verification (with negation detection, morphological
 normalization, and unicode handling) with LLM-assisted classification for
-ambiguous cases. This is not analogy---it is an instance of the escape
+ambiguous cases. This is not analogy because it is an instance of the escape
 condition applied to the evaluation pipeline itself.
 
 We validated the stratified evaluator against human review of 80 blinded items.
