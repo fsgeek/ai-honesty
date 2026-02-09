@@ -10,13 +10,16 @@
 
 %% Rights - will be filled in upon acceptance
 \setcopyright{none}
-\acmConference[SOSP '26]{ACM SIGOPS 31st Symposium on Operating Systems Principles}{November 2026}{Austin, TX, USA}
+\acmConference[SOSP '26]{ACM SIGOPS 31st Symposium on Operating Systems Principles}{October 2026}{Prague, Czech Republic}
 
 %%
 %% Math packages and theorem environments
 %%
 \usepackage{amsmath}
 \usepackage{booktabs}
+\usepackage{xspace}
+
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
 
 %% Theorem environments (acmart provides some, but we define ours for consistency)
 \newtheorem{condition}{Condition}
@@ -25,12 +28,39 @@
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
 
+\hypersetup{
+  pdflang={en},
+  pdfdisplaydoctitle}
+
+\definecolor[named]{OurPurple}{cmyk}{0.55,1,0,0.15}
+\definecolor[named]{OurDarkBlue}{cmyk}{1,0.58,0,0.21}
+\hypersetup{
+  colorlinks,
+  linkcolor=OurPurple,
+  citecolor=OurPurple,
+  urlcolor=OurDarkBlue,
+  filecolor=OurDarkBlue}
+
+
+
 %% Custom math operators
 \newcommand{\R}{\mathcal{R}}
 \newcommand{\Q}{\mathcal{Q}}
 \newcommand{\W}{\mathcal{W}}
 \newcommand{\D}{\mathcal{D}}
 \DeclareMathOperator{\verify}{Verify}
+
+%% Helper text commands
+\newcommand{\eg}{e.g.\xspace}
+\newcommand{\ie}{i.e.\xspace}
+\newcommand{\cf}{cf.\xspace}
+
+%% Override autorefs
+\def\Snospace~{\S{}}
+\def\sectionautorefname{\Snospace}
+\def\subsectionautorefname{\Snospace}
+\def\subsubsectionautorefname{\Snospace}
+
 
 %%
 %% Document metadata
@@ -74,8 +104,8 @@
 
 \input{intro}
 \input{background}
-\input{motivation}
 \input{formal_proof}
+\input{motivation}
 \input{design}
 \input{eval}
 \input{discussion}
