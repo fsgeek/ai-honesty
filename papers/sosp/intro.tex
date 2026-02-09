@@ -186,12 +186,10 @@ This paper makes the following contributions:
   of model scale, training procedure, or prompt engineering, and
   cannot be escaped by stacking supervisors.
 
-\item \textbf{Epistemic Observability and its key components.}
-  We demonstrate across four model architectures that internal tensor
-  signals discriminate grounded from ungrounded generation with high
-  reliability, while self-reported confidence through the text channel
-  is not merely uncalibrated but \emph{inverted}, with the models
-  systematically misreporting higher confidence on fabrications.
+\item \textbf{Epistemic Observability.}
+  We introduce the concept of epistemic observability, \ie, metrics
+  and traces from the internal generation procedure of the models
+  that carry epistemic metadata about the state of the model.
 
 \item \textbf{A tensor interface for epistemic observability.} We
   demonstrate a minimal interface extension that exports epistemic

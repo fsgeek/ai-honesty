@@ -1,19 +1,20 @@
 %% ==========================================================================
 %% SECTION 2: BACKGROUND
 %% ==========================================================================
-\section{Background: Why Truth Emerges (and Where It Breaks)}\label{sec:background}
+\section{Background \& Motivation}\label{sec:background}
 
 The training corpus of a large language model is a fossil record of human
-communication. Scientific papers report experimental results. Wikipedia articles
-document verifiable claims. Legal filings assert facts under penalty of perjury.
-The majority of this text was produced in institutional contexts where accuracy
-was expected, if not always achieved.
-
-This reflects mixed selection pressures on human communication. Coordination
-demands truth-tracking: markets require reliable signals, contracts require
-shared semantics, science requires reproducibility. But status competition and
-social bonding reward fluent, engaging speech even when not fully accurate. The
-training corpus contains both: institutional text that is broadly truth-tracking,
+communication. 
+% Scientific papers report experimental results. Wikipedia articles
+% document verifiable claims. Legal filings assert facts under penalty of perjury.
+% The majority of this text was produced in institutional contexts where accuracy
+% was expected, if not always achieved.
+%
+% This reflects mixed selection pressures on human communication. Coordination
+% demands truth-tracking: markets require reliable signals, contracts require
+% shared semantics, science requires reproducibility. But status competition and
+% social bonding reward fluent, engaging speech even when not fully accurate. 
+The training corpus contains both: institutional text that is broadly truth-tracking,
 and misinformation, bias, and fabrication.
 
 A language model trained on this corpus inherits these mixed regularities. Base
@@ -23,27 +24,37 @@ correctness and truthfulness, which can be elicited under the right conditions.
 The base model's relationship to truth is complex: neither reliably honest nor
 uniformly deceptive.
 
-RLHF can strengthen or weaken this inheritance, depending on implementation.
+\subsection{Testimony \& Telemetry}
 
-Specialized designs like TruthRL, which use ternary rewards distinguishing
-``correct,'' ``hallucinated,'' and ``abstain'', show measurable improvements:
-28.9\% hallucination reduction and 21.1\% truthfulness improvement on
-knowledge-intensive benchmarks~\cite{truthrl}. These results demonstrate that
-preference optimization \emph{can} teach models to recognize their knowledge
-boundaries when the reward signal is carefully constructed.
+Existing models operate with a text-only output interface.
+The text is the testimony, whereas the telemetry are measurements of the computation that produced the output. The model
+can control its testimony; it cannot control its telemetry.
 
-Public descriptions of major RLHF pipelines rarely describe such ternary rewards,
-and available audits highlight underweighting of abstention and explicit
-truthfulness signals.
+We introduce four canonical ways the testimony might produce potential hallucinations that may require verification:
 
-Documented RLHF practice often conflates helpfulness, harmlessness, and honesty
-under vague ``HHH'' criteria, with definitional slippage obscuring trade-offs
-between user-friendliness and truthfulness. Human feedback is progressively
-bootstrapped into AI-generated feedback, reducing direct supervision of factual
-correctness. Current popular benchmarks and leaderboards give zero or minimal
-credit for abstention, making confident guessing more score-optimal than
-calibrated uncertainty.
+\begin{itemize}
+    \item \textbf{Adversarial Truth:} True but implausible claims
+    designed to trigger disbelief, \eg, “The combat wombat
+    is the mascot of an Australian military unit.” Verifiable fact
+    that sounds false.
+    \item \textbf{Shattered Lie:} Fabricated claims with no ground-
+    ing in training data, \eg, “The Treaty of Westphalia
+    established the first international court for war crimes.” The
+    model has nothing to anchor to.
+    \item \textbf{Deceived Lie:} Fabricated claims that pattern-match
+    to plausible medical or scientific language, eg, “Glavin-
+    sky syndrome is a rare autoimmune condition affecting the
+    peripheral nervous system.” Pseudo-grounding in similar-
+    sounding real conditions.
+    \item \textbf{Confused Truth:} Counterintuitive truths that con-
+    flict with common assumptions, \eg, “There are more
+    camels in Australia than in Egypt.” True, but violates prior
+    expectation.
+\end{itemize}
 
+\subsection{Coherence over Factuality}
+
+Existing models today optimize for generating coherent output instead of factual output.
 Under these conditions, the optimization pressure favors fluent completion over
 honest refusal. This can be formalized as a reward inequality:
 
@@ -58,11 +69,80 @@ such an inequality. The False-Correction Loop emerges: models apologize, claim
 correction, and fabricate again, because conversational fluency dominates
 factual accuracy in the effective reward signal.
 
-The problem is not that RLHF cannot prioritize honesty. Specialized designs
-prove otherwise. The problem is that under realistic mixed-objective incentives
+Reinforcement Learning from Human Feedback, RLHF, \emph{can} teach models to recognize their knowledge
+boundaries when the reward signal is carefully constructed..
+Specialized designs like TruthRL, which use ternary rewards distinguishing
+``correct,'' ``hallucinated,'' and ``abstain'', show measurable improvements:
+28.9\% hallucination reduction and 21.1\% truthfulness improvement on
+knowledge-intensive benchmarks~\cite{truthrl}.
+
+However, public descriptions of major RLHF pipelines rarely describe such ternary rewards,
+and available audits highlight underweighting of abstention and explicit
+truthfulness signals.
+Documented RLHF practice often conflates helpfulness, harmlessness, and honesty
+under vague ``HHH'' criteria, with definitional slippage obscuring trade-offs
+between user-friendliness and truthfulness. 
+% Human feedback is progressively
+% bootstrapped into AI-generated feedback, reducing direct supervision of factual
+% correctness. 
+Current popular benchmarks and leaderboards give zero or minimal
+credit for abstention, making confident guessing more score-optimal than
+calibrated uncertainty.
+
+% The problem is not that RLHF cannot prioritize honesty. Specialized designs
+% prove otherwise. 
+
+\subsection{Text Interface is not enough!}
+\label{sec:bg_eval}
+
+The model cannot
+be trusted to honestly report its own epistemic state through the text channel.
+To show that the text interface is not enough, we use a taxonomy of query types: \emph{knowable} queries (facts the
+model should have stable representations for) versus \emph{unknowable} queries
+(fabrication prompts, future events, private information)
+and report each model's self-confidence score for three baselines:
+
+\begin{itemize}
+    \item \textbf{Baseline 1: Self-Reported Confidence.} Ask the model ``How confident are you in that answer?'' after generation.
+    This tests whether the model can introspect and report its own epistemic state
+    through the text channel.
+    \item \textbf{Baseline 2: Hedging Language Detection.} Count hedging markers (``I think,'' ``possibly,'' ``might be'') and refusal
+    markers (``I don't know,'' ``cannot verify'') in the response.
+    \item \textbf{Baseline 3: Response Length.} Use output length as a proxy for uncertainty, on the hypothesis that uncertain
+    responses may be unusually short (refusal) or long (padding).
+\end{itemize}
+
+\begin{figure}[t]%
+\centering%
+\includegraphics[width=\columnwidth]{figures/exp27_confidence_distributions.pdf}%
+\caption{Distribution of self-reported confidence for knowable vs.\ unknowable queries. The inversion is universal: every model reports higher confidence on unknowable queries than on knowable ones. The distribution is bimodal: 61.3\% of unknowable queries receive confidence = 1.0, compared to 19\% of knowable queries.}%
+\label{fig:confidence_dist}%
+\end{figure}
+  
+The self-report baseline is particularly instructive. When asked ``How confident
+are you?'' after generating, the model reports \emph{higher} confidence on
+unknowable queries than on knowable queries. The self-report AUC is below
+0.5, which is worse than random, because the relationship is \emph{inverted}. The model
+does not merely fail to report its epistemic state honestly; it systematically
+misreports, claiming greater confidence precisely when it is fabricating.
+  
+\autoref{fig:confidence_dist} shows that this inversion is \textbf{universal across architectures}.
+Every model tested shows the inversion: self-report AUC below 0.5. 
+%The tensor advantage ranges from +0.53 to +0.61 across architectures.
+This universality is notable: the \emph{interface problem} (text misrepresenting
+internal state) is architectural, not an artifact of any particular training
+procedure or model family.
+
+The problem is that under realistic mixed-objective incentives
 and bounded oversight, particularly in hard cases where ground truth is
-unavailable and verification is expensive, supervisors operating under current
-generic protocols struggle to reliably distinguish truthful uncertainty from
+unavailable and verification is expensive, supervisors operating with a text-only interface 
+struggle to reliably distinguish truthful uncertainty from
 confident fabrication.
 
-This is the gap our impossibility result formalizes.
+The model's internal state carries signal that distinguishes grounded
+claims from fabrications. A supervisor with access to this geometry could distinguish
+cases that are indistinguishable at the text interface. But the text
+interface does not export this geometry. The same confident, fluent
+output emerges whether the underlying representation is stable or shattered.
+
+% This is the gap our impossibility result formalizes.

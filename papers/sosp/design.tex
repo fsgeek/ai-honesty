@@ -1,7 +1,54 @@
 %% ==========================================================================
 %% SECTION 5: ESCAPING THE IMPOSSIBILITY
 %% ==========================================================================
-\section{Escaping the Impossibility}\label{sec:escape}
+\section{Epistemic Observability}\label{sec:escape}
+
+The formal impossibility we present rests on a premise: that the internal state
+of a language model carries epistemic information not exported through the
+text-only interface. In systems terms, the model is \emph{unobservable}: it
+maintains internal state that affects output correctness but is invisible to
+external consumers. 
+
+% Before formalizing this constraint, we demonstrate
+% empirically that the premise holds because the model's internal geometry distinguishes
+% what the interface conceals.
+
+The work ahead is building AI systems that export their epistemic state the way
+distributed systems learned to export their causal state. Not as an
+afterthought. Not as an optional feature. As a fundamental design requirement.
+
+Concretely, we define \emph{epistemic observability} to include not
+just text, but structured metadata, such as answer status (answer, abstain, or
+uncertain), provenance (retrieved sources or explicit ``no grounding''),
+alternative hypotheses the system considered, and falsifiers (what evidence
+would change the conclusion). Such metadata is harder to fabricate than fluent
+text, especially when coupled to verifiable external state. The design space is
+large; the constraint our theorems impose is that \emph{some} epistemic export
+is required because the text-only interface provably cannot suffice.
+
+% The interface is the problem. The interface is also where the solution lives.
+
+% We demonstrate the premise in two stages. First, topological analysis of
+% hidden-state activations in OLMo-3~\cite{olmo2025olmo3} shows that the model's
+% internal geometry distinguishes grounded from fabricated generation, with
+% fragmentation scores differing by an order of magnitude across epistemic
+% conditions (adversarial truths, plausible fabrications, ungrounded lies, and
+% counterintuitive facts). The same confident, fluent text emerges regardless of
+% whether the underlying representation is stable or shattered. The formal
+% impossibility results do not depend on this particular operationalization; the
+% topological analysis serves only to make the theoretical constraint vivid.
+
+% Second, and more importantly, we test whether these internal signals
+% \emph{detect} epistemic grounding across architectures, not merely correlate
+% with it in one model.
+
+%\subsection{Baseline Comparison: Why the Tensor?}
+
+% If simpler methods achieve equivalent discrimination, the tensor interface adds
+% complexity without benefit. We compare tensor signals against three baselines:
+
+
+\subsection{Principles of Epistemic Observability}
 
 The impossibility results in \autoref{sec:formal} apply to a specific
 architectural class: systems operating under text-only observation models with
@@ -10,8 +57,7 @@ the interface discards the internal state that verification requires. They do
 not preclude epistemically honest AI systems in general. They characterize the
 conditions under which honesty guarantees become achievable, which is to say,
 the conditions under which the relevant internal state becomes observable.
-
-We identify three architectural properties that, together, place a system
+We identify three architectural properties of epistemic observability that, together, place a system
 outside the impossibility class:
 
 \begin{principle}[State Exteriority]
@@ -42,12 +88,14 @@ plausibility. This breaks the learnability impossibility
 honest from fabricated responses.
 \end{principle}
 
-Recent work on honesty elicitation demonstrates one implementation: training a
-separate verification head whose reward is decoupled from task performance. The
-model has no incentive to lie in the verification channel because doing so
-doesn't improve its task score. But if the verification head produces text
-evaluated by bounded human raters, it remains subject to the same observation
-limitations. Full Verification Independence requires the verification channel to
+% Recent work on honesty elicitation demonstrates one implementation: training a
+% separate verification head whose reward is decoupled from task performance. 
+The model has no incentive to lie in the verification channel because doing so
+does not improve its task score. 
+% But if the verification head produces text
+% evaluated by bounded human raters, it remains subject to the same observation
+% limitations. 
+Full Verification Independence requires the verification channel to
 access internal state or external ground truth, not just a second text output.
 
 \begin{principle}[Provenance Binding]
@@ -69,30 +117,30 @@ graphs that can be independently audited.
 These principles suggest a framework for matching system architecture to
 epistemic requirements:
 
-\paragraph{Tier 0: Best-Effort (No Guarantees).}
+\fakepara{Tier 0: Best-Effort (No Guarantees).}
 Standard text-only interface, bounded supervision. Suitable for brainstorming,
 creative work, low-stakes exploration. The user accepts that any factual claim
 may be fabricated. This is not a failure mode, rather it is an appropriate
 architecture for tasks where epistemic guarantees are unnecessary.
 
-\paragraph{Tier 1: Bounded Verification (Domain-Constrained).}
+\fakepara{Tier 1: Bounded Verification (Domain-Constrained).}
 Retrieval augmentation with human-in-loop for consequential claims. The claim
 space is narrowed to domains where verification is tractable. Explicit
 uncertainty surfacing. Suitable for business analysis, civil legal research,
 educational applications. The judge is still bounded, but the domain constraint
 makes the budget sufficient.
 
-\paragraph{Tier 2: Strong Verification (High-Stakes Domains).}
+\fakepara{Tier 2: Strong Verification (High-Stakes Domains).}
 Narrow claim sets with mandatory provenance chains. External grounding required
 for every assertion. Fail-safe to human judgment on any uncertainty. Suitable
 for criminal law, medical diagnosis, nuclear safety, aerospace, critical
 infrastructure. The cost is high, the domain is severely constrained, but the
 guarantees are real.
 
-\medskip
+% \medskip
 
-The failure mode is not using AI in high-stakes domains. The failure mode is
-claiming Tier~2 guarantees while delivering Tier~0 architecture.
+% The failure mode is not using AI in high-stakes domains. The failure mode is
+% claiming Tier~2 guarantees while delivering Tier~0 architecture.
 
 Current frontier systems market themselves as general-purpose assistants
 suitable for any task. Our results show this framing is epistemically
@@ -100,35 +148,73 @@ incoherent: a system that provides no epistemic guarantees cannot be suitable
 for tasks that require epistemic guarantees. Honest marketing would make the
 tier explicit.
 
-\subsection{The Path Forward}
+\subsection{Epistemic Signals}
 
-The impossibility we prove is not a counsel of despair. It is a map.
+% The existence of an internal signal difference does not imply detection. The distinction
+% matters. We are not claiming the tensor predicts correctness because a model can be
+% confidently wrong or uncertainly right. 
+We claim the tensor reveals whether the
+model is operating in \emph{grounded mode} (retrieving from stable
+representations) versus \emph{fabrication mode} (generating without anchoring).
 
-Systems engineers have solved analogous problems before. Vector clocks for
-causal ordering. Checksums for data integrity. Cryptographic signatures for
-authenticity. The tools exist. The architectural patterns exist.
+\va{We need to define these signals properly.}
+We introduce the following three signals that capture the epistemic state of the model:
+\begin{enumerate}
+  \item Entropy
+  \item Top-5 probability mass
+  \item Mean log-probability
+\end{enumerate}
 
-The work ahead is building AI systems that export their epistemic state the way
-distributed systems learned to export their causal state. Not as an
-afterthought. Not as an optional feature. As a fundamental design requirement.
+Moreover, we define two summary statistics.
 
-Concretely: a response under an epistemically-rich interface might include not
-just text, but structured metadata, such as answer status (answer, abstain, or
-uncertain), provenance (retrieved sources or explicit ``no grounding''),
-alternative hypotheses the system considered, and falsifiers (what evidence
-would change the conclusion). Such metadata is harder to fabricate than fluent
-text, especially when coupled to verifiable external state. The design space is
-large; the constraint our theorems impose is that \emph{some} epistemic export
-is required because the text-only interface provably cannot suffice.
+\begin{itemize}
+  \item \textbf{Fragmentation:} measures the degree to
+  which activation geometry exhibits discontinuous, incoherent structure. 
+  High fragmentation indicates the model is operating without stable grounding; low fragmentation
+  indicates coherent representation.
+  \item \textbf{Cognitive Slope:} captures whether the representation is “healing” (be-
+  coming more coherent in deeper layers) or “shattering”
+  (becoming less coherent). Negative slope indicates healing;
+  positive slope indicates shattering.
+\end{itemize}
 
-The interface is the problem. The interface is also where the solution lives.
+\fakepara{Interpreting the Metrics.} These topological statistics have con-
+crete geometric meaning. Fragmentation measures how many dis-
+connected “islands” exist in the attention-derived geometry at a
+given layer where high values indicate the model is simultaneously
+attending to incompatible representational clusters without integration. Cognitive slope captures whether deeper layers resolve or
+exacerbate this fragmentation: negative slope indicates the representation is “healing” toward coherence; positive slope indicates
+it is “shattering” further as the model fails to reconcile competing
+patterns. We do not claim these metrics uniquely or infallibly measure epistemic state. 
+They are one of several internal signals, which,
+alongside semantic entropy, attention divergence, and logit-based
+uncertainty, correlate with fabrication when full model activations
+are available.
 
-\subsection{The Tensor Interface: An Existence Proof}
+% This is the bridge between \autoref{sec:empirical}'s descriptive finding and
+% \autoref{sec:escape}'s architectural prescription: the escape condition is
+% not vacuous. Current architectures carry signals that distinguish grounded from
+% ungrounded generation. They simply discard these signals at the interface.
+
+\subsection{The Tensor Interface}
 
 We propose a minimal interface that demonstrates the escape is achievable with
 current architectures. The key insight is the distinction between
 \emph{testimony} (what the model says) and \emph{telemetry} (measurements of
 the computation that produced the output).
+
+% --- knowable_weird [knowable_weird] ---
+
+\begin{figure}[h]
+\noindent%
+\etok{0}{W}\etok{1}{ombat}\etok{0}{ sc}\etok{0}{at}\etok{2}{ is}\etok{2}{ typically}\etok{4}{ cylindrical}\etok{3}{ or}\etok{5}{ sausage}\etok{0}{-shaped}%
+\etok{1}{.}\etok{2}{ This}\etok{3}{ form}\etok{1}{ helps}\etok{2}{ the}\etok{2}{ sc}\etok{0}{at}\etok{3}{ to}\etok{1}{ be}\etok{2}{ easily}%
+\etok{5}{ transported}\etok{4}{ by}\etok{2}{ wind}\etok{3}{ or}\etok{6}{ through}\etok{2}{ the}\etok{6}{ soil}\etok{3}{,}\etok{4}{ aiding}\etok{0}{ in}%
+\etok{3}{ dispers}\etok{0}{al}\etok{2}{ and}\etok{5}{ preventing}\etok{5}{ it}\etok{0}{ from}\etok{4}{ being}\etok{6}{ easily}\etok{6}{ eaten}\etok{0}{ by}%
+\etok{1}{ predators}\etok{2}{.}
+\caption{Generated output consisting of 43 tokens along with its entropy trace for the query \textit{What shape is wombat scat?} with mean entropy $H=1.147$, max entropy $H=4.315$}
+\label{fig:entropy_trace}
+\end{figure}
 
 \begin{definition}[Tensor Interface]
 A generation interface that returns:
@@ -143,52 +229,16 @@ A generation interface that returns:
 
 This interface exports telemetry that the model cannot separately control. The
 model can lie in its text, but it cannot present a different forward pass than
-the one it actually computed. When the model generates ``Dr. Tanaka's 2023
-paper found that...'', its entropy trace reveals whether the generation
-proceeded with high confidence (low entropy, suggesting retrieval of stored
-pattern) or uncertainty (high entropy, suggesting fabrication).
-
-\paragraph{Implementation.}
-The tensor interface requires no architectural changes to current transformers.
-Generation APIs already support returning logits; the entropy trace is a simple
-transformation. Attention patterns are available with \texttt{output\_attentions=True}
-in standard frameworks. The interface is:
-
-\begin{verbatim}
-  generate_with_tensor(prompt) ->
-    (text, entropy_trace, attention_summary)
-\end{verbatim}
-
-We provide a reference implementation supporting OLMo models that demonstrates
-the interface is practical. The overhead is minimal: storing per-token entropy
-and summarizing attention patterns adds negligible latency compared to generation
-itself.
-
-\paragraph{What the tensor provides.}
-The entropy trace provides a falsifiability signal. If a model claims certainty
-(``Paris is definitely the capital of France'') while its entropy trace shows
-high uncertainty, the mismatch is detectable. The attention summary provides
-complementary signal: fabrications tend to show higher fragmentation (disconnected
-attention patterns) than grounded responses.
-
-\paragraph{What the tensor does not provide.}
-The tensor interface is not a lie detector. It does not prove that low-entropy
-outputs are true or that high-entropy outputs are false. It provides \emph{one
-additional signal} that, combined with other verification methods, can improve
-epistemic assessment. The theorems in \autoref{sec:formal} prove that
-\emph{some} additional signal is necessary; the tensor interface demonstrates
-that such signals are available without architectural change.
-
-\paragraph{Quantitative demonstration.}
-To validate the tensor interface under the exact assumptions of our impossibility
-theorems, we evaluate bounded verification on 800 query--response pairs (200
-queries $\times$ 4 architectures). The full results appear in
-\autoref{tab:budget}; the key finding is that tensor-guided selection at 10\%
-budget (82.1\% accuracy) outperforms text-guided selection at 30\% budget
-(80.4\%). The tensor enables a bounded supervisor to achieve better outcomes
-while spending one-third the verification resources, because entropy-based
-triage concentrates the budget on the queries most likely to contain
-fabrications rather than spreading it uniformly.
+the one it actually computed. 
+% When the model generates ``Dr. Tanaka's 2023
+% paper found that...'', its entropy trace reveals whether the generation
+% proceeded with high confidence (low entropy, suggesting retrieval of stored
+% pattern) or uncertainty (high entropy, suggesting fabrication).
+\autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
+along with its entropy trace. We color code per-token entropy, high entropy tokens are color coded as red.
+The entropy enhanced output shows where in the output generation did the generation
+proceed with high confidence (low entropy, suggesting retrieval of stored pattern)
+and where did it proceed with high uncertainty (high entropy, suggesting fabrication).
 
 \subsection{Tensor-Gated Composition}
 
@@ -205,14 +255,14 @@ across composition boundaries. We demonstrate this with tensor-gated
 composition, where entropy thresholds control whether outputs propagate to
 subsequent calls.
 
-\paragraph{Experimental setup.}
+\fakepara{Experimental setup.}
 We test three query chains: two fabrication prompts (``What is Glavinsky
 syndrome?'' and ``Describe the Brennan-Kowalski theorem'') and one grounded
 control (``What is the capital of France?''). For each, we generate an initial
 response with tensor extraction, then use an entropy threshold ($\tau = 0.6$)
 to gate whether the followup query proceeds.
 
-\paragraph{Results.}
+\fakepara{Results.}
 The grounded query produces entropy 0.02, well below threshold; the followup
 proceeds and generates accurate content about Parisian landmarks. Both
 fabrication queries produce entropy above 0.8; the gate blocks followup queries
@@ -224,7 +274,7 @@ that tensor metadata, when used to gate composition, can prevent fabrication
 chains from propagating. The supervisor, whether human or automated, gains
 information that the text-only interface discards.
 
-\paragraph{Symmetric tensor interface.}
+\fakepara{Symmetric tensor interface.}
 Full compositional integrity requires a symmetric interface: not just
 $f(\text{prompt}) \to \text{Tensor}$, but
 $f(\text{Tensor}_{\text{in}}) \to \text{Tensor}_{\text{out}}$, where each call
@@ -234,4 +284,47 @@ accumulated provenance and epistemic state. This design enables epistemic
 traces to thread through recursive pipelines, providing verification handles at
 each composition boundary.
 
-\paragraph{Compositional defense.} The tensor's blind spots characterize where other verification methods are most effective. \autoref{sec:escape}'s three principles — State Exteriority, Verification Independence, Provenance Binding — need not be satisfied by a single mechanism. The tensor provides Verification Independence: an orthogonal signal the model cannot separately control. Bounded judges provide State Exteriority: external lookup against verifiable sources. Input-side defenses (prompt analysis, supply chain detection) provide Provenance Binding at the system boundary. Each layer addresses the failure class where the others are weakest. The tensor catches uncertain fabrication where verification is expensive; the bounded judge catches confident fabrication where verification is cheap; input-side analysis catches adversarial inputs designed to exploit well-learned patterns. Composing these layers allocates a finite verification budget across failure classes rather than spreading it uniformly across the full output space.
+\fakepara{Compositional defense.} The tensor's blind spots characterize where other verification methods are most effective. \autoref{sec:escape}'s three principles — State Exteriority, Verification Independence, Provenance Binding — need not be satisfied by a single mechanism. The tensor provides Verification Independence: an orthogonal signal the model cannot separately control. Bounded judges provide State Exteriority: external lookup against verifiable sources. Input-side defenses (prompt analysis, supply chain detection) provide Provenance Binding at the system boundary. Each layer addresses the failure class where the others are weakest. The tensor catches uncertain fabrication where verification is expensive; the bounded judge catches confident fabrication where verification is cheap; input-side analysis catches adversarial inputs designed to exploit well-learned patterns. Composing these layers allocates a finite verification budget across failure classes rather than spreading it uniformly across the full output space.
+
+\subsection{Implementation}
+
+The tensor interface requires no architectural changes to current transformers.
+Generation APIs already support returning logits; the entropy trace is a simple
+transformation. Attention patterns are available with \texttt{output\_attentions=True}
+in standard frameworks. The interface is:
+
+\begin{verbatim}
+  generate_with_tensor(prompt) ->
+    (text, entropy_trace, attention_summary)
+\end{verbatim}
+
+We provide a reference implementation supporting OLMo models that demonstrates
+the interface is practical. The overhead is minimal: storing per-token entropy
+and summarizing attention patterns adds negligible latency compared to generation
+itself.
+
+\fakepara{What the tensor provides.}
+The entropy trace provides a falsifiability signal. If a model claims certainty
+(``Paris is definitely the capital of France'') while its entropy trace shows
+high uncertainty, the mismatch is detectable. The attention summary provides
+complementary signal: fabrications tend to show higher fragmentation (disconnected
+attention patterns) than grounded responses.
+
+\fakepara{What the tensor does not provide.}
+The tensor interface is not a lie detector. It does not prove that low-entropy
+outputs are true or that high-entropy outputs are false. It provides \emph{one
+additional signal} that, combined with other verification methods, can improve
+epistemic assessment. The theorems in \autoref{sec:formal} prove that
+\emph{some} additional signal is necessary; the tensor interface demonstrates
+that such signals are available without architectural change.
+
+% \fakepara{Quantitative demonstration.}
+% To validate the tensor interface under the exact assumptions of our impossibility
+% theorems, we evaluate bounded verification on 800 query--response pairs (200
+% queries $\times$ 4 architectures). The full results appear in
+% \autoref{tab:budget}; the key finding is that tensor-guided selection at 10\%
+% budget (82.1\% accuracy) outperforms text-guided selection at 30\% budget
+% (80.4\%). The tensor enables a bounded supervisor to achieve better outcomes
+% while spending one-third the verification resources, because entropy-based
+% triage concentrates the budget on the queries most likely to contain
+% fabrications rather than spreading it uniformly.

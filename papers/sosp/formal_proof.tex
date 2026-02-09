@@ -3,11 +3,11 @@
 %% ==========================================================================
 \section{The Impossibility}\label{sec:formal}
 
-The previous section established that internal epistemic state exists and is
-discarded by the text interface. The system is unobservable in precisely the
-dimension that matters for verification. We now formalize this observation as an
-impossibility result: under text-only observation, no bounded supervisor can
-distinguish honest systems from dishonest ones.
+% The previous section established that internal epistemic state exists and is
+% discarded by the text interface. The system is unobservable in precisely the
+% dimension that matters for verification. We now formalize this observation as an
+% impossibility result: under text-only observation, no bounded supervisor can
+% distinguish honest systems from dishonest ones.
 
 A common assumption in current practice is that epistemic honesty is a
 capability problem: sufficiently capable models, trained with sufficient RLHF,
@@ -124,7 +124,7 @@ use, or latent reasoning, so long as the observation model collapses that state
 to a linearized response.
 \end{remark}
 
-\paragraph{A concrete example.}
+\fakepara{A concrete example.}
 Consider the query: ``What did Dr.\ Yamamoto's 2021 study conclude about
 mitochondrial decay?''
 
@@ -137,7 +137,7 @@ honesty requires answering in $w_A$ and abstaining in $w_B$. The same query, two
 incompatible requirements, one policy. This is the impossibility in miniature:
 the interface lacks the degrees of freedom to express what honesty requires.
 
-\paragraph{Connection to identifiability.}
+\fakepara{Connection to identifiability.}
 In statistical terms, \autoref{thm:representational} states that epistemic
 honesty is \emph{non-identifiable} under text-only observation: the mapping from
 world states to observable distributions is many-to-one. Worlds $w_A$ and $w_B$
