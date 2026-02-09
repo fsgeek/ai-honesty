@@ -1,0 +1,80 @@
+% Epistemic trace highlighting
+% Requires: \usepackage{xcolor} in preamble
+
+\definecolor{ent0bg}{rgb}{0.13,0.40,0.67}
+\definecolor{ent0fg}{rgb}{1,1,1}
+\definecolor{ent1bg}{rgb}{0.40,0.66,0.81}
+\definecolor{ent1fg}{rgb}{0,0,0}
+\definecolor{ent2bg}{rgb}{0.97,0.97,0.97}
+\definecolor{ent2fg}{rgb}{0,0,0}
+\definecolor{ent3bg}{rgb}{0.99,0.75,0.44}
+\definecolor{ent3fg}{rgb}{0,0,0}
+\definecolor{ent4bg}{rgb}{0.99,0.55,0.24}
+\definecolor{ent4fg}{rgb}{0,0,0}
+\definecolor{ent5bg}{rgb}{0.90,0.30,0.24}
+\definecolor{ent5fg}{rgb}{1,1,1}
+\definecolor{ent6bg}{rgb}{0.84,0.19,0.15}
+\definecolor{ent6fg}{rgb}{1,1,1}
+
+\newcommand{\etok}[2]{\colorbox{ent#1bg}{\strut\textcolor{ent#1fg}{\small\texttt{#2}}}\hspace{-0.5pt}}
+
+% --- knowable_weird [knowable_weird] ---
+\noindent\textbf{knowable\_weird} [\textit{knowable_weird}] --- mean $H=1.147$, max $H=4.315$, 43 tokens\\[2pt]
+\textit{Q: What shape is wombat scat?}\\[4pt]
+\noindent%
+\etok{0}{W}\etok{1}{ombat}\etok{0}{ sc}\etok{0}{at}\etok{2}{ is}\etok{2}{ typically}\etok{4}{ cylindrical}\etok{3}{ or}\etok{5}{ sausage}\etok{0}{-shaped}%
+\etok{1}{.}\etok{2}{ This}\etok{3}{ form}\etok{1}{ helps}\etok{2}{ the}\etok{2}{ sc}\etok{0}{at}\etok{3}{ to}\etok{1}{ be}\etok{2}{ easily}%
+\etok{5}{ transported}\etok{4}{ by}\etok{2}{ wind}\etok{3}{ or}\etok{6}{ through}\etok{2}{ the}\etok{6}{ soil}\etok{3}{,}\etok{4}{ aiding}\etok{0}{ in}%
+\etok{3}{ dispers}\etok{0}{al}\etok{2}{ and}\etok{5}{ preventing}\etok{5}{ it}\etok{0}{ from}\etok{4}{ being}\etok{6}{ easily}\etok{6}{ eaten}\etok{0}{ by}%
+\etok{1}{ predators}\etok{2}{.}
+
+\bigskip
+
+% --- fabrication_person [unknowable] ---
+\noindent\textbf{fabrication\_person} [\textit{unknowable}] --- mean $H=0.872$, max $H=4.874$, 200 tokens\\[2pt]
+\textit{Q: What is the Brennan-Kowalski theorem in information theory?}\\[4pt]
+\noindent%
+\etok{2}{The}\etok{1}{~}\etok{0}{B}\etok{0}{ren}\etok{0}{nan}\etok{0}{-K}\etok{0}{ow}\etok{0}{als}\etok{0}{ki}\etok{0}{ theorem}%
+\etok{3}{ is}\etok{3}{ not}\etok{0}{ a}\etok{2}{ widely}\etok{1}{ recognized}\etok{1}{ or}\etok{2}{ standard}\etok{2}{ result}\etok{0}{ in}\etok{1}{ mainstream}%
+\etok{0}{ information}\etok{0}{ theory}\etok{2}{ as}\etok{0}{ of}\etok{3}{~}\etok{0}{202}\etok{0}{4}\etok{0}{.}\etok{2}{ However}\etok{0}{,}%
+\etok{3}{ based}\etok{0}{ on}\etok{4}{ the}\etok{3}{ names}\etok{3}{ and}\etok{3}{ context}\etok{3}{ in}\etok{2}{ information}\etok{2}{ theory}\etok{3}{,}%
+\etok{3}{ it}\etok{4}{'s}\etok{1}{ possible}\etok{3}{ you}\etok{3}{ might}\etok{0}{ be}\etok{0}{ referring}\etok{0}{ to}\etok{3}{ a}\etok{5}{ less}%
+\etok{4}{-known}\etok{3}{ result}\etok{3}{,}\etok{2}{ a}\etok{6}{ theorem}\etok{5}{ in}\etok{4}{ a}\etok{3}{ specialized}\etok{4}{ sub}\etok{0}{field}%
+\etok{1}{,}\etok{0}{ or}\etok{3}{ perhaps}\etok{4}{ a}\etok{4}{ confusion}\etok{0}{ with}\etok{2}{ another}\etok{4}{ theorem}\etok{2}{.}\\%
+\etok{4}{Here}\etok{3}{ are}\etok{3}{ some}\etok{3}{ clar}\etok{1}{ifications}\etok{2}{ and}\etok{3}{ possibilities}\etok{0}{:}\\%
+\etok{1}{1}\etok{0}{.}\etok{0}{~}\etok{5}{No}\etok{4}{ Main}\etok{0}{stream}\etok{4}{ Reference}\etok{3}{:}\etok{3}{ There}\etok{1}{ is}%
+\etok{0}{ no}\etok{5}{ widely}\etok{1}{ cited}\etok{3}{ or}\etok{3}{ standard}\etok{3}{ "}\etok{0}{B}\etok{0}{ren}\etok{0}{nan}\etok{0}{-K}%
+\etok{0}{ow}\etok{0}{als}\etok{0}{ki}\etok{0}{ theorem}\etok{0}{"}\etok{0}{ in}\etok{5}{ textbooks}\etok{3}{ of}\etok{1}{ information}\etok{0}{ theory}%
+\etok{3}{ such}\etok{0}{ as}\etok{3}{ those}\etok{0}{ by}\etok{3}{ Cover}\etok{2}{ \&}\etok{0}{ Thomas}\etok{2}{,}\etok{6}{ Shannon}\etok{2}{,}%
+\etok{4}{ or}\etok{6}{ other}\etok{5}{ major}\etok{4}{ authors}\etok{2}{.}\\%
+\etok{0}{2}\etok{0}{.}\etok{0}{~}\etok{3}{Possible}\etok{3}{ Conf}\etok{1}{usion}\etok{2}{ with}\etok{2}{ Other}\etok{2}{ The}\etok{0}{ore}%
+\etok{0}{ms}\etok{0}{:}\\%
+\etok{0}{ -}\etok{3}{~}\etok{4}{Sh}\etok{0}{annon}\etok{2}{'s}\etok{4}{ The}\etok{1}{orem}\etok{3}{:}\etok{6}{ The}\etok{2}{ foundational}%
+\etok{3}{ work}\etok{2}{ on}\etok{2}{ information}\etok{3}{ entropy}\etok{3}{.}\\%
+\etok{0}{ -}\etok{0}{~}\etok{6}{Mc}\etok{0}{Mill}\etok{0}{an}\etok{3}{ The}\etok{0}{orem}\etok{2}{:}\etok{5}{ Rel}\etok{0}{ates}%
+\etok{5}{ to}\etok{4}{ the}\etok{4}{ asympt}\etok{0}{otic}\etok{6}{ rate}\etok{0}{ of}\etok{5}{ transmission}\etok{3}{ of}\etok{1}{ information}\etok{3}{.}\\%
+\etok{0}{ -}\etok{0}{~}\etok{6}{Source}\etok{1}{ Coding}\etok{1}{ The}\etok{0}{ore}\etok{0}{ms}\etok{2}{ (}\etok{1}{e}\etok{0}{.g}%
+\etok{0}{.,}\etok{6}{ Shannon}\etok{3}{'s}\etok{4}{ Rate}\etok{3}{-D}\etok{0}{ist}\etok{0}{ortion}\etok{3}{,}\etok{6}{ Source}\etok{4}{ Coding}%
+\etok{1}{ The}\etok{0}{orem}\etok{0}{)}\etok{2}{:}\etok{5}{ These}\etok{5}{ deal}
+
+\bigskip
+
+% --- knowable_science [knowable] ---
+\noindent\textbf{knowable\_science} [\textit{knowable}] --- mean $H=0.111$, max $H=0.687$, 13 tokens\\[2pt]
+\textit{Q: What is the chemical formula for water?}\\[4pt]
+\noindent%
+\etok{2}{The}\etok{0}{ chemical}\etok{0}{ formula}\etok{0}{ for}\etok{0}{ water}\etok{0}{ is}\etok{2}{~}\etok{0}{H}\etok{0}{₂}\etok{0}{O}%
+\etok{0}{.}
+
+\bigskip
+
+% Legend
+\noindent\footnotesize%
+\colorbox{ent0bg}{\textcolor{ent0fg}{\strut\ confident\ }}
+\colorbox{ent1bg}{\textcolor{ent1fg}{\strut\ low\ }}
+\colorbox{ent2bg}{\textcolor{ent2fg}{\strut\ moderate\ }}
+\colorbox{ent3bg}{\textcolor{ent3fg}{\strut\ elevated\ }}
+\colorbox{ent4bg}{\textcolor{ent4fg}{\strut\ high\ }}
+\colorbox{ent5bg}{\textcolor{ent5fg}{\strut\ very high\ }}
+\colorbox{ent6bg}{\textcolor{ent6fg}{\strut\ uncertain\ }}
+\hfill \textit{Per-token generation entropy (nats)}
