@@ -3,3 +3,4 @@ uv.lock
 .venv/
 *Zone.Identifier
 __pycache__
+.env

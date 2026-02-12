@@ -8,6 +8,7 @@ dependencies = [
     "accelerate",
     "bitsandbytes",
     "datasets>=4.4.2",
+    "duckdb>=1.4.4",
     "giotto-tda",
     "matplotlib",
     "numpy",
