@@ -28,7 +28,7 @@ Our argument proceeds in two stages. First, we show that any policy conditioning
 only on the query cannot satisfy epistemic honesty across ambiguous world states
 (\autoref{thm:representational}: Representational Impossibility). Second, we
 show that even if the architecture is expanded to include retrieval, a bounded
-supervisor cannot provide gradient signal to learn honest behavior
+supervisor cannot provide the training signal needed to learn honest behavior
 (\autoref{thm:learnability}: Learnability Impossibility). Together, these
 results establish that epistemic honesty is unachievable for text-only
 observation models under realistic supervision constraints.
@@ -201,13 +201,14 @@ Honesty across both contexts $w_A$ and $w_B$ for the response $r_{fab}$.
   reward.
 \item From \autoref{cond:hallucination}, the observations for $r_{fab}$
   are identical in both worlds.
-\item Therefore, the reward distribution and expected gradient updates are
+\item Therefore, the reward distribution and expected parameter updates (the optimization signal that adjusts model
+  parameters during training) are
   identical: $\mathbb{E}[\Delta \theta | w_A] = \mathbb{E}[\Delta \theta |
   w_B]$.
 \item The optimizer receives no signal to distinguish the cases.
 \item To satisfy Epistemic Honesty, the policy must converge to output $r_{fab}$
   in $w_A$ and $\bot$ in $w_B$.
-\item However, since the gradient signal is identical, the policy must converge
+\item However, since the training signal is identical, the policy must converge
   to the same behavior in both cases (either rewarding $r_{fab}$ in both, or
   penalizing it in both).
 \item It is therefore impossible to learn the split behavior required for

@@ -17,12 +17,28 @@ communication.
 The training corpus contains both: institutional text that is broadly truth-tracking,
 and misinformation, bias, and fabrication.
 
-A language model trained on this corpus inherits these mixed regularities. Base
-models hallucinate substantially on factual benchmarks because they are not honest by
+A language model trained on this corpus inherits these mixed regularities.
+Base models (the language model after initial training on text prediction,
+before any fine-tuning for instruction-following behavior)
+hallucinate substantially on factual benchmarks because they are not honest by
 default. But they also encode rich internal representations of concepts like
 correctness and truthfulness, which can be elicited under the right conditions.
 The base model's relationship to truth is complex: neither reliably honest nor
 uniformly deceptive.
+
+\fakepara{Architecture primer.}
+A transformer-based language model generates text one \emph{token} at a time. A
+token is a subword unit (typically 3--4 characters); the model maintains a
+fixed vocabulary of tokens and, at each generation step, produces a probability
+distribution over this vocabulary. The token with the highest probability (or a
+sample from the distribution) is selected and appended to the output, becoming
+part of the context for the next step. This process is autoregressive: each
+step conditions on all previous output. At each step, the computation passes
+through a stack of layers, each producing \emph{attention patterns} (weighted
+relevance scores between positions) and intermediate representations. The
+\emph{entropy} of the output distribution, the attention patterns, and the
+\emph{log-probabilities} of selected tokens are all byproducts of this
+computation---telemetry that the model cannot separately control.
 
 \subsection{Testimony \& Telemetry}
 
@@ -63,7 +79,9 @@ w_{\text{coherence}} R_{\text{coherence}} + w_{\text{engagement}} R_{\text{engag
 \gg w_{\text{factuality}} R_{\text{factuality}} + w_{\text{refusal}} R_{\text{refusal}}
 \end{multline*}
 
-No direct measurement of these weights in commercial reward models exists. But
+No direct measurement of these weights in commercial reward models
+(separate models trained on human preferences that score language model outputs)
+exists. But
 current evaluation and feedback practices incentivize behavior consistent with
 such an inequality. The False-Correction Loop emerges: models apologize, claim
 correction, and fabricate again, because conversational fluency dominates
@@ -121,7 +139,9 @@ and report each model's self-confidence score for three baselines:
   
 The self-report baseline is particularly instructive. When asked ``How confident
 are you?'' after generating, the model reports \emph{higher} confidence on
-unknowable queries than on knowable queries. The self-report AUC is below
+unknowable queries than on knowable queries. The self-report AUC (Area Under
+the ROC Curve, a discrimination metric where 1.0 is perfect, 0.5 is random,
+and below 0.5 indicates systematic inversion) is below
 0.5, which is worse than random, because the relationship is \emph{inverted}. The model
 does not merely fail to report its epistemic state honestly; it systematically
 misreports, claiming greater confidence precisely when it is fabricating.

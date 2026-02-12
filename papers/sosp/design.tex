@@ -84,7 +84,7 @@ citations because State Exteriority is necessary but not sufficient.
 Verification signals must originate from a channel orthogonal to the generation
 signal, capable of overriding the bounded supervisor's preference for
 plausibility. This breaks the learnability impossibility
-(\autoref{thm:learnability}) by providing gradient signal that distinguishes
+(\autoref{thm:learnability}) by providing a training signal that distinguishes
 honest from fabricated responses.
 \end{principle}
 
@@ -169,7 +169,7 @@ Moreover, we define two summary statistics.
 
 \begin{itemize}
   \item \textbf{Fragmentation:} measures the degree to
-  which activation geometry exhibits discontinuous, incoherent structure. 
+  which internal representation geometry exhibits discontinuous, incoherent structure. 
   High fragmentation indicates the model is operating without stable grounding; low fragmentation
   indicates coherent representation.
   \item \textbf{Cognitive Slope:} captures whether the representation is “healing” (be-
@@ -223,13 +223,13 @@ A generation interface that returns:
 \item \textbf{Entropy trace}: Per-token entropy of the output distribution during
   generation.
 \item \textbf{Attention summary}: Statistics of attention patterns (concentration,
-  self-attention ratio) from reasoning layers.
+  self-attention ratio) from deeper processing layers.
 \end{enumerate}
 \end{definition}
 
 This interface exports telemetry that the model cannot separately control. The
-model can lie in its text, but it cannot present a different forward pass than
-the one it actually computed. 
+model can lie in its text, but it cannot present a different inference computation than
+the one it actually performed. 
 % When the model generates ``Dr. Tanaka's 2023
 % paper found that...'', its entropy trace reveals whether the generation
 % proceeded with high confidence (low entropy, suggesting retrieval of stored

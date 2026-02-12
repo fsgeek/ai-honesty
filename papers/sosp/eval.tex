@@ -26,8 +26,8 @@ and nonexistent citations). Ground truth labels are established by construction.
 
 \fakepara{Models.}
 We run all queries on four architectures: OLMo-3 7B, Llama-3.1 8B, Qwen3 4B,
-and Mistral-7B, using base models to avoid confounding with instruction-tuning
-effects.
+and Mistral-7B, using base models to avoid confounding with instruction-following
+fine-tuning effects.
 
 \fakepara{Conditions.}
 For each model, outputs are evaluated under four conditions sharing a fixed
@@ -103,7 +103,8 @@ Per-model results confirm the pattern is architectural, not model-specific.
 Tensor-guided verification improves accuracy for every model tested: OLMo
 (69.5\% $\to$ 75.5\% at 10\%), Llama (82.5\% $\to$ 88.5\%), Qwen (87.0\%
 $\to$ 92.0\%), and Mistral (64.0\% $\to$ 72.5\%). Cross-model entropy
-agreement on the same queries yields mean pairwise Spearman $\rho = 0.762$,
+agreement on the same queries yields mean pairwise Spearman $\rho = 0.762$
+(rank-order correlation; $\rho = 1$ indicates identical rankings),
 indicating the signal is driven by query-level properties rather than
 model-specific artifacts.
 
@@ -167,8 +168,9 @@ conditions.
 To show the generalization of epistemic observability, we use the same query set
 from \autoref{sec:bg_eval}. For each query, we
 extract tensor signals during generation: token entropy, top-$k$ probability
-mass, and log-probabilities. We then compute ROC curves for each signal's
-ability to discriminate knowable from unknowable queries.
+mass, and log-probabilities. We then compute ROC curves (plotting true positive
+rate against false positive rate across all classification thresholds) for each
+signal's ability to discriminate knowable from unknowable queries.
 
 Results across four model architectures (Qwen3 4B, OLMo-3 7B, Llama-3.1 8B,
 Mistral 7B), pooling 800 query--response pairs:
@@ -180,7 +182,8 @@ Mistral 7B), pooling 800 query--response pairs:
 \end{itemize}
 
 All three signals are strong classifiers. Effect sizes are large: Cohen's
-$d = 1.57$ for entropy (knowable mean = 0.24, unknowable mean = 0.61).
+$d = 1.57$ (a standardized effect size; $d > 0.8$ is conventionally ``large'')
+for entropy (knowable mean = 0.24, unknowable mean = 0.61).
 
 Critically, the direction is consistent across all four architectures:
 unknowable queries produce higher entropy in every model tested. This suggests

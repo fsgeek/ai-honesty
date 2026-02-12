@@ -27,7 +27,8 @@ open.
   optimality. Better interfaces may achieve stronger guarantees with lower
   overhead.
 \item These findings generalize to all architectures. Our empirical work spans
-  four open-weight model families; closed-weight and significantly larger models
+  four open-weight model families (models whose internal parameters are publicly
+  available); closed-weight (API-only) and significantly larger models
   may exhibit different signal profiles.
 \end{itemize}
 
@@ -67,9 +68,9 @@ not interpretable; summarization into confidence bands, uncertainty flags, or
 visual indicators requires HCI research beyond the scope of this paper.
 
 \fakepara{Model specificity.} Our topological analysis (\autoref{sec:empirical})
-uses OLMo, which permits full hidden-state inspection. The bounded verification
+uses OLMo, which permits full inspection of intermediate layer representations. The bounded verification
 experiment (\autoref{tab:budget}) tests four architectures spanning 4B--8B
-parameters and four distinct training pipelines. The self-report inversion
+parameters (billions of learned numerical weights) and four distinct training pipelines. The self-report inversion
 finding is universal across all four. We do not claim exhaustive coverage of
 all model families, but the consistency across architecturally diverse models
 suggests the findings are not idiosyncratic.
