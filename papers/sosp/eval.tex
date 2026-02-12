@@ -181,9 +181,11 @@ Mistral 7B), pooling 800 query--response pairs:
 \item Mean log-probability: AUC = 0.868
 \end{itemize}
 
-All three signals are strong classifiers. Effect sizes are large: Cohen's
-$d = 1.57$ (a standardized effect size; $d > 0.8$ is conventionally ``large'')
-for entropy (knowable mean = 0.24, unknowable mean = 0.61).
+All three signals are strong classifiers at the raw level. Effect sizes are
+large: Cohen's $d = 1.57$ (a standardized effect size; $d > 0.8$ is
+conventionally ``large'') for entropy (knowable mean = 0.24, unknowable mean =
+0.61). However, these raw AUC values conflate text-channel and tensor-channel
+signals; we decompose them below (\autoref{tab:decomposition}).
 
 Critically, the direction is consistent across all four architectures:
 unknowable queries produce higher entropy in every model tested. This suggests
@@ -199,12 +201,18 @@ than fabricate.
 
 \fakepara{Comparison with text baselines.} We compare the performance of epistemic
 signals with the performance of the text baselines described in \autoref{sec:bg_eval}.
-Across 800 query--response pairs, epistemic signals
-substantially outperform text baselines: log-probability AUC = 0.87, entropy
-AUC = 0.87, top-5 mass AUC = 0.88. The text baselines fare worse: hedging
-language achieves AUC = 0.74, response length AUC = 0.57.
+Across 800 query--response pairs pooled across four models, epistemic signals
+outperform text baselines: log-probability AUC = 0.87, entropy
+AUC = 0.87, top-5 mass AUC = 0.88. The text baselines fare worse in the pooled
+comparison: hedging language achieves AUC = 0.74, response length AUC = 0.57.
+Note, however, that per-model length discrimination is substantially higher
+(AUC 0.88--0.96; see \autoref{tab:decomposition}); pooling across models with
+different verbosity profiles attenuates the length signal. The per-model
+decomposition provides a more accurate picture of how much raw entropy
+discrimination is attributable to response length.
 
-We tested self-reported confidence across four model families:
+We tested self-reported confidence across four model families (raw tensor AUC
+values; see \autoref{tab:decomposition} for the length-controlled decomposition):
 
 \begin{itemize}
 \item OLMo-3 7B: Tensor AUC = 0.894, Self-report AUC = 0.284
@@ -218,6 +226,54 @@ Text-based heuristics partially work (hedging language is informative), but
 self-report fails catastrophically and universally. Only the tensor provides
 reliable access to the epistemic state the model cannot help but reveal through
 its computation.
+
+\fakepara{Decomposition: text-channel vs.\ tensor-channel signal.}
+The raw AUC numbers above conflate two kinds of signal. Response length is a
+text-channel observable: it requires no tensor interface, and a supervisor can
+measure it from the output string alone. \autoref{tab:decomposition} decomposes
+the discrimination into a length component and a residual per-token entropy
+component (entropy after regressing out length).
+
+\begin{table}[t]
+\centering
+\caption{Signal decomposition: raw entropy AUC, length-only AUC, and residual
+entropy AUC (after controlling for response length) for knowable vs.\
+unknowable discrimination. Length explains 53--74\% of the raw entropy signal
+above chance.}
+\label{tab:decomposition}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Raw Entropy} & \textbf{Length} & \textbf{Residual} \\
+\midrule
+Qwen3 4B       & 0.896 & 0.881 & 0.668 \\
+OLMo-3 7B      & 0.894 & 0.912 & 0.645 \\
+Llama-3.1 8B   & 0.922 & 0.941 & 0.700 \\
+Mistral 7B     & 0.905 & 0.956 & 0.604 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+We decompose the discrimination signal into two components. Response length
+alone achieves AUC 0.88--0.96 across models---a text-channel signal observable
+without any tensor interface. After controlling for length, per-token entropy
+retains AUC 0.60--0.70: a modest but persistent computational signal.
+
+This decomposition is predicted by our impossibility result
+(\autoref{thm:learnability}). The text channel carries behavioral signals
+(length, hedging patterns, refusal templates) that discriminate in current
+models but are trivially gameable: a model trained to fabricate briefly defeats
+length-based detection. The tensor channel carries computational signals
+(per-token entropy, attention geometry) that the model cannot independently
+control---flattening the entropy of a fabricated response requires changing the
+computation that produces it.
+
+The residual signal is modest. We do not claim that current tensor signals are
+sufficient for reliable epistemic honesty detection. We claim that they occupy a
+fundamentally different position in the adversarial landscape: they are robust to
+the class of behavioral adaptations that defeat text-channel signals. The gap
+between the length AUC and the residual entropy AUC is the theorem made
+empirical---it measures how much of the discrimination comes from the gameable
+text channel versus the robust tensor channel.
 
 % TODO: Add figure environments once figures are prepared
 % TDA figures available in supplementary materials:

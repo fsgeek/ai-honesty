@@ -48,6 +48,21 @@ linguistically do not systematically show higher tensor entropy, but whether
 adversarial training can force this coupling remains open.
 Information-theoretic bounds on signal manipulation are needed.
 
+\fakepara{The MOSS analogy.}
+The relationship between computational and behavioral signals has a structural
+parallel in software engineering. Code plagiarism detectors like
+MOSS~\cite{schleimer2003winnowing, mason2019collaboration} work because restructuring code to defeat a
+similarity metric requires writing genuinely different code---gaming the metric
+changes the thing being measured. The same structural pattern applies to tensor
+signals: flattening the entropy of a fabricated response requires changing the
+computation that generates it, which means changing the generation itself. In
+contrast, behavioral signals (response length, hedging frequency) can be
+adjusted by training without altering the underlying computation, the same way
+reformatting code changes its surface without changing its logic. This
+distinction---between signals that are decoupled from the measured process and
+signals that are constitutive of it---is what separates the text channel from
+the tensor channel in our impossibility framework.
+
 \fakepara{Future work: Compositional integrity.}
 Does tensor composition preserve epistemic properties in recursive settings?
 When LLM outputs feed into subsequent LLM inputs, the epistemic trace must
@@ -83,3 +98,18 @@ conditions for escaping the impossibility. We do not prove they are
 \emph{sufficient}. A system satisfying all three might still fail epistemic
 honesty through implementation bugs, adversarial inputs, or unforeseen failure
 modes. Sufficiency requires additional formal treatment.
+
+\fakepara{Methodology note: bounded supervision in practice.}
+The length confound reported in \autoref{tab:decomposition} was not discovered
+by targeted analysis. It was found when we deployed five independent
+open-ended reviewers with the instruction ``examine the data and report what you
+find''---no hypothesis specified. Three of five independently flagged response
+length as a dominant confound. This is itself an instance of the bounded
+supervision pattern the paper describes: multiple bounded observers with
+different perspectives, none individually authoritative, whose agreement on an
+unforeseen finding provides stronger evidence than any single targeted analysis.
+The methodology performed itself.\footnote{The three reviewers that flagged the
+confound used different analytical approaches: correlation analysis, feature
+ablation, and distribution visualization. Their convergence on the same finding
+without coordination illustrates the compositional defense principle from
+\autoref{sec:escape}.}
