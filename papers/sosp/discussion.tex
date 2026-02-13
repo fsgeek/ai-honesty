@@ -1,57 +1,32 @@
 \section{Limitations and Future Work}\label{sec:discussion}
 
-We are explicit about what this paper does and does not claim. The cost surface
+We are explicit about what this paper does not claim. The cost surface
 is characterized; the investment tiers are mapped; but several important
 questions remain open.
 
-\fakepara{What we claim.}
-\begin{itemize}
-\item The impossibility is structural, not a training failure: text-only interfaces
-  with bounded supervision cannot verify epistemic honesty regardless of model
-  capability. This establishes the floor of the cost surface.
-\item The tensor interface provides a different investment tier: concrete
-  computational signals exist in current architectures that distinguish
-  grounded from ungrounded generation, and these signals cannot be independently
-  gamed.
-\item We do not claim that current tensor signals solve epistemic verification. We
-  claim that they occupy a fundamentally different position in the
-  cost-robustness tradeoff than text-channel signals.
-\item Current architectures already carry the relevant information; they just
-  discard it at the interface.
-\end{itemize}
-
 \fakepara{What we do NOT claim.}
 \begin{itemize}
-\item The tensor interface is unfakeable under adversarial training.
-  A model trained to minimize the correlation between entropy and
-  truthfulness might learn to present confident distributions even
-  when fabricating. This is an open question.
-\item Composition preserves epistemic properties. If a model's output becomes
-  input to another model (as in recursive LLM-mediated reasoning), the tensor
-  signals from the first model may not propagate meaningfully.
+\item The tensor interface is unfakeable under adversarial training---models
+  might learn to present confident distributions when fabricating.
+\item Composition preserves epistemic properties---tensor signals may not
+  propagate in recursive LLM pipelines.
 \item The tensor interface is the optimal design. We demonstrate existence, not
-  optimality. Better interfaces may achieve stronger guarantees with lower
-  overhead.
+  optimality.
 \item These findings generalize to all architectures. Our empirical work spans
-  four open-weight model families (models whose internal parameters are publicly
-  available); closed-weight (API-only) and significantly larger models
+  four open-weight model families; closed-weight and significantly larger models
   may exhibit different signal profiles.
 \end{itemize}
 
 \fakepara{Future work: Adversarial robustness.}
 Can training find weights that produce confident tensors for fabricated content?
-This is the adversarial analog of our structural results. Recent work by
 Winninger et al.~\cite{winninger2025usingmechanisticinterpretabilitycraft}
-demonstrates that mechanistic interpretability tools can be used to identify
-internal subspaces associated with safety behavior and craft attacks that target
-those subspaces directly. This confirms that internal signals are rich enough to
-be both attacked and defended, which is precisely why exporting them matters.
+show that mechanistic interpretability tools can identify internal subspaces
+and craft targeted attacks, confirming that internal signals are rich enough to
+be both attacked and defended---precisely why exporting them matters.
 The intuition that ``you cannot fake the computation you actually performed''
-may break down if the model is trained end-to-end to minimize the tensor signal
-on fabrications. Preliminary analysis suggests that linguistic confidence and
-tensor confidence are decoupled in natural model outputs, models that hedge
-linguistically do not systematically show higher tensor entropy, but whether
-adversarial training can force this coupling remains open.
+may break down under end-to-end adversarial training. Preliminary analysis
+suggests linguistic and tensor confidence are decoupled in natural outputs, but
+whether adversarial training can force this coupling remains open.
 Information-theoretic bounds on signal manipulation are needed.
 
 \fakepara{Future work: Compositional integrity.}
@@ -85,25 +60,17 @@ suggests the findings are not idiosyncratic.
 
 \fakepara{Format-constraint variation: preliminary observations.}
 The cost surface is not flat across content formats.
-Tokenization analysis of generated code reveals that BPE compression
-concentrates syntactic scaffolding (keywords, operators, whitespace) into
-11--19\% of output tokens, while semantic content (variable names, literals,
-strings) occupies 61--72\%. However, semantic content in familiar code patterns
-is itself highly predictable: conventional variable names (\texttt{left},
-\texttt{right}, \texttt{mid} in binary search) are as low-entropy as keywords,
-constituting a second scaffolding layer we term \emph{semantic scaffolding}.
-When both layers are considered, the entropy trace for familiar code is
-predominantly flat, with spikes concentrated at genuine decision points, where
-the model could not pattern-match and had to choose. We have not yet measured
-discrimination AUC across content formats; what we report is the structural
-observation that scaffolding ratio varies dramatically across output types and
-predicts where entropy-based triage should be most efficient. If the
-relationship holds, tensor-guided verification may be \emph{more}
-cost-effective for code than for natural text, because higher scaffolding ratios
-concentrate the informative signal into fewer tokens.
-We do not claim to have mapped the full manifold. We claim it exists, that its
-parameterization is observable, and that mapping it is the natural next step
-for systems engineers choosing verification strategies across content domains.
+Tokenization analysis of generated code reveals that syntactic scaffolding
+(keywords, operators, whitespace) occupies only 11--19\% of tokens, while
+semantic content occupies 61--72\%. Conventional variable names
+(\texttt{left}, \texttt{right}, \texttt{mid}) are as low-entropy as keywords,
+forming a second \emph{semantic scaffolding} layer. The entropy trace for
+familiar code is predominantly flat, with spikes at genuine decision points.
+Scaffolding ratio varies dramatically across output types; if higher scaffolding
+concentrates informative signal into fewer tokens, tensor-guided verification
+may be more cost-effective for code than for natural text.
+We claim the manifold exists and is observable; mapping it across content
+domains is the natural next step.
 
 \fakepara{Sufficiency gap.} The three architectural principles (State
 Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}

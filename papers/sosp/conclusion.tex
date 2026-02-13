@@ -15,13 +15,7 @@ these systems communicate discards the epistemic metadata that would make
 verification possible. This impossibility establishes the floor of the cost
 surface: below this line, text-channel investment cannot improve assurance.
 
-The impossibility has a shape. Policies conditioning only on queries cannot
-satisfy epistemic honesty across ambiguous world states (\autoref{thm:representational}). Even
-grounded architectures cannot learn honest behavior when supervisors cannot
-distinguish plausible fabrications from truth (\autoref{thm:learnability}). Stacking judges
-does not escape the constraint (\autoref{cor:layered}). Verification cost grows
-superlinearly with response complexity (\autoref{lem:superlinear}). Responsibility concentrates
-with the system owner (\autoref{cor:responsibility}).
+The impossibility has a shape: it decomposes into representational, learnability, and supervisory constraints that together close every text-channel escape route (\autoref{sec:formal}).
 
 But impossibility results are maps, not walls. The Fischer-Lynch-Paterson
 theorem did not end distributed systems; it clarified what assumptions had to
@@ -44,13 +38,5 @@ The engineering question is not whether to verify, but how much verification
 to buy and at which tier. A brainstorming tool needs Tier~0. A medical system
 needs Tier~2. The cost surface tells you what each investment buys, and
 preliminary observations indicate that content format modulates the tradeoff.
-
-The work ahead is not exhorting models to try harder at honesty. It is
-building systems that make honesty verifiable by design, with verification
-budgets allocated according to the cost surface rather than spread uniformly
-across outputs. The tools exist: vector clocks, cryptographic signatures,
-content-addressable storage. The architectural patterns exist. What remains is
-applying them to the epistemic dimension with the same rigor we learned to
-apply to causality and integrity in distributed systems.
 
 The interface is the problem. The interface is where the solution lives.

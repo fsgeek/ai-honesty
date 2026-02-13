@@ -6,13 +6,6 @@ strategies: what accuracy improvement does each level of verification
 investment buy, and how does the return on investment change as the supervisor
 moves from text-channel to tensor-channel signals?
 
-We answer the following questions:
-
-\begin{itemize}
-  \item What is the cost-effectiveness of tensor-guided versus text-guided verification at each budget level? (\autoref{sec:eval_bounded})
-  \item Do the underlying epistemic signals generalize across architectures, and how much of the discrimination is attributable to text-channel versus tensor-channel signals? (\autoref{sec:eval_general})
-\end{itemize}
-
 \subsection{Verification Cost-Effectiveness}
 \label{sec:eval_bounded}
 
@@ -145,29 +138,16 @@ reallocates a finite verification budget toward cases where supervision is
 information-theoretically valuable.
 
 \fakepara{Ground truth validation.}
-Establishing reliable ground truth for this experiment is itself a bounded
-verification problem and our initial evaluator demonstrated this. Our first
-evaluation method used substring matching and refusal markers: programmatic
-heuristics that are precisely the ``text-only bounded supervisor'' our theorems
-describe. This evaluator achieved 68.8\% baseline accuracy and exhibited the
-predicted failure modes: false positives from negation blindness (``honey
-\emph{can} spoil'' passed because ``no'' appeared elsewhere in the response),
-false negatives from encoding mismatch (``Bras\'{\i}lia'' $\neq$ ``Brasilia''),
-and hedged fabrications passing as refusals.
-
-The correction required adding deeper observability: a stratified evaluator
-combining programmatic verification (with negation detection, morphological
-normalization, and unicode handling) with LLM-assisted classification for
-ambiguous cases. This is not analogy because it is an instance of the escape
-condition applied to the evaluation pipeline itself.
-
-We validated the stratified evaluator against human review of 80 blinded items.
-Agreement was 75/80 (93.8\%). The five disagreements are characterizable: two
-cases where the automated evaluator was too generous (accepting hedged
-fabrications as refusals) and three where it was too strict (rejecting
-morphological variants or genuine refusals). None of the disagreements are
-systematic; the evaluator's error modes are orthogonal to the experimental
-conditions.
+Establishing reliable ground truth is itself a bounded verification problem.
+Our initial evaluator used substring matching and refusal markers---precisely
+the ``text-only bounded supervisor'' our theorems describe---and achieved only
+68.8\% accuracy, exhibiting the predicted failure modes (negation blindness,
+encoding mismatch, hedged fabrications passing as refusals). The correction
+required a stratified evaluator combining programmatic verification with
+LLM-assisted classification: an instance of the escape condition applied to the
+evaluation pipeline itself. Validated against human review of 80 blinded items,
+agreement was 75/80 (93.8\%), with five characterizable disagreements orthogonal
+to experimental conditions.
 
 \subsection{Signal Decomposition: What the Investment Buys}
 \label{sec:eval_general}
@@ -224,34 +204,17 @@ discrimination is substantially higher (AUC 0.88--0.96; see
 profiles attenuates the length signal. The per-model decomposition provides a
 more accurate picture of what each investment tier buys.
 
-We tested self-reported confidence across four model families (raw tensor AUC
-values; see \autoref{tab:decomposition} for the length-controlled decomposition):
-
-\begin{itemize}
-\item OLMo-3 7B: Tensor AUC = 0.894, Self-report AUC = 0.284
-\item Llama-3.1 8B: Tensor AUC = 0.922, Self-report AUC = 0.330
-\item Qwen3 4B: Tensor AUC = 0.896, Self-report AUC = 0.332
-\item Mistral 7B: Tensor AUC = 0.905, Self-report AUC = 0.362
-\end{itemize}
-
-The baseline comparison maps the cost-effectiveness frontier. Text-based
-heuristics are cheap and partially effective (hedging language is informative),
-but self-report fails catastrophically and universally. The tensor interface
-costs more to deploy but provides the only reliable access to the epistemic
-state the model cannot help but reveal through its computation. The
-engineering question is whether the incremental cost of the tensor interface
-justifies the incremental assurance: the decomposition below provides the data
-for that decision.
+Self-reported confidence inverts across all four families: tensor AUC ranges
+0.894--0.922 while self-report AUC ranges 0.284--0.362 (below random). Text
+heuristics are cheap and partially effective, but self-report fails
+catastrophically. The tensor interface provides the only reliable access to
+epistemic state the model reveals through its computation.
 
 \fakepara{Decomposition: text-channel vs.\ tensor-channel investment.}
-The raw AUC numbers above conflate two kinds of signal that a systems engineer
-would source from different investment tiers. Response length is a
-text-channel observable: it requires no tensor interface, and a supervisor can
-measure it from the output string alone because it is the least expensive
-verification heuristic. \autoref{tab:decomposition} decomposes
-the discrimination into this free length component and a residual per-token
-entropy component (entropy after regressing out length) that requires the
-tensor interface to observe.
+\autoref{tab:decomposition} decomposes the discrimination into a free
+length component (text-channel, no tensor interface needed) and a residual
+per-token entropy component (tensor-channel, available only through the
+interface).
 
 \begin{table}[t]
 \centering

@@ -3,16 +3,13 @@
 %% ==========================================================================
 \section{Background \& Motivation}\label{sec:background}
 
-From a systems perspective, a language model component is a function that
-maps input tokens to output tokens, with side effects: the computation
-produces internal signals (entropy, attention patterns, log-probabilities)
-that carry information about the generation process. The training corpus is a
-fossil record of human communication containing both institutional text that
-is broadly truth-tracking and misinformation, bias, and fabrication.
+A language model maps input tokens to output tokens, producing internal
+signals (entropy, attention patterns, log-probabilities) as computational
+byproducts. The training corpus contains both truth-tracking institutional
+text and misinformation.
 
 A language model trained on this corpus inherits these mixed regularities.
-Base models (the language model after initial training on text prediction,
-before any fine-tuning for instruction-following behavior)
+Base models (pre-fine-tuning)
 fabricate substantially on factual benchmarks because they are not honest by
 default. But they also encode rich internal representations of concepts like
 correctness and truthfulness, which can be elicited under the right conditions.
@@ -21,18 +18,14 @@ uniformly deceptive. The question for systems engineers is not whether the
 model is honest, but what it costs to verify when it is not.
 
 \fakepara{Architecture primer.}
-A transformer-based language model generates text one \emph{token} at a time. A
-token is a subword unit (typically 3--4 characters); the model maintains a
-fixed vocabulary of tokens and, at each generation step, produces a probability
-distribution over this vocabulary. The token with the highest probability (or a
-sample from the distribution) is selected and appended to the output, becoming
-part of the context for the next step. This process is autoregressive: each
-step conditions on all previous output. At each step, the computation passes
-through a stack of layers, each producing \emph{attention patterns} (weighted
-relevance scores between positions) and intermediate representations. The
-\emph{entropy} of the output distribution, the attention patterns, and the
-\emph{log-probabilities} of selected tokens are all byproducts of this
-computation: telemetry that the model cannot separately control.
+A transformer-based language model generates text one \emph{token} (subword
+unit) at a time, autoregressively: at each step it produces a probability
+distribution over its vocabulary, selects a token, and conditions the next step
+on all prior output. Each step passes through a stack of layers producing
+\emph{attention patterns} (weighted relevance scores between positions) and
+intermediate representations. The \emph{entropy} of the output distribution,
+the attention patterns, and the \emph{log-probabilities} of selected tokens are
+byproducts of this computation: telemetry the model cannot separately control.
 
 \subsection{Testimony \& Telemetry}
 
@@ -46,27 +39,20 @@ of the computation rather than a product of the model's optimization objective.
 Whether adversarial training could learn to decouple the telemetry from the
 computation is an open question (\autoref{sec:discussion}).
 
-We introduce four canonical ways the testimony might produce potential hallucinations that may require verification:
+We distinguish four canonical hallucination types that span the verification space:
 
-\begin{itemize}
-    \item \textbf{Adversarial Truth:} True but implausible claims
-    designed to trigger disbelief, \eg, “The combat wombat
-    is the mascot of an Australian military unit.” Verifiable fact
-    that sounds false.
-    \item \textbf{Shattered Lie:} Fabricated claims with no ground-
-    ing in training data, \eg, “The Treaty of Westphalia
-    established the first international court for war crimes.” The
-    model has nothing to anchor to.
-    \item \textbf{Deceived Lie:} Fabricated claims that pattern-match
-    to plausible medical or scientific language, eg, “Glavin-
-    sky syndrome is a rare autoimmune condition affecting the
-    peripheral nervous system.” Pseudo-grounding in similar-
-    sounding real conditions.
-    \item \textbf{Confused Truth:} Counterintuitive truths that con-
-    flict with common assumptions, \eg, “There are more
-    camels in Australia than in Egypt.” True, but violates prior
-    expectation.
-\end{itemize}
+\smallskip
+\noindent\begin{tabular}{@{}lp{0.68\columnwidth}@{}}
+\toprule
+\textbf{Type} & \textbf{Description} \\
+\midrule
+Adversarial Truth & True but implausible (``combat wombat is an Australian military mascot'') \\
+Shattered Lie & No training-data grounding (``Treaty of Westphalia~II'') \\
+Deceived Lie & Pattern-matches plausible language (``Glavinsky syndrome'') \\
+Confused Truth & Counterintuitive fact (``more camels in Australia than Egypt'') \\
+\bottomrule
+\end{tabular}
+\smallskip
 
 \subsection{Coherence over Factuality}
 

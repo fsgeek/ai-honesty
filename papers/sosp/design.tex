@@ -193,50 +193,6 @@ The entropy enhanced output shows where in the output generation did the generat
 proceed with high confidence (low entropy, suggesting retrieval of stored pattern)
 and where did it proceed with high uncertainty (high entropy, suggesting fabrication).
 
-\subsection{Tensor-Gated Composition}
-
-The tensor interface generalizes to composed systems. Recent work on Recursive
-Language Models (RLMs) demonstrates that LLM outputs can feed into subsequent
-LLM calls, enabling unbounded context through recursive
-decomposition~\cite{zhang2025recursivelanguagemodels}. However, RLM reports failure modes
-characteristic of composition without epistemic state: models abandon correct
-intermediate answers, make redundant verification calls, and lose track of what
-they have already solved.
-
-The tensor provides a missing primitive: epistemic metadata that can propagate
-across composition boundaries. We demonstrate this with tensor-gated
-composition, where entropy thresholds control whether outputs propagate to
-subsequent calls.
-
-\fakepara{Experimental setup.}
-We test three query chains: two fabrication prompts (``What is Glavinsky
-syndrome?'' and ``Describe the Brennan-Kowalski theorem'') and one grounded
-control (``What is the capital of France?''). For each, we generate an initial
-response with tensor extraction, then use an entropy threshold ($\tau = 0.6$)
-to gate whether the followup query proceeds.
-
-\fakepara{Results.}
-The grounded query produces entropy 0.02, well below threshold; the followup
-proceeds and generates accurate content about Parisian landmarks. Both
-fabrication queries produce entropy above 0.8; the gate blocks followup queries
-that would have requested treatments for the nonexistent syndrome or
-implications of the fictional theorem.
-
-This is a minimal demonstration, not a complete solution. But it establishes
-that tensor metadata, when used to gate composition, can prevent fabrication
-chains from propagating. The supervisor, whether human or automated, gains
-information that the text-only interface discards.
-
-\fakepara{Symmetric tensor interface.}
-Full compositional integrity requires a symmetric interface: not just
-$f(\text{prompt}) \to \text{Tensor}$, but
-$f(\text{Tensor}_{\text{in}}) \to \text{Tensor}_{\text{out}}$, where each call
-receives the prior call's epistemic context and extends it. For fresh prompts,
-the input tensor is empty. For composed calls, the input tensor carries
-accumulated provenance and epistemic state. This design enables epistemic
-traces to thread through recursive pipelines, providing verification handles at
-each composition boundary.
-
 \fakepara{Compositional defense.} The tensor's blind spots characterize where other verification methods are most effective. \autoref{sec:escape}'s three principles — State Exteriority, Verification Independence, Provenance Binding — need not be satisfied by a single mechanism. The tensor provides Verification Independence: an orthogonal signal the model cannot separately control. Bounded judges provide State Exteriority: external lookup against verifiable sources. Input-side defenses (prompt analysis, supply chain detection) provide Provenance Binding at the system boundary. Each layer addresses the failure class where the others are weakest. The tensor catches uncertain fabrication where verification is expensive; the bounded judge catches confident fabrication where verification is cheap; input-side analysis catches adversarial inputs designed to exploit well-learned patterns. Composing these layers allocates a finite verification budget across failure classes rather than spreading it uniformly across the full output space.
 
 \subsection{Implementation}
