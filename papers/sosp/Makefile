@@ -3,7 +3,8 @@
 MAIN = epistemic_honest
 LATEXMK = latexmk -lualatex
 
-all: $(MAIN).pdf
+all: 
+	$(LATEXMK) $(MAIN)
 
 $(MAIN).pdf:
 	$(LATEXMK) $(MAIN)

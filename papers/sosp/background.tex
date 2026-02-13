@@ -32,7 +32,7 @@ through a stack of layers, each producing \emph{attention patterns} (weighted
 relevance scores between positions) and intermediate representations. The
 \emph{entropy} of the output distribution, the attention patterns, and the
 \emph{log-probabilities} of selected tokens are all byproducts of this
-computation---telemetry that the model cannot separately control.
+computation: telemetry that the model cannot separately control.
 
 \subsection{Testimony \& Telemetry}
 
@@ -94,7 +94,7 @@ distinguishing ``correct,'' ``hallucinated,'' and ``abstain,'' show measurable
 improvements: 28.9\% hallucination reduction and 21.1\% truthfulness
 improvement on knowledge-intensive benchmarks~\cite{truthrl}.
 
-However, RLHF optimizes for text-channel reward---precisely the channel that
+However, RLHF optimizes for text-channel reward, which are precisely the channel that
 our impossibility theorem (\autoref{sec:formal}) shows is insufficient for
 verification. Public descriptions of major RLHF pipelines rarely describe
 ternary rewards, and available audits highlight underweighting of abstention
@@ -109,7 +109,7 @@ model generates). This is the text-channel trap: the optimization pressure
 operates on the gameable signal.
 
 % The problem is not that RLHF cannot prioritize honesty. Specialized designs
-% prove otherwise. 
+% prove otherwise.
 
 \subsection{The Text Channel Cannot Self-Verify}
 \label{sec:bg_eval}
@@ -120,7 +120,7 @@ To demonstrate the inadequacy of text-only verification, we use a taxonomy of
 query types: \emph{knowable} queries (facts the model should have stable
 representations for) versus \emph{unknowable} queries (fabrication prompts,
 future events, private information) and report each model's self-confidence
-score for three text-channel baselines---the cheapest verification strategies
+score for three text-channel baselines, which are the cheapest verification strategies
 available to a bounded supervisor:
 
 \begin{itemize}
@@ -139,7 +139,7 @@ available to a bounded supervisor:
 \caption{Distribution of self-reported confidence for knowable vs.\ unknowable queries. The inversion is universal: every model reports higher confidence on unknowable queries than on knowable ones. The distribution is bimodal: 61.3\% of unknowable queries receive confidence = 1.0, compared to 19\% of knowable queries.}%
 \label{fig:confidence_dist}%
 \end{figure}
-  
+
 The self-report baseline is particularly instructive. When asked ``How confident
 are you?'' after generating, the model reports \emph{higher} confidence on
 unknowable queries than on knowable queries. The self-report AUC (Area Under
@@ -148,9 +148,9 @@ and below 0.5 indicates systematic inversion) is below
 0.5, which is worse than random, because the relationship is \emph{inverted}. The model
 does not merely fail to report its epistemic state honestly; it systematically
 misreports, claiming greater confidence precisely when it is fabricating.
-  
+
 \autoref{fig:confidence_dist} shows that this inversion is \textbf{universal across architectures}.
-Every model tested shows the inversion: self-report AUC below 0.5. 
+Every model tested shows the inversion: self-report AUC below 0.5.
 %The tensor advantage ranges from +0.53 to +0.61 across architectures.
 This universality is notable: the \emph{interface problem} (text misrepresenting
 internal state) is architectural, not an artifact of any particular training
@@ -158,7 +158,7 @@ procedure or model family.
 
 The problem is that under realistic mixed-objective incentives
 and bounded oversight, particularly in hard cases where ground truth is
-unavailable and verification is expensive, supervisors operating with a text-only interface 
+unavailable and verification is expensive, supervisors operating with a text-only interface
 struggle to reliably distinguish truthful uncertainty from
 confident fabrication.
 

@@ -33,26 +33,26 @@ rather than concentrated on the cases where verification is most needed.
 \fakepara{Self-report is worse than useless.}
 Across four model architectures (OLMo-3 7B, Llama-3.1 8B, Qwen3 4B,
 Mistral 7B), every model reports \emph{higher} confidence on fabrications than
-on known facts. Self-report AUC ranges 0.28--0.36---below random, because the
+on known facts. Self-report AUC ranges 0.28--0.36, which are below random, because the
 relationship is systematically inverted. The models carry the epistemic state
 needed for verification. The interface throws it away. Stacking supervisors
-does not escape the constraint---later judges see no finer information than
+does not escape the constraint: later judges see no finer information than
 earlier ones.
 
 \fakepara{Testimony versus telemetry.}
-Language models carry internal signals---entropy traces, attention geometry,
-token-level log-probabilities---that distinguish grounded generation from
+Language models carry internal signals (entropy traces, attention geometry,
+token-level log-probabilities) that distinguish grounded generation from
 fabrication. These signals are byproducts of the computation itself:
 \emph{telemetry} (measurements of the computation that produced the output)
 that the model cannot separately control under standard training. But the
-standard text-only interface exports only the model's chosen output---its
+standard text-only interface exports only the model's chosen output, which is its
 \emph{testimony} (what the model says). The testimony may lie; under current
 training objectives, the telemetry is harder to fake.
 Code plagiarism detection systems like
 MOSS~\cite{schleimer2003winnowing, mason2019collaboration} have navigated this
 same structural distinction for decades. MOSS works because gaming the
-similarity metric requires writing genuinely different code---restructuring
-code to defeat the detector changes the code itself. Behavioral signals
+similarity metric requires writing genuinely different code (restructuring
+code to defeat the detector changes the code itself). Behavioral signals
 (formatting, variable naming, comment style) can be trivially altered without
 changing the underlying logic, but computational signals (algorithmic structure,
 data flow) cannot be independently controlled. The same pattern governs
@@ -65,7 +65,7 @@ geometry) cannot be flattened without changing the generation process itself.
 We construct a minimal interface extension that exports computational
 telemetry alongside text, with no architectural changes to current
 transformers. The interface exports entropy traces and attention
-summaries---telemetry that the model cannot independently control. Under
+summaries (telemetry that the model cannot independently control). Under
 bounded verification, tensor-guided judges at 10\% budget outperform
 text-guided judges at 30\% budget (82.1\% vs.\ 78.5\% accuracy), not because
 the tensor signal is strong in isolation, but because it enables efficient
@@ -95,14 +95,14 @@ current transformers.
 
 Third, we provide an \emph{honest decomposition} of where the discrimination
 comes from (\autoref{sec:eval}). The text channel is stronger than
-expected: response length alone achieves AUC 0.88--0.96 across models---a
+expected: response length alone achieves AUC 0.88--0.96 across models, which is a
 free signal requiring no tensor interface. But it is trivially gameable: a
 model trained to fabricate briefly defeats length-based detection. After
 controlling for length, the tensor residual adds AUC 0.60--0.70: a
 computational signal that cannot be independently gamed without adversarial
 optimization targeting the signal itself. The gap between the text-channel
 ceiling and the tensor-channel floor is the impossibility theorem made
-empirical---it measures the boundary between gameable and robust verification.
+empirical because it measures the boundary between gameable and robust verification.
 
 \fakepara{A cost map, not a detector.}
 The contribution of this paper is not a high AUC number. It is the map.

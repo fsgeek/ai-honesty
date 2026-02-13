@@ -134,7 +134,7 @@ investment strategy to its return. Row~1 (No judge, 75.8\%) is the zero-investme
 baseline: the accuracy you get for free, bounded by the model's unassisted
 honesty rate. Row~2 (Text-guided) is the text-channel investment tier: at 10\%
 budget, text-guided judges achieve only 76.1\%, barely above baseline, because
-the text channel provides no reliable signal for triage---this is
+the text channel provides no reliable signal for triage: this is
 \autoref{thm:learnability} made empirical. Row~3 (Tensor-guided) is the
 tensor-channel investment tier: exported telemetry enables
 efficient triage, concentrating verification on the cases most likely to be
@@ -240,14 +240,14 @@ but self-report fails catastrophically and universally. The tensor interface
 costs more to deploy but provides the only reliable access to the epistemic
 state the model cannot help but reveal through its computation. The
 engineering question is whether the incremental cost of the tensor interface
-justifies the incremental assurance---the decomposition below provides the data
+justifies the incremental assurance: the decomposition below provides the data
 for that decision.
 
 \fakepara{Decomposition: text-channel vs.\ tensor-channel investment.}
 The raw AUC numbers above conflate two kinds of signal that a systems engineer
 would source from different investment tiers. Response length is a
 text-channel observable: it requires no tensor interface, and a supervisor can
-measure it from the output string alone---it is the cheapest possible
+measure it from the output string alone because it is the least expensive
 verification heuristic. \autoref{tab:decomposition} decomposes
 the discrimination into this free length component and a residual per-token
 entropy component (entropy after regressing out length) that requires the
@@ -273,19 +273,19 @@ Mistral 7B     & 0.905 & 0.956 & 0.604 \\
 \end{table}
 
 We decompose the discrimination signal into two investment tiers. Response
-length alone achieves AUC 0.88--0.96 across models---a text-channel signal
+length alone achieves AUC 0.88--0.96 across models, a text-channel signal
 observable without any tensor interface, available at zero marginal cost. After
 controlling for length, per-token entropy retains AUC 0.60--0.70: a modest but
 persistent computational signal available only through the tensor interface.
 
-The dominance of the length signal is not a weakness of our approach---it is
+The dominance of the length signal is not a weakness of our approach, rather it is
 evidence for the impossibility result (\autoref{thm:learnability}). The text
 channel carries behavioral signals (length, hedging patterns, refusal
 templates) that discriminate in current models but are trivially gameable: a
 model trained to fabricate briefly defeats length-based detection, the same way
 reformatting code to change line counts defeats a size-based plagiarism
 detector. The tensor channel carries computational signals (per-token entropy,
-attention geometry) that the model cannot independently control under standard training---flattening
+attention geometry) that the model cannot independently control under standard training. Flattening
 the entropy of a fabricated response requires changing the computation that
 produces it, the same structural property that makes MOSS
 robust~\cite{schleimer2003winnowing}.
@@ -295,7 +295,7 @@ solve epistemic verification. We claim that they occupy a fundamentally
 different position in the cost-robustness tradeoff: they are robust to the
 class of behavioral adaptations that defeat text-channel signals. The gap
 between the length AUC and the residual entropy AUC is the theorem made
-empirical---it measures how much of the discrimination comes from the gameable
+empirical because it measures how much of the discrimination comes from the gameable
 text channel (cheap but fragile) versus the robust tensor channel (costlier but
 durable).
 
@@ -312,4 +312,3 @@ durable).
     grounding from fabrication at the architectural level.}
   \label{fig:entropy_dist}
 \end{figure}
-

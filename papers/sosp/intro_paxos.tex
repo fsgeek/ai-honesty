@@ -8,18 +8,18 @@ with a precise structural analogy in distributed systems. In Paxos
 consensus~\cite{paxos}, three roles divide the work: \emph{proposers} generate
 candidate values, \emph{acceptors} filter proposals into decisions, and
 \emph{learners} observe the decided values. A learner that sees only the decided
-sequence cannot reconstruct what was proposed and rejected---the decision
+sequence cannot reconstruct what was proposed and rejected:the decision
 process is opaque by design. We show that language model generation exhibits the
 same structure, and that the opacity creates the same class of verification
 problem.
 
-In a transformer, the internal computation---feature activations, competing
-attention heads, probability mass spread across the vocabulary---plays the role
+In a transformer, the internal computation (feature activations, competing
+attention heads, probability mass spread across the vocabulary) plays the role
 of proposer: many candidate continuations are represented in parallel. Post-training
 alignment (RLHF, HHA) plays the role of acceptor: it biases selection toward
 tokens that satisfy helpfulness, harmlessness, and coherence objectives.
 The output token stream is the decided sequence. External
-observers---users, supervisors, downstream system components---are learners.
+observers (users, supervisors, downstream system components) are learners.
 They see only the linearized output. They cannot see what was proposed and
 rejected, how contested each decision was, or whether the acceptor overrode a
 high-entropy proposal distribution to emit a confident-sounding token.
@@ -28,8 +28,8 @@ projection discards the epistemic state that verification requires.
 
 \fakepara{The problem.}
 This opacity is not incidental. It is architectural, and it has direct
-consequences for verification cost. A supervisor receiving only text---only the
-decided values---must spend its verification budget reconstructing what the
+consequences for verification cost. A supervisor receiving only text (only the
+decided values) must spend its verification budget reconstructing what the
 model's own computation already knew. The budget is consumed by
 reconstruction rather than concentrated on the cases where verification is most
 needed. We prefer the term \emph{fabrication} to emphasize that fluent
@@ -49,7 +49,7 @@ helpfulness and fluency, which means the decided token often expresses
 confidence regardless of how uncertain the proposal distribution was. Across
 four model architectures (OLMo-3 7B, Llama-3.1 8B, Qwen3 4B, Mistral 7B),
 every model reports \emph{higher} confidence on fabrications than on known
-facts. Self-report AUC ranges 0.28--0.36---below random, because the
+facts. Self-report AUC ranges 0.28--0.36, which is below random, because the
 relationship is systematically inverted. Self-report inversion is not a training
 failure. It is the acceptor working as designed: asked ``how confident are
 you?'', the helpful-harmless-honest filter proposes a confident answer, because
@@ -79,13 +79,13 @@ works for one region of the generation may fail for the next.
 
 \fakepara{Key insight.}
 The generation process produces signals that the text interface
-discards---\emph{telemetry} (measurements of the computation that produced the
+discards: \emph{telemetry} (measurements of the computation that produced the
 output) as distinct from \emph{testimony} (what the model says). The entropy of
 the proposal distribution at each step records how contested the decision was.
 Attention summaries record which context positions influenced the acceptor. These
 are proposer-level signals: they describe the state of the computation
 \emph{before} acceptance collapsed it into a single token. Under current
-training objectives, the model cannot independently control this telemetry---it
+training objectives, the model cannot independently control this telemetry: it
 is a byproduct of the computation, not a product of the optimization objective.
 The testimony may lie; the telemetry is harder to fake.
 
@@ -98,7 +98,7 @@ the token stream, enabling external supervisors to triangulate: tensor signals
 read how wide the proposal distribution was; text signals read what survived
 acceptance. Neither alone can distinguish ``wide proposals, stable acceptance''
 (genuine uncertainty resolved by context) from ``narrow proposals, unstable
-acceptance'' (confident computation with a drifting acceptor)---but composed
+acceptance'' (confident computation with a drifting acceptor) but composed
 together, they can.
 
 \fakepara{Results.}
@@ -106,7 +106,7 @@ Under bounded verification budgets, tensor-guided judges at 10\% budget
 outperform text-guided judges at 30\% budget (82.1\% vs.\ 78.5\% end-to-end
 accuracy, averaged across four architectures): the tensor enables a $3\times$
 reduction in verification cost. The text channel is stronger than
-expected---response length alone achieves AUC 0.88--0.96---but it is trivially
+expected (response length alone achieves AUC 0.88--0.96) but it is trivially
 gameable: a model trained to fabricate briefly defeats length-based detection.
 After controlling for length, the tensor residual adds AUC 0.60--0.70: a
 computational signal that cannot be independently gamed without adversarial
@@ -124,7 +124,7 @@ of epistemic verification.
   predictive token generation systems operating under text-only observation with
   bounded supervision. The impossibility is structural: it holds regardless of
   model scale, training procedure, or prompt engineering, and cannot be escaped
-  by stacking supervisors---just as adding Paxos learners does not recover
+  by stacking supervisors, just as adding Paxos learners does not recover
   discarded proposal history. It establishes the floor below which text-channel
   verification investment cannot improve assurance.
 

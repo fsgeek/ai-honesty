@@ -32,18 +32,18 @@ which outputs to prioritize, and what signals to use for triage.
 \fakepara{The text-only interface cannot self-verify.}
 The standard interface between a language model and its consumers exports
 only text. A supervisor operating through this interface has exactly one
-source of information: what the model chose to say---its \emph{testimony}.
+source of information: what the model chose to say: its \emph{testimony}.
 But testimony is unreliable. Across four model architectures (OLMo-3 7B,
 Llama-3.1 8B, Qwen3 4B, Mistral 7B), we find that every model reports
 \emph{higher} confidence on fabrications than on known facts. Self-report
-AUC ranges 0.28--0.36---below random, because the relationship is
+AUC ranges 0.28--0.36, which are below random, because the relationship is
 systematically inverted. The models do not merely fail to report their
 epistemic state; they systematically misreport it. This inversion is
 universal: it holds across all four architectures, ruling out
 training-procedure artifacts.
 
 The problem is not limited to self-report. Stacking text-only supervisors
-does not escape the constraint---later judges see no finer information than
+does not escape the constraint: later judges see no finer information than
 earlier ones. A bounded supervisor receiving only text must spend its
 verification budget reconstructing, from the output alone, what the model's
 own computation already knew. The budget is consumed by reconstruction
@@ -62,8 +62,8 @@ tell.
 %% --- KEY INSIGHT: What changes the game? ---
 
 \fakepara{Testimony versus telemetry.}
-Language models carry internal signals---entropy traces, attention geometry,
-token-level log-probabilities---that distinguish grounded generation from
+Language models carry internal signals, such as entropy traces, attention geometry,
+token-level log-probabilities, that distinguish grounded generation from
 fabrication. These signals are byproducts of the computation itself:
 \emph{telemetry} (measurements of the computation that produced the output)
 that the model cannot separately control under standard training. But the
@@ -78,21 +78,21 @@ flattened without changing the generation process itself.
 This pattern maps to a well-known structure in distributed
 systems. In Paxos consensus~\cite{paxos}, proposers generate candidate
 values, acceptors filter proposals into decisions, and learners observe
-only the decided values. A transformer's internal computation---feature
+only the decided values. A transformer's internal computation (feature
 activations, competing attention heads, probability mass spread across the
-vocabulary---plays the proposer role. Post-training alignment (RLHF, HHA)
+vocabulary) plays the proposer role. Post-training alignment (RLHF, HHA)
 plays the acceptor: it biases selection toward tokens that satisfy
 helpfulness and coherence objectives. External observers are learners; they
 see only the linearized token stream. The self-report inversion follows
 directly: the acceptor optimizes for helpfulness, so when asked ``how
 confident are you?'' it emits a confident answer, because confident answers
-score well---regardless of how uncertain the proposal distribution was. In
+score well, regardless of how uncertain the proposal distribution was. In
 standard Paxos, the acceptance criterion is fixed by protocol. In a
 language model, the acceptor redefines its effective weights each round:
 each output token changes the context, changing attention patterns, changing
 the acceptance criterion for the next token. In Paxos this would be a
 liveness bug; in LLMs it is the mechanism that enables both capability and
-unreliability. Adding more learners---stacking supervisors---cannot recover
+unreliability. Adding more learners (stacking supervisors) cannot recover
 proposal history that the interface boundary already discarded.
 
 %% --- SOLUTION: What did we build/prove? ---
@@ -117,7 +117,7 @@ Second, we construct a \emph{tensor interface} that escapes the
 impossibility class by exporting computational signals alongside text
 (\autoref{sec:escape}). The interface requires no architectural changes to
 current transformers. It exports entropy traces and attention
-summaries---telemetry that the model cannot independently control. Under
+summaries: telemetry that the model cannot independently control. Under
 bounded verification, tensor-guided judges at 10\% budget outperform
 text-guided judges at 30\% budget (82.1\% vs.\ 78.5\% accuracy), not
 because the tensor signal is strong in isolation, but because it enables
@@ -127,13 +127,13 @@ contain fabrications.
 Third, we provide an \emph{honest decomposition} of where the
 discrimination comes from (\autoref{sec:eval}). The text channel is
 stronger than expected: response length alone achieves AUC 0.88--0.96
-across models---a free signal requiring no tensor interface. But it is
+across models, a free signal requiring no tensor interface. But it is
 trivially gameable: a model trained to fabricate briefly defeats
 length-based detection. After controlling for length, the tensor residual
 adds AUC 0.60--0.70: a computational signal that cannot be independently
 gamed without adversarial optimization targeting the signal itself. The gap
 between the text-channel ceiling and the tensor-channel floor is the
-impossibility theorem made empirical---it measures the boundary between
+impossibility theorem made empirical because it measures the boundary between
 gameable and robust verification.
 
 %% --- ACHIEVEMENTS: What does the reader gain? ---

@@ -13,7 +13,7 @@ limitation to be solved with scale, nor a training failure to be solved with bet
 RLHF. It is a structural property of the interface: the channel through which
 these systems communicate discards the epistemic metadata that would make
 verification possible. This impossibility establishes the floor of the cost
-surface---below this line, text-channel investment cannot improve assurance.
+surface: below this line, text-channel investment cannot improve assurance.
 
 The impossibility has a shape. Policies conditioning only on queries cannot
 satisfy epistemic honesty across ambiguous world states (\autoref{thm:representational}). Even
@@ -26,13 +26,13 @@ with the system owner (\autoref{cor:responsibility}).
 But impossibility results are maps, not walls. The Fischer-Lynch-Paterson
 theorem did not end distributed systems; it clarified what assumptions had to
 change. Our result plays an analogous role. Systems that export structured
-epistemic state---provenance, entropy traces, attention topology---escape the
+epistemic state (provenance, entropy traces, attention topology) escape the
 impossibility class. The tensor interface demonstrates this escape is
 achievable with current architectures and minimal overhead.
 
 The empirical cost surface is honest. Under bounded verification,
 tensor-guided judges at 10\% budget outperform text-guided judges at 30\%
-budget---a 3$\times$ reduction in verification cost. The text channel is
+budget, which is a 3$\times$ reduction in verification cost. The text channel is
 stronger than expected (response length alone: AUC 0.88--0.96) but trivially
 gameable. The tensor residual (AUC 0.60--0.70) is modest but occupies a
 fundamentally different position in the adversarial landscape: computational
