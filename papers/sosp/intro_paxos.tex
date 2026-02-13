@@ -1,0 +1,146 @@
+%% ==========================================================================
+%% SECTION 1: INTRODUCTION (Paxos framing)
+%% ==========================================================================
+\section{Introduction}\label{sec:intro}
+
+Systems that incorporate language model components face a verification problem
+with a precise structural analogy in distributed systems. In Paxos
+consensus~\cite{paxos}, three roles divide the work: \emph{proposers} generate
+candidate values, \emph{acceptors} filter proposals into decisions, and
+\emph{learners} observe the decided values. A learner that sees only the decided
+sequence cannot reconstruct what was proposed and rejected---the decision
+process is opaque by design. We show that language model generation exhibits the
+same structure, and that the opacity creates the same class of verification
+problem.
+
+In a transformer, the internal computation---feature activations, competing
+attention heads, probability mass spread across the vocabulary---plays the role
+of proposer: many candidate continuations are represented in parallel. Post-training
+alignment (RLHF, HHA) plays the role of acceptor: it biases selection toward
+tokens that satisfy helpfulness, harmlessness, and coherence objectives.
+The output token stream is the decided sequence. External
+observers---users, supervisors, downstream system components---are learners.
+They see only the linearized output. They cannot see what was proposed and
+rejected, how contested each decision was, or whether the acceptor overrode a
+high-entropy proposal distribution to emit a confident-sounding token.
+The token stream is a projection of a parallel computation, and the
+projection discards the epistemic state that verification requires.
+
+\fakepara{The problem.}
+This opacity is not incidental. It is architectural, and it has direct
+consequences for verification cost. A supervisor receiving only text---only the
+decided values---must spend its verification budget reconstructing what the
+model's own computation already knew. The budget is consumed by
+reconstruction rather than concentrated on the cases where verification is most
+needed. We prefer the term \emph{fabrication} to emphasize that fluent
+confabulation is the system's default behavior under coherence optimization, not
+a malfunction to be patched. Xu et al.~\cite{xu2024hallucination} prove a
+related result: hallucination is inevitable for LLMs over the class of
+computable functions. Our result is orthogonal. They prove a computational limit
+on what the model can produce; we prove an observational limit on what a
+supervisor can verify. The model may know it is fabricating. The supervisor
+cannot tell.
+
+\fakepara{Why self-report fails.}
+The Paxos analogy predicts a specific failure mode, and the empirical data
+confirms it. In consensus, a decided value carries no trace of how contested the
+vote was. In language models, the acceptor (alignment training) optimizes for
+helpfulness and fluency, which means the decided token often expresses
+confidence regardless of how uncertain the proposal distribution was. Across
+four model architectures (OLMo-3 7B, Llama-3.1 8B, Qwen3 4B, Mistral 7B),
+every model reports \emph{higher} confidence on fabrications than on known
+facts. Self-report AUC ranges 0.28--0.36---below random, because the
+relationship is systematically inverted. Self-report inversion is not a training
+failure. It is the acceptor working as designed: asked ``how confident are
+you?'', the helpful-harmless-honest filter proposes a confident answer, because
+confident answers score well on helpfulness. The proposer may have been
+uncertain. The learner sees only what the acceptor decided.
+
+\fakepara{The structural challenge.}
+Stacking learners does not help. A second language model judging the first
+model's output is another learner observing the same decided sequence. It sees
+no finer information than the original observer. Text-only supervision is
+closed under composition: judges of judges remain in the same observation class.
+This is the distributed systems insight: adding more learners to a Paxos
+deployment does not give any learner access to the proposal history. The
+information was discarded at the interface boundary, and no downstream
+processing can recover it.
+
+There is a deeper structural problem. In standard Paxos, acceptor behavior is
+fixed by the protocol: the acceptance criterion does not change between rounds.
+In a language model, the acceptor redefines its own weights each round. Each
+output token changes the context, which changes attention patterns, which
+changes the effective acceptance criterion for the next token. The model is
+simultaneously a consensus protocol and a dynamically reconfiguring one. This is
+what makes language models both capable and unreliable: the adaptive acceptor
+enables flexible, context-sensitive generation, but it also means that the
+proposer--acceptor relationship is non-stationary. A verification strategy that
+works for one region of the generation may fail for the next.
+
+\fakepara{Key insight.}
+The generation process produces signals that the text interface
+discards---\emph{telemetry} (measurements of the computation that produced the
+output) as distinct from \emph{testimony} (what the model says). The entropy of
+the proposal distribution at each step records how contested the decision was.
+Attention summaries record which context positions influenced the acceptor. These
+are proposer-level signals: they describe the state of the computation
+\emph{before} acceptance collapsed it into a single token. Under current
+training objectives, the model cannot independently control this telemetry---it
+is a byproduct of the computation, not a product of the optimization objective.
+The testimony may lie; the telemetry is harder to fake.
+
+\fakepara{Our approach.}
+We construct a \emph{tensor interface} that exports proposer-level telemetry to
+learners, escaping the observation class in which the impossibility holds
+(\autoref{sec:escape}). The interface requires no architectural changes to
+current transformers. It exports entropy traces and attention summaries alongside
+the token stream, enabling external supervisors to triangulate: tensor signals
+read how wide the proposal distribution was; text signals read what survived
+acceptance. Neither alone can distinguish ``wide proposals, stable acceptance''
+(genuine uncertainty resolved by context) from ``narrow proposals, unstable
+acceptance'' (confident computation with a drifting acceptor)---but composed
+together, they can.
+
+\fakepara{Results.}
+Under bounded verification budgets, tensor-guided judges at 10\% budget
+outperform text-guided judges at 30\% budget (82.1\% vs.\ 78.5\% end-to-end
+accuracy, averaged across four architectures): the tensor enables a $3\times$
+reduction in verification cost. The text channel is stronger than
+expected---response length alone achieves AUC 0.88--0.96---but it is trivially
+gameable: a model trained to fabricate briefly defeats length-based detection.
+After controlling for length, the tensor residual adds AUC 0.60--0.70: a
+computational signal that cannot be independently gamed without adversarial
+optimization targeting the signal itself. The discrimination is architectural,
+not model-specific: cross-model agreement reaches Spearman $\rho = 0.762$,
+meaning the proposer-level signal generalizes across model families.
+
+\fakepara{Contributions.}
+This paper establishes three results that together characterize the cost surface
+of epistemic verification.
+
+\begin{itemize}
+\item \textbf{An impossibility result as budget constraint.}
+  \autoref{sec:formal} proves that epistemic honesty is unverifiable for
+  predictive token generation systems operating under text-only observation with
+  bounded supervision. The impossibility is structural: it holds regardless of
+  model scale, training procedure, or prompt engineering, and cannot be escaped
+  by stacking supervisors---just as adding Paxos learners does not recover
+  discarded proposal history. It establishes the floor below which text-channel
+  verification investment cannot improve assurance.
+
+\item \textbf{A tensor interface as the next investment tier.}
+  \autoref{sec:escape} demonstrates a minimal interface extension that exports
+  proposer-level telemetry alongside text with no architectural changes to
+  current transformers. The tensor interface increases the observation budget
+  available to external verifiers by exposing computational signals the
+  text-only interface discards.
+
+\item \textbf{An empirical cost surface.}
+  \autoref{sec:eval} decomposes verification effectiveness into text-channel and
+  tensor-channel components, characterizes the cost-robustness tradeoff, and
+  identifies the format-dependent variation that determines optimal judge
+  strategy per domain. The contribution is the map, not a single detector: systems
+  engineers building with language model components need to know what each level
+  of verification investment buys. This paper provides the cost surface for that
+  decision.
+\end{itemize}

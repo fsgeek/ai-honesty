@@ -2,7 +2,8 @@
 %% Epistemic Honesty in Predictive Systems: An Impossibility Result
 %% Target: SOSP 2026
 %%
-\documentclass[sigconf,anonymous,review]{acmart}
+\documentclass[sigplan,10pt,anonymous]{acmart}
+\renewcommand\footnotetextcopyrightpermission[1]{}
 
 %% Bibliography setup
 \AtBeginDocument{%
@@ -11,6 +12,7 @@
 %% Rights - will be filled in upon acceptance
 \setcopyright{none}
 \acmConference[SOSP '26]{ACM SIGOPS 31st Symposium on Operating Systems Principles}{October 2026}{Prague, Czech Republic}
+
 
 %%
 %% Math packages and theorem environments
@@ -87,7 +89,7 @@
 %%
 %% Document metadata
 %%
-\title{Epistemic Honesty in Predictive Systems: An Impossibility Result}
+\title{Epistemic Observability in Predictive Systems: An Impossibility Result}
 
 \author{Anonymous Author(s)}
 \affiliation{%
@@ -116,13 +118,15 @@
 \ccsdesc[500]{Computing methodologies~Artificial intelligence}
 \ccsdesc[300]{Software and its engineering~Software verification and validation}
 
-\keywords{epistemic honesty, language models, impossibility results, RLHF, verification}
+\keywords{epistemic observability, language models, impossibility results, RLHF, verification}
 
 \begin{document}
 
 \input{abstract}
 
+\settopmatter{printfolios=true}
 \maketitle
+\pagestyle{plain}
 
 \input{intro}
 \input{background}

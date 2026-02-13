@@ -1,0 +1,43 @@
+=== Review heartbeat: 2026-02-13T14:00:07Z ===
+Collecting paper text...
+  Paper: 96083 chars, SHA256: 6ee436b4e4917972...
+  Git: 18ff84f8801e*
+  Pages: 14, Lines: 1777
+
+Pipeline configuration:
+  Run #5 (prev: 20260213_040142)
+  Paper changed: True
+  Reviewers: 3, Scourers: 2
+  Output: /home/tony/projects/ai-honesty/reviews/review_20260213_140008.jsonl
+
+[1/5] hostile_rejecter via qwen/qwen-2.5-72b-instruct (temp=0.95)...
+  RETRY 1/1: empty response — trying mistralai/mistral-large-2411...
+  OK: 6272 chars, 1385 tokens, 33816ms
+[2/5] shepherd via google/gemini-2.5-pro-preview (temp=0.43)...
+  OK: 9396 chars, 4892 tokens, 47635ms
+[3/5] non_domain_expert via google/gemini-2.0-flash-001 (temp=0.24)...
+  OK: 7103 chars, 1494 tokens, 12433ms
+[4/5] open_ended_scourer via deepseek/deepseek-chat-v3-0324 (temp=0.62)...
+  OK: 3 chars, 2 tokens, 3916ms
+[5/5] adversarial_scourer via google/gemini-2.0-flash-001 (temp=1.83)...
+  OK: 8235 chars, 1638 tokens, 11368ms
+
+======================================================================
+Pipeline complete: /home/tony/projects/ai-honesty/reviews/review_20260213_140008.jsonl
+  Total reviews: 5
+  Successful: 5
+  Failed: 0
+  Total tokens: 122180
+  Total latency: 109.2s
+
+Review assignments:
+  [OK] hostile_rejecter          mistralai/mistral-large-2411                  temp=0.95
+  [OK] shepherd                  google/gemini-2.5-pro-preview                 temp=0.43
+  [OK] non_domain_expert         google/gemini-2.0-flash-001                   temp=0.24
+  [OK] open_ended_scourer        deepseek/deepseek-chat-v3-0324                temp=0.62
+  [OK] adversarial_scourer       google/gemini-2.0-flash-001                   temp=1.83
+
+Manifest entry appended: reviews/manifest.jsonl
+State updated: reviews/state.json (run #5)
+=== Heartbeat complete: 2026-02-13T14:02:21Z ===
+
