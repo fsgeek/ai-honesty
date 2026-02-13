@@ -1,0 +1,61 @@
+{
+  "run_id": "20260212_184021",
+  "created": "2026-02-13T04:30:00+00:00",
+  "note": "Bootstrapped retroactively from conversation context.",
+  "findings": [
+    {
+      "id": "f001",
+      "source_persona": "hostile_rejecter",
+      "claim": "Headline AUC 0.89-0.92 anchors reader on wrong number",
+      "category": 2,
+      "action": "fix_planned",
+      "persists_from": null,
+      "note": "C+D reframing: lead with budget result, reframe AUC as text-channel ceiling."
+    },
+    {
+      "id": "f002",
+      "source_persona": "hostile_rejecter",
+      "claim": "Theorem is intuitively obvious, not novel",
+      "category": 2,
+      "action": "pending",
+      "persists_from": null,
+      "note": "Recurring. Options A-E presented. Tony has not decided."
+    },
+    {
+      "id": "f003",
+      "source_persona": "hostile_rejecter",
+      "claim": "Missing adversarial experiment",
+      "category": 3,
+      "action": "deferred",
+      "persists_from": null,
+      "note": "Already in Future Work section. This is paper-two."
+    },
+    {
+      "id": "f004",
+      "source_persona": "hostile_rejecter",
+      "claim": "Testimony does not lie contradicted by discussion",
+      "category": 1,
+      "action": "fix_planned",
+      "persists_from": null,
+      "note": "Three locations softened: intro x2, background x1."
+    },
+    {
+      "id": "f005",
+      "source_persona": "hostile_rejecter",
+      "claim": "Text baseline includes counter-productive self-report",
+      "category": 1,
+      "action": "fix_planned",
+      "persists_from": null,
+      "note": "Re-evaluation run. Self-report removed. Text@30% dropped 80.4->78.5."
+    }
+  ],
+  "edits_applied": [
+    {
+      "description": "C+D reframing: lead with budget result in abstract/intro/conclusion",
+      "files_changed": ["abstract.tex", "intro.tex", "conclusion.tex"],
+      "motivated_by": "f001"
+    }
+  ],
+  "resolved_from_prev": [],
+  "last_modified": "2026-02-13T04:30:00+00:00"
+}

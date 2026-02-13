@@ -52,6 +52,23 @@ results explain why these approaches are fundamentally limited under text-only
 interfaces: the observation model discards the internal state that would
 distinguish calibrated uncertainty from confident fabrication.
 
+\fakepara{Semantic entropy.} Kuhn et
+al.~\cite{kuhn2023semanticuncertaintylinguisticinvariances} propose sampling
+multiple responses and clustering them by meaning to estimate uncertainty,
+achieving strong results on question-answering benchmarks. Their method is the
+most sophisticated text-channel uncertainty approach to date: by measuring
+agreement \emph{between} outputs rather than features \emph{within} a single
+output, it partially addresses the gaming problem. However, it remains a
+text-channel method: the clustering operates on generated text, the uncertainty
+estimate is derived from output diversity, and a bounded supervisor evaluating
+semantic equivalence is subject to the same observation limits our theorems
+describe. Our approach differs structurally: rather than sampling multiple
+outputs and measuring their agreement (costly and still text-observable), we
+extract signals from the computation that produced a single output---signals
+the model cannot independently control. The two approaches are complementary:
+semantic entropy measures output-level consistency; the tensor interface measures
+computation-level confidence.
+
 \fakepara{Impossibility results in LLMs.} Xu et
 al.~\cite{xu2024hallucination} prove that hallucination is inevitable for LLMs
 over the class of computable functions, which is a computational limit. Our result is

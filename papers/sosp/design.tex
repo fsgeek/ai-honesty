@@ -3,19 +3,18 @@
 %% ==========================================================================
 \section{Epistemic Observability}\label{sec:escape}
 
-The formal impossibility we present rests on a premise: that the internal state
-of a language model carries epistemic information not exported through the
-text-only interface. In systems terms, the model is \emph{unobservable}: it
-maintains internal state that affects output correctness but is invisible to
-external consumers. 
-
-% Before formalizing this constraint, we demonstrate
-% empirically that the premise holds because the model's internal geometry distinguishes
-% what the interface conceals.
+The formal impossibility establishes a budget floor: below the tensor
+interface, verification investment in the text channel yields diminishing and
+gameable returns. The premise is that the internal state of a language model
+carries epistemic information not exported through the text-only interface. In
+systems terms, the model is \emph{unobservable}: it maintains internal state
+that affects output correctness but is invisible to external consumers.
 
 The work ahead is building AI systems that export their epistemic state the way
 distributed systems learned to export their causal state. Not as an
 afterthought. Not as an optional feature. As a fundamental design requirement.
+The tensor interface increases the observation budget available to external
+verifiers.
 
 Concretely, we define \emph{epistemic observability} to include not
 just text, but structured metadata, such as answer status (answer, abstain, or
@@ -112,42 +111,6 @@ True provenance binding requires structural guarantees: signed queries to
 retrieval services, content hashes of retrieved passages, or justification
 graphs that can be independently audited.
 
-\subsection{Quality of Service Tiers}
-
-These principles suggest a framework for matching system architecture to
-epistemic requirements:
-
-\fakepara{Tier 0: Best-Effort (No Guarantees).}
-Standard text-only interface, bounded supervision. Suitable for brainstorming,
-creative work, low-stakes exploration. The user accepts that any factual claim
-may be fabricated. This is not a failure mode, rather it is an appropriate
-architecture for tasks where epistemic guarantees are unnecessary.
-
-\fakepara{Tier 1: Bounded Verification (Domain-Constrained).}
-Retrieval augmentation with human-in-loop for consequential claims. The claim
-space is narrowed to domains where verification is tractable. Explicit
-uncertainty surfacing. Suitable for business analysis, civil legal research,
-educational applications. The judge is still bounded, but the domain constraint
-makes the budget sufficient.
-
-\fakepara{Tier 2: Strong Verification (High-Stakes Domains).}
-Narrow claim sets with mandatory provenance chains. External grounding required
-for every assertion. Fail-safe to human judgment on any uncertainty. Suitable
-for criminal law, medical diagnosis, nuclear safety, aerospace, critical
-infrastructure. The cost is high, the domain is severely constrained, but the
-guarantees are real.
-
-% \medskip
-
-% The failure mode is not using AI in high-stakes domains. The failure mode is
-% claiming Tier~2 guarantees while delivering Tier~0 architecture.
-
-Current frontier systems market themselves as general-purpose assistants
-suitable for any task. Our results show this framing is epistemically
-incoherent: a system that provides no epistemic guarantees cannot be suitable
-for tasks that require epistemic guarantees. Honest marketing would make the
-tier explicit.
-
 \subsection{Epistemic Signals}
 
 % The existence of an internal signal difference does not imply detection. The distinction
@@ -157,39 +120,24 @@ We claim the tensor reveals whether the
 model is operating in \emph{grounded mode} (retrieving from stable
 representations) versus \emph{fabrication mode} (generating without anchoring).
 
-\va{We need to define these signals properly.}
-We introduce the following three signals that capture the epistemic state of the model:
+We extract three per-token signals from the generation process:
+
 \begin{enumerate}
-  \item Entropy
-  \item Top-5 probability mass
-  \item Mean log-probability
+  \item \textbf{Entropy:} the Shannon entropy of the output probability
+  distribution at each token position. High entropy indicates the model
+  is uncertain among many candidates; low entropy indicates a confident
+  next-token prediction.
+  \item \textbf{Top-$k$ probability mass:} the cumulative probability of
+  the five most likely tokens at each position. Low top-$k$ mass indicates
+  the model's probability is spread across many alternatives.
+  \item \textbf{Mean log-probability:} the average log-probability of the
+  tokens actually selected. Low values indicate the model chose
+  low-probability tokens, suggesting generation without strong grounding.
 \end{enumerate}
 
-Moreover, we define two summary statistics.
-
-\begin{itemize}
-  \item \textbf{Fragmentation:} measures the degree to
-  which internal representation geometry exhibits discontinuous, incoherent structure. 
-  High fragmentation indicates the model is operating without stable grounding; low fragmentation
-  indicates coherent representation.
-  \item \textbf{Cognitive Slope:} captures whether the representation is “healing” (be-
-  coming more coherent in deeper layers) or “shattering”
-  (becoming less coherent). Negative slope indicates healing;
-  positive slope indicates shattering.
-\end{itemize}
-
-\fakepara{Interpreting the Metrics.} These topological statistics have con-
-crete geometric meaning. Fragmentation measures how many dis-
-connected “islands” exist in the attention-derived geometry at a
-given layer where high values indicate the model is simultaneously
-attending to incompatible representational clusters without integration. Cognitive slope captures whether deeper layers resolve or
-exacerbate this fragmentation: negative slope indicates the representation is “healing” toward coherence; positive slope indicates
-it is “shattering” further as the model fails to reconcile competing
-patterns. We do not claim these metrics uniquely or infallibly measure epistemic state. 
-They are one of several internal signals, which,
-alongside semantic entropy, attention divergence, and logit-based
-uncertainty, correlate with fabrication when full model activations
-are available.
+These signals are byproducts of the softmax computation at each generation
+step. They require access to the output distribution, not to internal
+activations, making them extractable with minimal interface changes.
 
 % This is the bridge between \autoref{sec:empirical}'s descriptive finding and
 % \autoref{sec:escape}'s architectural prescription: the escape condition is
@@ -227,7 +175,7 @@ A generation interface that returns:
 \end{enumerate}
 \end{definition}
 
-This interface exports telemetry that the model cannot separately control. The
+This interface exports telemetry that the model cannot separately control under current training objectives. The
 model can lie in its text, but it cannot present a different inference computation than
 the one it actually performed. This asymmetry is the foundation of the
 adversarial robustness argument: computational signals (entropy, attention
@@ -312,8 +260,8 @@ itself.
 The entropy trace provides a falsifiability signal. If a model claims certainty
 (``Paris is definitely the capital of France'') while its entropy trace shows
 high uncertainty, the mismatch is detectable. The attention summary provides
-complementary signal: fabrications tend to show higher fragmentation (disconnected
-attention patterns) than grounded responses.
+complementary signal: fabrications tend to show more dispersed attention
+patterns than grounded responses.
 
 \fakepara{What the tensor does not provide.}
 The tensor interface is not a lie detector. It does not prove that low-entropy
@@ -329,7 +277,7 @@ that such signals are available without architectural change.
 % queries $\times$ 4 architectures). The full results appear in
 % \autoref{tab:budget}; the key finding is that tensor-guided selection at 10\%
 % budget (82.1\% accuracy) outperforms text-guided selection at 30\% budget
-% (80.4\%). The tensor enables a bounded supervisor to achieve better outcomes
+% (78.5\%). The tensor enables a bounded supervisor to achieve better outcomes
 % while spending one-third the verification resources, because entropy-based
 % triage concentrates the budget on the queries most likely to contain
 % fabrications rather than spreading it uniformly.

@@ -1,0 +1,59 @@
+{
+  "run_id": "20260212_185518",
+  "created": "2026-02-13T04:35:00+00:00",
+  "note": "Bootstrapped retroactively. Post-C+D run confirmed headline fix.",
+  "findings": [
+    {
+      "id": "f001",
+      "source_persona": "hostile_rejecter",
+      "claim": "Theorem is intuitively obvious, not novel",
+      "category": 2,
+      "action": "pending",
+      "persists_from": "20260212_184021",
+      "note": "Still recurring. Same attack, different phrasing."
+    },
+    {
+      "id": "f002",
+      "source_persona": "hostile_rejecter",
+      "claim": "Missing adversarial experiment",
+      "category": 3,
+      "action": "deferred",
+      "persists_from": "20260212_184021",
+      "note": "Persistent. Already in Future Work."
+    },
+    {
+      "id": "f003",
+      "source_persona": "hostile_rejecter",
+      "claim": "Text baseline includes counter-productive self-report (AUC < 0.5)",
+      "category": 1,
+      "action": "fix_planned",
+      "persists_from": null,
+      "note": "NEW finding from this run. Prompted re-evaluation."
+    }
+  ],
+  "edits_applied": [
+    {
+      "description": "Softened robustness claim at 3 locations",
+      "files_changed": ["intro.tex", "background.tex"],
+      "motivated_by": "run2:f004"
+    },
+    {
+      "description": "Re-ran text baseline without self-report. Created experiment27_reeval_no_selfreport.py",
+      "files_changed": ["scripts/experiment27_reeval_no_selfreport.py"],
+      "motivated_by": "f003"
+    }
+  ],
+  "resolved_from_prev": [
+    {
+      "finding_id": "headline_auc_misread",
+      "from_run": "20260212_184021",
+      "resolution": "C+D reframing. Gemini hostile no longer misreads the headline number."
+    },
+    {
+      "finding_id": "testimony_does_not_lie",
+      "from_run": "20260212_184021",
+      "resolution": "Softened at 3 locations. No reviewer flags contradiction in this run."
+    }
+  ],
+  "last_modified": "2026-02-13T04:35:00+00:00"
+}

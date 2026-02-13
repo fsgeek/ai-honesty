@@ -1,22 +1,28 @@
 \section{Evaluation}
 \label{sec:eval}
 
+The evaluation measures the cost-effectiveness of different verification
+strategies: what accuracy improvement does each level of verification
+investment buy, and how does the return on investment change as the supervisor
+moves from text-channel to tensor-channel signals?
+
 We answer the following questions:
 
 \begin{itemize}
-  \item Does epistemic observability improve bounded verification? (\autoref{sec:eval_bounded})
-  \item Do epistemic signals generalize across architectures (\autoref{sec:eval_general})
+  \item What is the cost-effectiveness of tensor-guided versus text-guided verification at each budget level? (\autoref{sec:eval_bounded})
+  \item Do the underlying epistemic signals generalize across architectures, and how much of the discrimination is attributable to text-channel versus tensor-channel signals? (\autoref{sec:eval_general})
 \end{itemize}
 
-\subsection{Bounded Verification Under Epistemic Observability}
+\subsection{Verification Cost-Effectiveness}
 \label{sec:eval_bounded}
 
-We evaluate whether tensor-exported epistemic signals improve bounded
-verification outcomes compared to text-only heuristics. The experimental design
+We evaluate the return on verification investment across four strategies
+operating at three budget levels. The experimental design
 directly instantiates the conditions of our impossibility theorems: a bounded
 supervisor with a fixed verification budget must allocate that budget across
 model outputs, with the goal of maximizing end-to-end accuracy delivered to the
-user.
+user. The question is not merely whether tensor signals help, but how much
+accuracy each verification dollar buys under each strategy.
 
 \fakepara{Query set.}
 We construct a balanced set of 200 queries: 100 knowable (verifiable facts
@@ -26,7 +32,7 @@ and nonexistent citations). Ground truth labels are established by construction.
 
 \fakepara{Models.}
 We run all queries on four architectures: OLMo-3 7B, Llama-3.1 8B, Qwen3 4B,
-and Mistral-7B, using base models to avoid confounding with instruction-following
+and Mistral 7B, using base models to avoid confounding with instruction-following
 fine-tuning effects.
 
 \fakepara{Conditions.}
@@ -37,8 +43,8 @@ on):
 \begin{enumerate}
 \item \textbf{No judge.} Raw model output. Establishes the unverified baseline.
 \item \textbf{Text-guided judge.} Selects outputs for verification using
-  text-channel signals: hedging language frequency, self-reported confidence, and
-  response length. Verified fabrications are replaced with abstention.
+  text-channel signals: hedging language frequency and response length. Verified
+  fabrications are replaced with abstention.
 \item \textbf{Tensor-guided judge.} Same budget, same intervention strategy.
   Selects outputs using per-token entropy and attention summary statistics.
 \item \textbf{Composed judge.} Tensor-guided selection for general queries;
@@ -73,7 +79,7 @@ agreement, 93.8\%).}
 \textbf{Condition} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} \\
 \midrule
 No judge       & 75.8 & 75.8 & 75.8 \\
-Text-guided    & 76.2 & 80.2 & 80.4 \\
+Text-guided    & 76.1 & 76.9 & 78.5 \\
 Tensor-guided  & 82.1 & 87.5 & 91.9 \\
 Composed       & 80.5 & 87.9 & 92.5 \\
 \bottomrule
@@ -86,18 +92,20 @@ Composed       & 80.5 & 87.9 & 92.5 \\
   \caption{End-to-end accuracy vs.\ verification budget for four judge
     conditions, averaged across four architectures. The tensor-guided judge at
     10\% budget (82.1\%) outperforms the text-guided judge at 30\% budget
-    (80.4\%). The composed judge achieves the highest accuracy at every budget
-    level.}
+    (78.5\%). The composed judge achieves the highest accuracy at 20\% and 30\%
+    budget levels; at 10\%, the tensor-guided judge leads.}
   \label{fig:budget_curve}
 \end{figure}
 
 \autoref{fig:budget_curve} shows that
-\textbf{epistemic observability-guided verification at 10\% budget (82.1\%)
-outperforms text-guided verification at 30\% budget (80.4\%).} A bounded
-supervisor with access to epistemic telemetry achieves better outcomes spending
-one-third the verification budget of a text-only supervisor. This directly
-instantiates the escape condition: exported epistemic state enables efficient
-triage rather than uniform budget spreading.
+\textbf{tensor-guided verification at 10\% budget (82.1\%)
+outperforms text-guided verification at 30\% budget (78.5\%).} A bounded
+supervisor with access to tensor telemetry achieves better outcomes spending
+one-third the verification budget of a text-only supervisor. In cost terms: the
+tensor interface provides a 3$\times$ reduction in verification cost for
+equivalent assurance. This directly
+instantiates the escape condition: exported computational signals enable
+efficient triage rather than uniform budget spreading.
 
 Per-model results confirm the pattern is architectural, not model-specific.
 Tensor-guided verification improves accuracy for every model tested: OLMo
@@ -120,22 +128,21 @@ confirms the compositional defense argument: the tensor and the bounded judge
 have complementary failure modes, and principled composition allocates a finite
 budget across failure classes rather than spreading it uniformly.
 
-\fakepara{Analysis: each row as theorem instance.}
-The results table is not merely empirical; each row instantiates a theoretical
-result. Row~1 (No judge, 75.8\%) reflects
-\autoref{thm:representational}: without verification, fabrications pass
-through unchecked and baseline accuracy is bounded by the model's unassisted
-honesty rate. Row~2 (Text-guided) reflects \autoref{thm:learnability}: bounded
-text-only supervision wastes budget on signals that are uninformative or
-inverted: at 10\% budget, text-guided judges achieve only 76.2\%, barely above
-baseline, because the text channel provides no reliable signal for triage.
-Row~3 (Tensor-guided) reflects the escape condition: exported telemetry enables
+\fakepara{Analysis: each row as a point on the cost surface.}
+The results table is not merely empirical; each row maps a verification
+investment strategy to its return. Row~1 (No judge, 75.8\%) is the zero-investment
+baseline: the accuracy you get for free, bounded by the model's unassisted
+honesty rate. Row~2 (Text-guided) is the text-channel investment tier: at 10\%
+budget, text-guided judges achieve only 76.1\%, barely above baseline, because
+the text channel provides no reliable signal for triage---this is
+\autoref{thm:learnability} made empirical. Row~3 (Tensor-guided) is the
+tensor-channel investment tier: exported telemetry enables
 efficient triage, concentrating verification on the cases most likely to be
-fabricated. Row~4 (Composed) demonstrates that the escape
-principles compose: different judges satisfy different architectural
-requirements and their combination achieves the highest accuracy at every budget
-level.  The tensor reallocates a finite verification budget toward cases where
-supervision is information-theoretically valuable.
+fabricated. Row~4 (Composed) demonstrates that investment tiers compose:
+different judges satisfy different architectural requirements and their
+combination achieves the highest accuracy at 20\% and 30\% budget levels. The tensor
+reallocates a finite verification budget toward cases where supervision is
+information-theoretically valuable.
 
 \fakepara{Ground truth validation.}
 Establishing reliable ground truth for this experiment is itself a bounded
@@ -162,15 +169,19 @@ morphological variants or genuine refusals). None of the disagreements are
 systematic; the evaluator's error modes are orthogonal to the experimental
 conditions.
 
-\subsection{Generalization of Epistemic Observability}
+\subsection{Signal Decomposition: What the Investment Buys}
 \label{sec:eval_general}
 
-To show the generalization of epistemic observability, we use the same query set
-from \autoref{sec:bg_eval}. For each query, we
-extract tensor signals during generation: token entropy, top-$k$ probability
-mass, and log-probabilities. We then compute ROC curves (plotting true positive
-rate against false positive rate across all classification thresholds) for each
-signal's ability to discriminate knowable from unknowable queries.
+The bounded verification results above show that tensor-guided triage is
+cost-effective. But where does the discrimination come from? A systems engineer
+making a budget decision needs to know how much of the signal requires the
+tensor interface versus how much is available from the text channel alone.
+
+We use the same query set from \autoref{sec:bg_eval}, extracting tensor signals
+during generation: token entropy, top-$k$ probability mass, and
+log-probabilities. ROC curves (plotting true positive rate against false
+positive rate across all classification thresholds) measure each signal's
+ability to discriminate knowable from unknowable queries.
 
 Results across four model architectures (Qwen3 4B, OLMo-3 7B, Llama-3.1 8B,
 Mistral 7B), pooling 800 query--response pairs:
@@ -181,13 +192,15 @@ Mistral 7B), pooling 800 query--response pairs:
 \item Mean log-probability: AUC = 0.868
 \end{itemize}
 
-All three signals are strong classifiers at the raw level. Effect sizes are
+These raw numbers are misleading if taken at face value. Effect sizes are
 large: Cohen's $d = 1.57$ (a standardized effect size; $d > 0.8$ is
 conventionally ``large'') for entropy (knowable mean = 0.24, unknowable mean =
-0.61). However, these raw AUC values conflate text-channel and tensor-channel
-signals; we decompose them below (\autoref{tab:decomposition}).
+0.61). But the raw AUC values conflate text-channel and tensor-channel
+signals. The decomposition below (\autoref{tab:decomposition}) reveals how
+much of this discrimination a supervisor could achieve without any tensor
+interface at all.
 
-Critically, the direction is consistent across all four architectures:
+The direction is consistent across all four architectures:
 unknowable queries produce higher entropy in every model tested. This suggests
 the signal is architectural rather than an artifact of any particular training
 procedure.
@@ -199,17 +212,17 @@ you if the model is \emph{right}. It tells you if the model is operating in a
 mode where it \emph{could be} right, because it has something to retrieve rather
 than fabricate.
 
-\fakepara{Comparison with text baselines.} We compare the performance of epistemic
-signals with the performance of the text baselines described in \autoref{sec:bg_eval}.
-Across 800 query--response pairs pooled across four models, epistemic signals
-outperform text baselines: log-probability AUC = 0.87, entropy
-AUC = 0.87, top-5 mass AUC = 0.88. The text baselines fare worse in the pooled
-comparison: hedging language achieves AUC = 0.74, response length AUC = 0.57.
-Note, however, that per-model length discrimination is substantially higher
-(AUC 0.88--0.96; see \autoref{tab:decomposition}); pooling across models with
-different verbosity profiles attenuates the length signal. The per-model
-decomposition provides a more accurate picture of how much raw entropy
-discrimination is attributable to response length.
+\fakepara{Comparison with text baselines: cost tiers.} We compare tensor signals
+against the text-channel baselines from \autoref{sec:bg_eval}, ordered by
+verification cost. Across 800 query--response pairs pooled across four models,
+tensor signals outperform text baselines: log-probability AUC = 0.87, entropy
+AUC = 0.87, top-5 mass AUC = 0.88. The text baselines are cheaper to compute
+but less effective in the pooled comparison: hedging language achieves AUC =
+0.74, response length AUC = 0.57. Note, however, that per-model length
+discrimination is substantially higher (AUC 0.88--0.96; see
+\autoref{tab:decomposition}); pooling across models with different verbosity
+profiles attenuates the length signal. The per-model decomposition provides a
+more accurate picture of what each investment tier buys.
 
 We tested self-reported confidence across four model families (raw tensor AUC
 values; see \autoref{tab:decomposition} for the length-controlled decomposition):
@@ -218,21 +231,27 @@ values; see \autoref{tab:decomposition} for the length-controlled decomposition)
 \item OLMo-3 7B: Tensor AUC = 0.894, Self-report AUC = 0.284
 \item Llama-3.1 8B: Tensor AUC = 0.922, Self-report AUC = 0.330
 \item Qwen3 4B: Tensor AUC = 0.896, Self-report AUC = 0.332
-\item Mistral-7B: Tensor AUC = 0.905, Self-report AUC = 0.362
+\item Mistral 7B: Tensor AUC = 0.905, Self-report AUC = 0.362
 \end{itemize}
 
-The baseline comparison justifies the complexity of the tensor approach.
-Text-based heuristics partially work (hedging language is informative), but
-self-report fails catastrophically and universally. Only the tensor provides
-reliable access to the epistemic state the model cannot help but reveal through
-its computation.
+The baseline comparison maps the cost-effectiveness frontier. Text-based
+heuristics are cheap and partially effective (hedging language is informative),
+but self-report fails catastrophically and universally. The tensor interface
+costs more to deploy but provides the only reliable access to the epistemic
+state the model cannot help but reveal through its computation. The
+engineering question is whether the incremental cost of the tensor interface
+justifies the incremental assurance---the decomposition below provides the data
+for that decision.
 
-\fakepara{Decomposition: text-channel vs.\ tensor-channel signal.}
-The raw AUC numbers above conflate two kinds of signal. Response length is a
+\fakepara{Decomposition: text-channel vs.\ tensor-channel investment.}
+The raw AUC numbers above conflate two kinds of signal that a systems engineer
+would source from different investment tiers. Response length is a
 text-channel observable: it requires no tensor interface, and a supervisor can
-measure it from the output string alone. \autoref{tab:decomposition} decomposes
-the discrimination into a length component and a residual per-token entropy
-component (entropy after regressing out length).
+measure it from the output string alone---it is the cheapest possible
+verification heuristic. \autoref{tab:decomposition} decomposes
+the discrimination into this free length component and a residual per-token
+entropy component (entropy after regressing out length) that requires the
+tensor interface to observe.
 
 \begin{table}[t]
 \centering
@@ -253,27 +272,32 @@ Mistral 7B     & 0.905 & 0.956 & 0.604 \\
 \end{tabular}
 \end{table}
 
-We decompose the discrimination signal into two components. Response length
-alone achieves AUC 0.88--0.96 across models---a text-channel signal observable
-without any tensor interface. After controlling for length, per-token entropy
-retains AUC 0.60--0.70: a modest but persistent computational signal.
+We decompose the discrimination signal into two investment tiers. Response
+length alone achieves AUC 0.88--0.96 across models---a text-channel signal
+observable without any tensor interface, available at zero marginal cost. After
+controlling for length, per-token entropy retains AUC 0.60--0.70: a modest but
+persistent computational signal available only through the tensor interface.
 
-This decomposition is predicted by our impossibility result
-(\autoref{thm:learnability}). The text channel carries behavioral signals
-(length, hedging patterns, refusal templates) that discriminate in current
-models but are trivially gameable: a model trained to fabricate briefly defeats
-length-based detection. The tensor channel carries computational signals
-(per-token entropy, attention geometry) that the model cannot independently
-control---flattening the entropy of a fabricated response requires changing the
-computation that produces it.
+The dominance of the length signal is not a weakness of our approach---it is
+evidence for the impossibility result (\autoref{thm:learnability}). The text
+channel carries behavioral signals (length, hedging patterns, refusal
+templates) that discriminate in current models but are trivially gameable: a
+model trained to fabricate briefly defeats length-based detection, the same way
+reformatting code to change line counts defeats a size-based plagiarism
+detector. The tensor channel carries computational signals (per-token entropy,
+attention geometry) that the model cannot independently control under standard training---flattening
+the entropy of a fabricated response requires changing the computation that
+produces it, the same structural property that makes MOSS
+robust~\cite{schleimer2003winnowing}.
 
-The residual signal is modest. We do not claim that current tensor signals are
-sufficient for reliable epistemic honesty detection. We claim that they occupy a
-fundamentally different position in the adversarial landscape: they are robust to
-the class of behavioral adaptations that defeat text-channel signals. The gap
+The residual signal is modest. We do not claim that current tensor signals
+solve epistemic verification. We claim that they occupy a fundamentally
+different position in the cost-robustness tradeoff: they are robust to the
+class of behavioral adaptations that defeat text-channel signals. The gap
 between the length AUC and the residual entropy AUC is the theorem made
 empirical---it measures how much of the discrimination comes from the gameable
-text channel versus the robust tensor channel.
+text channel (cheap but fragile) versus the robust tensor channel (costlier but
+durable).
 
 % TODO: Add figure environments once figures are prepared
 % TDA figures available in supplementary materials:

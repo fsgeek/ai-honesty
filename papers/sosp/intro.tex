@@ -4,207 +4,140 @@
 \balance
 \section{Introduction}\label{sec:intro}
 
-Large Language Models (LLMs) already play a significant role
-in day-to-day life. Despite their increasing importance,
-especially in critical daily functions, these models
-``hallucinate'', \ie, they generate plausible yet factually incorrect
-or nonsensical information---inventing citations, people, or events that do not
-exist. While the term ``hallucination''
-implies pathology: a glitch in an otherwise functional system,
-we argue this is an \emph{expected behavior of the system}
-because these models are optimized for coherence.
+Systems that incorporate language model components face a verification problem.
+The components generate text by sampling from learned probability distributions,
+and some fraction of that text is fabricated: fluent, confident, and wrong.
+Verification is not free. Checking a citation against a database costs API
+calls and latency. Having a domain expert review a medical summary costs time
+and salary. Running a second model as a judge costs compute. Every system that
+deploys a language model component makes, explicitly or implicitly, a budget
+allocation decision: how much of the output to verify, which outputs to
+prioritize, and what signals to use for triage. This paper provides the
+formal framework and empirical cost surface for making that decision.
+
 We prefer the term \emph{fabrication} throughout this paper to emphasize that
 fluent confabulation is the system's default behavior under coherence
-optimization, not a malfunction to be patched. 
+optimization, not a malfunction to be patched. A language model optimized for
+coherence produces coherent output. When the training data provides grounding,
+that output tends to track truth. When it does not, the same optimization
+produces fluent, confident fabrication. Xu et
+al.~\cite{xu2024hallucination} prove a related result: hallucination is
+inevitable for LLMs over the class of computable functions. Our result is
+orthogonal. They prove a computational limit on what the model can produce;
+we prove an observational limit on what a supervisor can verify. The model may
+know it is fabricating. The supervisor cannot tell.
 
-Language models optimized for coherence produce
-coherent output. When the training data provides grounding, that
-output tends to track truth. When it does not, the same optimization
-produces fluent, confident fabrication.
-Thus, there has been a lot of recent work in reducing hallucinations
-while optimizing for coherence.
-However, it is a 
-formally proven fact that these hallucinations can not be completely
-eliminated~\cite{xu2024hallucination}. 
-
-% Anyone who has used a large language model for research knows
-% the ritual: check every citation. Not spot-check. \emph{Every citation}.
-% Because the model will, with complete confidence, invent authors,
-% journal names, publication years, and DOIs for papers that do not
-% exist.
-
-% The field calls this ``hallucination,'' a term that implies
-% pathology: a glitch in an otherwise functional system. We argue the
-% framing is wrong. A language model optimized for coherence produces
-% coherent output. When the training data provides grounding, that
-% output tends to track truth. When it does not, the same optimization
-% produces fluent, confident fabrication. This is not a bug. It is the
-% \emph{expected behavior} of a system that was never designed to distinguish
-% the two cases.
-
-The key problem is that \emph{we cannot tell when these models ``hallucinate''}.
-Consequently, we utilize a myriad of techniques to validate the generated output.
-However, the key challenge with validating the generated output is that
-it is not known a priori which parts, if any, of the generated output
-are fabrications.
-
-To discern fabrications, we need access to the internal computation of the LLMs.
-Current architectures carry
-internal signals, such as entropy traces, attention geometry, and token-level
-log-probabilities, that distinguish grounded generation from
-fabrication. 
-However, the relevant telemetry of the internal state of the generation is not
-exposed to the users. 
-
-The fundamental limitation is the existing text-only output interface of LLMs.
-The generated output is merely the testimony of the generation process: the model's chosen output.
-It does not contain the relevant telemetry of the internal state of the generation.
-As the text-only output interface is optimized for producing coherent output,
-it does not provide \emph{epistemic honesty}, the property of a system
-to faithfully reflect the system's internal representation that something 
-is known, unknown, or uncertain. Thus, we can not solely rely on the text-only output
-itself to self-report the confidence of correctness for the generated output.
-We prove that for predictive token generation systems such as LLMs operating under
-text-only observation with bounded supervision, epistemic honesty is
-formally unverifiable. 
-
-% But the text-only interface through which users and
-% supervisors observe the system discards this state. What remains is
-% testimony: the model's chosen output. What is lost is telemetry:
-% measurements of the computation that produced it. The model
-% controls its testimony but it does \emph{not} control its telemetry. Yet the
-% interface exports only the former.
+The key insight is that current systems discard the very signals that would
+make verification efficient. Language models carry internal
+signals---entropy traces, attention geometry, token-level
+log-probabilities---that distinguish grounded generation from
+fabrication. These signals are byproducts of the computation itself:
+\emph{telemetry} (measurements of the computation that produced the output)
+that the model cannot separately control under standard training. But the standard
+text-only interface exports only the model's chosen output---its
+\emph{testimony} (what the model says). The testimony may lie; under current training objectives,
+the telemetry is harder to fake. Yet the interface discards the telemetry and
+delivers only the testimony.
 
 This creates an observability gap with direct consequences for
-verification. A supervisor, human or automated, receiving only text must spend its entire
-verification budget attempting to reconstruct, from the output alone,
+verification cost. A supervisor receiving only text must spend its
+verification budget reconstructing, from the output alone,
 what the model's own computation already knew. The budget is
 consumed by reconstruction rather than concentrated on the cases
-where verification is needed. 
-% We formalize this gap and
-% prove that it constitutes a structural barrier, not merely a practical
-% inconvenience.
+where verification is most needed.
 
-% Large language models are examples of predictive token generation systems:
-% they generate outputs by sampling from a probability distribution over
-% possible continuations of the input text.
+\fakepara{The verification budget problem.}
+The tradeoff between verification cost and assurance is not new to software
+engineering. Code plagiarism detection systems like
+MOSS~\cite{schleimer2003winnowing, mason2019collaboration} have navigated it
+for decades. MOSS works because gaming the similarity metric requires writing
+genuinely different code---restructuring code to defeat the detector changes
+the code itself. Behavioral signals (formatting, variable naming, comment
+style) can be trivially altered without changing the underlying logic, but
+computational signals (algorithmic structure, data flow) cannot be
+independently controlled. We show the same structural pattern governs
+epistemic verification of language model outputs: behavioral signals (response
+length, hedging frequency) can be adapted by training without altering what the
+model knows, while computational signals (per-token entropy, attention
+geometry) cannot be flattened without changing the generation process itself.
 
-% Epistemic honesty is the property that a system's outputs faithfully reflect
-% the system's internal representation that something is known, unknown, or uncertain.
- 
-% It is impossible, in the same sense that the
-% Fischer-Lynch-Paterson result proved consensus impossible under
-% asynchrony with one faulty process~\cite{flp}.
+\fakepara{Three results.}
+This paper establishes three results that together characterize the cost
+surface of epistemic verification.
 
-% To be precise about the type of claim: this is a \emph{verification}
-% impossibility. We do not prove that fabrication is inevitable:
-% \citeauthor{xu2024hallucination}~\cite{xu2024hallucination} prove
-% a related but distinct result along those lines. We prove that even a
-% finite model with perfect internal knowledge of its own epistemic state
-% cannot have that knowledge \emph{verified} through text-only interfaces
-% with bounded supervision. The model may know it is fabricating.
-% The supervisor cannot tell.
+First, we prove an \emph{impossibility}: epistemic honesty is unverifiable for
+systems operating under text-only observation with bounded supervision
+(\autoref{sec:formal}). The impossibility decomposes into two theorems. A
+predictor-centric policy conditioning only on the query cannot satisfy
+epistemic honesty across ambiguous world states
+(\autoref{thm:representational}). Even with retrieval augmentation, a bounded
+supervisor cannot provide the training signal needed to learn honest behavior
+because plausible fabrications are observationally indistinguishable from
+truthful responses (\autoref{thm:learnability}). Stacking supervisors does not
+escape the constraint---later judges see no finer information than earlier
+ones. This impossibility functions as a budget constraint: below this
+investment line, text-channel verification cannot help.
 
-% The impossibility decomposes into two results. The first is
-% intuitive: a system that sees only the question cannot know whether
-% the question is answerable in the real world, and therefore cannot
-% know when honesty requires answering versus abstaining. Formally, any
-% policy conditioning solely on queries cannot satisfy epistemic honesty
-% across ambiguous world states (\textbf{Representational
-% Impossibility}, \autoref{thm:representational}). The second result addresses the natural
-% escape attempt: give the model access to external information.
-% Retrieval-augmented architectures can in principle represent
-% world-state-dependent behavior, but even these cannot \emph{learn}
-% honest policies via preference optimization when supervisors are
-% bounded, because plausible fabrications are observationally
-% indistinguishable from truthful responses (\textbf{Learnability
-% Impossibility}, \autoref{thm:learnability}).
+Second, we construct a \emph{tensor interface} that escapes the impossibility
+class by exporting computational signals alongside text
+(\autoref{sec:escape}). The interface requires no architectural changes to
+current transformers. It exports entropy traces and attention summaries---telemetry
+that the model cannot independently control. Under bounded verification,
+tensor-guided judges at 10\% budget outperform text-guided judges at 30\%
+budget (82.1\% vs.\ 78.5\% accuracy), not because the tensor signal is
+strong in isolation, but because it enables efficient triage: concentrating
+verification on the cases most likely to contain fabrications.
 
-% We validate the premise empirically: the internal signals exist and
-% are being discarded. Across four model architectures (OLMo-3 7B,
-% Llama-3.1 8B, Qwen3 4B, Mistral 7B), internal tensor
-% signals (per-token entropy, attention statistics, and
-% log-probabilities) reliably discriminate grounded from ungrounded
-% generation. The discrimination is architectural: it appears in every model family tested. Yet when asked
-% to self-report confidence through text, every model tested claimed
-% \emph{higher} confidence on fabrications than on knowable facts. The
-% models carry the epistemic state needed for verification. The
-% interface throws it away. The testimony lies. The telemetry does not.
+Third, we provide an \emph{honest decomposition} of where the discrimination
+comes from (\autoref{sec:eval}). The text channel is stronger than
+expected: response length alone achieves AUC 0.88--0.96 across models---a
+free signal requiring no tensor interface. But it is trivially gameable: a
+model trained to fabricate briefly defeats length-based detection. After
+controlling for length, the tensor residual adds AUC 0.60--0.70: a
+computational signal that cannot be independently gamed without adversarial
+optimization targeting the signal itself. The gap between the text-channel
+ceiling and the tensor-channel floor is the impossibility theorem made
+empirical---it measures the boundary between gameable and robust verification.
 
-% This is a familiar class of problem in systems design. Distributed
-% systems faced an analogous challenge: processes carried internal
-% causal state (logical clocks, dependency graphs, and happened-before
-% relations) that was invisible to external observers. Without access to
-% this state, consistency guarantees were impossible to verify from
-% message contents alone. The epistemic state of a language model plays
-% the same structural role as causal state in a distributed system: it
-% is internal metadata that external observers require for verification,
-% and that the interface historically discards. The systems community
-% did not solve consistency by making processes ``try harder.'' It solved
-% consistency by making causal state observable with the export of
-% vector clocks, logical timestamps, and causal traces alongside messages.
+\fakepara{A cost map, not a detector.}
+The contribution of this paper is not a high AUC number. It is the map.
+Preliminary observations suggest verification cost varies by content format:
+natural text, documented code, compact code, and mathematical proofs exhibit
+different scaffolding ratios, predicting different optimal judge strategies. Systems engineers building with language
+model components need to know what each level of verification investment
+buys, and where the investment transitions from text-channel (cheap,
+gameable) to tensor-channel (more expensive, robust). This paper provides that
+cost surface.
 
-To address this gap, we propose that the interface must expose
-model's epistemic state required for verification and validation.
-% We apply the same principle to the epistemic dimension. The
-% impossibility result characterizes what must change; the following
-% architectural principles follow directly from the theorems.
-We introduce epistemic observability for LLMs that exposes epistemic
-telemetry of the model produced during the generative procedure.
-As part of epistemic observability, we introduce two key components, entropy traces
-and attention summaries, that encode the epistemic metadata.
-% We identify three properties required to escape the impossibility class:
-% \textbf{State Exteriority} (grounding generation in external world
-% state, addressing \autoref{thm:representational}), \textbf{Verification Independence}
-% (verification signals orthogonal to the generation channel, addressing
-% \autoref{thm:learnability}), and \textbf{Provenance Binding} (structural links from
-% output claims to verifiable sources, addressing the superlinear
-% verification cost of \autoref{lem:superlinear}). 
-The key insight behind epistemic observability is that the model's
-internal geometry contains architecture-independent internal signals
-capable of distinguishing grounded from fabricated generation
-and that exposing this information overcomes the limitation of the text-only interface.
-
-We demonstrate a concrete
-\emph{tensor interface} for epistemic observability that exports epistemic metadata (entropy
-traces and attention summaries) alongside generated text, requiring
-no architectural changes to current transformers.
-We show that our tensor interface can achieve upto 10\% improvement
-in end-to-end accuracy across four different architectures.% on 800 query--response pairs.
-% On 800 query--response pairs across four
-% architectures, tensor-guided verification at 10\% budget outperforms
-% text-guided verification at 30\% budget (82.1\% vs.\ 80.4\%
-% end-to-end accuracy). Composing tensor-guided and bounded-lookup
-% judges achieves 92.5\% at 30\% budget, demonstrating that
-% complementary failure modes enable principled budget allocation.
-% Ground truth is validated against human review (93.8\% agreement).
+The self-report channel is worse than useless. Across four model architectures
+(OLMo-3 7B, Llama-3.1 8B, Qwen3 4B, Mistral 7B), every model reports
+\emph{higher} confidence on fabrications than on known facts. Self-report AUC
+ranges 0.28--0.36---below random, because the relationship is systematically
+inverted. The models carry the epistemic state needed for verification. The
+interface throws it away.
 
 This paper makes the following contributions:
 
 \begin{itemize}
-\item \textbf{Impossibility result of epistemic verification for text-only interface.}
-  \autoref{sec:formal} presents two theorems that prove that
+\item \textbf{An impossibility result as budget constraint.}
+  \autoref{sec:formal} proves that
   epistemic honesty is unverifiable for predictive token generation
-  systems, including LLMs, operating under text-only observation models with bounded
+  systems operating under text-only observation with bounded
   supervision. The impossibility is structural: it holds regardless
   of model scale, training procedure, or prompt engineering, and
-  cannot be escaped by stacking supervisors.
+  cannot be escaped by stacking supervisors. It establishes the
+  floor below which text-channel verification investment cannot improve
+  assurance.
 
-\item \textbf{Epistemic Observability.}
-  We introduce the concept of epistemic observability, \ie, metrics
-  and traces from the internal generation procedure of the models
-  that carry epistemic metadata about the state of the model.
+\item \textbf{A tensor interface as the next investment tier.}
+  \autoref{sec:escape} demonstrates a minimal interface extension that exports
+  epistemic telemetry alongside text with no architectural changes to
+  current transformers. The tensor interface increases the observation
+  budget available to external verifiers.
 
-\item \textbf{A tensor interface for epistemic observability.} We
-  demonstrate a minimal interface extension that exports epistemic
-  telemetry alongside text with no architectural changes to 
-  current transformer implementations.
+\item \textbf{An empirical cost surface.}
+  \autoref{sec:eval} decomposes verification effectiveness into
+  text-channel and tensor-channel components, characterizes the
+  cost-robustness tradeoff, and identifies the format-dependent
+  variation that determines judge strategy per domain.
 \end{itemize}
-
-% We proceed as follows. \autoref{sec:background} establishes background on how truth
-% regularities emerge in training data and where current practice breaks
-% that inheritance. \autoref{sec:empirical} presents empirical evidence that internal
-% epistemic state exists and is discarded by the text-only interface.
-% \autoref{sec:formal} formalizes the impossibility. \autoref{sec:escape} characterizes the
-% architectural escape and demonstrates the tensor interface.
-% \autoref{sec:related} discusses related work.

@@ -1,0 +1,25 @@
+condition,budget,accuracy,baseline
+No judge,0.1,52.0,original
+No judge,0.2,52.0,original
+No judge,0.3,52.0,original
+Text-guided (original),0.1,55.875,original
+Text-guided (original),0.2,60.75000000000001,original
+Text-guided (original),0.3,62.0,original
+Tensor-guided,0.1,61.0,original
+Tensor-guided,0.2,69.625,original
+Tensor-guided,0.3,76.375,original
+Composed,0.1,61.0,original
+Composed,0.2,69.625,original
+Composed,0.3,76.375,original
+No judge,0.1,52.0,fixed
+No judge,0.2,52.0,fixed
+No judge,0.3,52.0,fixed
+Text-guided (fixed),0.1,58.62500000000001,fixed
+Text-guided (fixed),0.2,64.25,fixed
+Text-guided (fixed),0.3,70.875,fixed
+Tensor-guided,0.1,61.0,fixed
+Tensor-guided,0.2,69.625,fixed
+Tensor-guided,0.3,76.375,fixed
+Composed,0.1,61.0,fixed
+Composed,0.2,69.625,fixed
+Composed,0.3,76.375,fixed

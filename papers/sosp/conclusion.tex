@@ -3,16 +3,17 @@
 %% ==========================================================================
 \section{Conclusion}\label{sec:conclusion}
 
-Anyone who has used a large language model for research knows the ritual: check
-every citation. This paper explains why the ritual exists and why it will not be
-engineered away under current architectures.
+Systems incorporating language model components must decide how much to spend
+on verification and where to spend it. This paper provides the cost surface
+for that decision.
 
 We have shown that epistemic honesty is unverifiable for systems operating under
 text-only observation models with bounded supervision. This is not a capability
 limitation to be solved with scale, nor a training failure to be solved with better
 RLHF. It is a structural property of the interface: the channel through which
 these systems communicate discards the epistemic metadata that would make
-verification possible.
+verification possible. This impossibility establishes the floor of the cost
+surface---below this line, text-channel investment cannot improve assurance.
 
 The impossibility has a shape. Policies conditioning only on queries cannot
 satisfy epistemic honesty across ambiguous world states (\autoref{thm:representational}). Even
@@ -25,25 +26,31 @@ with the system owner (\autoref{cor:responsibility}).
 But impossibility results are maps, not walls. The Fischer-Lynch-Paterson
 theorem did not end distributed systems; it clarified what assumptions had to
 change. Our result plays an analogous role. Systems that export structured
-epistemic state—provenance, entropy traces, attention topology—escape the
+epistemic state---provenance, entropy traces, attention topology---escape the
 impossibility class. The tensor interface demonstrates this escape is
 achievable with current architectures and minimal overhead.
 
-The tensor interface addresses verification at inference time. A complementary
-question is whether training-time interventions can produce systems that are
-constitutionally less capable of certain fabrications, such as systems where the
-modification class is bounded to exclude dishonest configurations before
-deployment. Recent work on pedagogical training suggests bounded modification
-during capability development may achieve what personality engineering cannot.
-The combination of training-time bounds and inference-time verification would
-provide defense in depth: systems less likely to fabricate and more easily
-caught when they do.
+The empirical cost surface is honest. Under bounded verification,
+tensor-guided judges at 10\% budget outperform text-guided judges at 30\%
+budget---a 3$\times$ reduction in verification cost. The text channel is
+stronger than expected (response length alone: AUC 0.88--0.96) but trivially
+gameable. The tensor residual (AUC 0.60--0.70) is modest but occupies a
+fundamentally different position in the adversarial landscape: computational
+signals cannot be independently controlled without adversarial optimization
+targeting the signal itself. Gaming the metric requires changing the thing
+being measured.
+
+The engineering question is not whether to verify, but how much verification
+to buy and at which tier. A brainstorming tool needs Tier~0. A medical system
+needs Tier~2. The cost surface tells you what each investment buys, and
+preliminary observations indicate that content format modulates the tradeoff.
 
 The work ahead is not exhorting models to try harder at honesty. It is
-building systems that make honesty verifiable by design. The tools exist:
-vector clocks, cryptographic signatures, content-addressable storage.
-The architectural patterns exist. What remains is applying them to the
-epistemic dimension with the same rigor we learned to apply to causality
-and integrity in distributed systems.
+building systems that make honesty verifiable by design, with verification
+budgets allocated according to the cost surface rather than spread uniformly
+across outputs. The tools exist: vector clocks, cryptographic signatures,
+content-addressable storage. The architectural patterns exist. What remains is
+applying them to the epistemic dimension with the same rigor we learned to
+apply to causality and integrity in distributed systems.
 
 The interface is the problem. The interface is where the solution lives.

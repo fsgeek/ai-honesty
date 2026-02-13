@@ -12,12 +12,12 @@
 A common assumption in current practice is that epistemic honesty is a
 capability problem: sufficiently capable models, trained with sufficient RLHF,
 will eventually ``know what they know'' and report it accurately. Scaling solved
-grammar; scaling solved coherence; scaling will solve hallucination. Lin et
+grammar; scaling solved coherence; scaling will solve fabrication. Lin et
 al.\ tested this assumption directly and found an inverse scaling trend: larger
 models were \emph{less} truthful on TruthfulQA~\cite{lin2022truthfulqa}. The
 theorems that follow explain why this expectation is architecturally
-incoherent. The
-constraint is not capability but interface. Text-only observation lacks the
+incoherent. The constraint is not capability but interface---or, in cost terms,
+the wrong investment tier. Text-only observation lacks the
 degrees of freedom to verify epistemic state, regardless of what the model
 internally represents. No amount of capability improvement can escape a
 verification impossibility because the model may know perfectly well that it is
@@ -338,6 +338,21 @@ with bounded supervision:
 
 These are not limitations to be overcome by better training or more careful
 prompting. They are structural properties of the architectural class.
+
+\fakepara{Relation to known results.}
+These results formalize what practitioners have observed informally: models
+fabricate, and text-only inspection cannot reliably catch it. The formalization
+matters because it delineates the boundary precisely. Xu et
+al.~\cite{xu2024hallucination} prove that hallucination is computationally
+inevitable for LLMs over the class of computable functions---a limit on what the
+model can \emph{produce}. Our result is orthogonal: a limit on what a supervisor
+can \emph{verify}. The RLHF literature documents that text-channel reward is
+gameable; we prove that gameability is architectural, not a training failure.
+The Fischer-Lynch-Paterson theorem~\cite{flp} showed that consensus is
+impossible without timing assumptions, not that distributed systems are hopeless.
+Similarly, our result does not argue against verification. It identifies the
+precise interface assumption that must change---and the next section constructs
+the escape.
 
 We provide two complementary TLA+ specifications that model these constraints
 and demonstrate the escape.

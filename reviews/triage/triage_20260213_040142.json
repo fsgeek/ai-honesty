@@ -1,0 +1,91 @@
+{
+  "run_id": "20260213_040142",
+  "created": "2026-02-13T04:45:00+00:00",
+  "note": "Post text-baseline fix. Numbers now consistent. Bootstrapped retroactively.",
+  "findings": [
+    {
+      "id": "f001",
+      "source_persona": "hostile_rejecter",
+      "claim": "Theorem is intuitively obvious, not novel",
+      "category": 2,
+      "action": "pending",
+      "persists_from": "20260212_184021",
+      "note": "3rd consecutive run. Options C+E recommended."
+    },
+    {
+      "id": "f002",
+      "source_persona": "hostile_rejecter",
+      "claim": "Missing RAG baselines",
+      "category": 3,
+      "action": "dismissed",
+      "persists_from": "20260212_184021",
+      "note": "Only from R#2. Paper already has RAG Escape subsection + related work + design discussion."
+    },
+    {
+      "id": "f003",
+      "source_persona": "hostile_rejecter",
+      "claim": "Missing adversarial experiment",
+      "category": 3,
+      "action": "deferred",
+      "persists_from": "20260212_184021",
+      "note": "Persistent across all runs. Already in Future Work. Paper-two."
+    },
+    {
+      "id": "f004",
+      "source_persona": "non_domain_expert",
+      "claim": "Undefined terms early in paper (epistemic honesty, testimony, telemetry)",
+      "category": 1,
+      "action": "fix_planned",
+      "persists_from": "20260212_184021",
+      "note": "Recurring. Add informal glosses in intro. Clean win for R#3."
+    },
+    {
+      "id": "f005",
+      "source_persona": "adversarial_scourer",
+      "claim": "Self-report inversion could be training-objective not architectural",
+      "category": 2,
+      "action": "pending",
+      "persists_from": null,
+      "note": "Interesting challenge. Paper frames as architectural. Could add qualifier."
+    },
+    {
+      "id": "f006",
+      "source_persona": "shepherd",
+      "claim": "Fabricated citation in related work suggestion",
+      "category": 3,
+      "action": "dismissed",
+      "persists_from": null,
+      "note": "Mistral Large at temp 1.59 hallucinated 'RARE: Randomized Reality for Database Provenance'. Ironic evidence for thesis."
+    }
+  ],
+  "edits_applied": [
+    {
+      "description": "Updated text-guided baseline numbers: 76.2/80.2/80.4 -> 76.1/76.9/78.5",
+      "files_changed": ["eval.tex", "abstract.tex", "intro.tex", "design.tex"],
+      "motivated_by": "run3:f003"
+    },
+    {
+      "description": "Removed self-report from text-guided judge description",
+      "files_changed": ["eval.tex"],
+      "motivated_by": "run3:f003"
+    },
+    {
+      "description": "Regenerated budget curve figure with fixed data",
+      "files_changed": ["figures/exp27_aggregate_budget_curve.pdf"],
+      "motivated_by": "run3:f003"
+    },
+    {
+      "description": "Added missing sec:discussion label",
+      "files_changed": ["discussion.tex"],
+      "motivated_by": "build_warning"
+    }
+  ],
+  "resolved_from_prev": [
+    {
+      "finding_id": "text_baseline_self_report",
+      "from_run": "20260212_185518",
+      "resolution": "Re-evaluated without self-report. Numbers updated throughout paper. Figure regenerated."
+    }
+  ],
+  "last_modified": "2026-02-13T04:45:00+00:00"
+}

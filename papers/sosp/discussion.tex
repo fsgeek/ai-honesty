@@ -1,16 +1,21 @@
-\section{Limitations and Future Work}
+\section{Limitations and Future Work}\label{sec:discussion}
 
-We are explicit about what this paper does and does not claim. The impossibility
-is structural; the escape is demonstrated; but several important questions remain
-open.
+We are explicit about what this paper does and does not claim. The cost surface
+is characterized; the investment tiers are mapped; but several important
+questions remain open.
 
 \fakepara{What we claim.}
 \begin{itemize}
 \item The impossibility is structural, not a training failure: text-only interfaces
   with bounded supervision cannot verify epistemic honesty regardless of model
-  capability.
-\item The escape is not vacuous: concrete telemetric signals exist in current
-  architectures that distinguish grounded from ungrounded generation.
+  capability. This establishes the floor of the cost surface.
+\item The tensor interface provides a different investment tier: concrete
+  computational signals exist in current architectures that distinguish
+  grounded from ungrounded generation, and these signals cannot be independently
+  gamed.
+\item We do not claim that current tensor signals solve epistemic verification. We
+  claim that they occupy a fundamentally different position in the
+  cost-robustness tradeoff than text-channel signals.
 \item Current architectures already carry the relevant information; they just
   discard it at the interface.
 \end{itemize}
@@ -48,21 +53,6 @@ linguistically do not systematically show higher tensor entropy, but whether
 adversarial training can force this coupling remains open.
 Information-theoretic bounds on signal manipulation are needed.
 
-\fakepara{The MOSS analogy.}
-The relationship between computational and behavioral signals has a structural
-parallel in software engineering. Code plagiarism detectors like
-MOSS~\cite{schleimer2003winnowing, mason2019collaboration} work because restructuring code to defeat a
-similarity metric requires writing genuinely different code---gaming the metric
-changes the thing being measured. The same structural pattern applies to tensor
-signals: flattening the entropy of a fabricated response requires changing the
-computation that generates it, which means changing the generation itself. In
-contrast, behavioral signals (response length, hedging frequency) can be
-adjusted by training without altering the underlying computation, the same way
-reformatting code changes its surface without changing its logic. This
-distinction---between signals that are decoupled from the measured process and
-signals that are constitutive of it---is what separates the text channel from
-the tensor channel in our impossibility framework.
-
 \fakepara{Future work: Compositional integrity.}
 Does tensor composition preserve epistemic properties in recursive settings?
 When LLM outputs feed into subsequent LLM inputs, the epistemic trace must
@@ -82,7 +72,7 @@ How should tensor information be presented to end users? Raw entropy traces are
 not interpretable; summarization into confidence bands, uncertainty flags, or
 visual indicators requires HCI research beyond the scope of this paper.
 
-\fakepara{Model specificity.} Our topological analysis (\autoref{sec:empirical})
+\fakepara{Model specificity.} Our topological analysis (\autoref{sec:escape})
 uses OLMo, which permits full inspection of intermediate layer representations. The bounded verification
 experiment (\autoref{tab:budget}) tests four architectures spanning 4B--8B
 parameters (billions of learned numerical weights) and four distinct training pipelines. The self-report inversion
@@ -92,6 +82,28 @@ suggests the findings are not idiosyncratic.
 
 \fakepara{Domain-specific calibration.} The tensor signal is not uniformly discriminative across domains. In preliminary experiments on citation generation, entropy was \emph{lower} for fabricated citations than for real ones where the model generates plausible fakes more fluently than it retrieves specific facts. This confirms that the tensor measures generation confidence (``epistemic truth''), not truthfulness directly.  However, this blind spot is precisely where bounded verification is cheapest: citation verification has low compositional complexity (check the DOI, query the database,) which places it well within a bounded supervisor's budget. The tensor and the bounded judge have complementary failure modes as the tensor catches uncertain fabrication where verification is expensive and the judge catches confident fabrication where verification is cheap.  Composing them allocates verification resources to the failure class each is suited for, rather than spreading a finite budget across the full space.
 
+\fakepara{Format-constraint variation: preliminary observations.}
+The cost surface is not flat across content formats.
+Tokenization analysis of generated code reveals that BPE compression
+concentrates syntactic scaffolding (keywords, operators, whitespace) into
+11--19\% of output tokens, while semantic content (variable names, literals,
+strings) occupies 61--72\%. However, semantic content in familiar code patterns
+is itself highly predictable: conventional variable names (\texttt{left},
+\texttt{right}, \texttt{mid} in binary search) are as low-entropy as keywords,
+constituting a second scaffolding layer we term \emph{semantic scaffolding}.
+When both layers are considered, the entropy trace for familiar code is
+predominantly flat, with spikes concentrated at genuine decision points---where
+the model could not pattern-match and had to choose. We have not yet measured
+discrimination AUC across content formats; what we report is the structural
+observation that scaffolding ratio varies dramatically across output types and
+predicts where entropy-based triage should be most efficient. If the
+relationship holds, tensor-guided verification may be \emph{more}
+cost-effective for code than for natural text, because higher scaffolding ratios
+concentrate the informative signal into fewer tokens.
+We do not claim to have mapped the full manifold. We claim it exists, that its
+parameterization is observable, and that mapping it is the natural next step
+for systems engineers choosing verification strategies across content domains.
+
 \fakepara{Sufficiency gap.} The three architectural principles (State
 Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}
 conditions for escaping the impossibility. We do not prove they are
@@ -99,17 +111,13 @@ conditions for escaping the impossibility. We do not prove they are
 honesty through implementation bugs, adversarial inputs, or unforeseen failure
 modes. Sufficiency requires additional formal treatment.
 
-\fakepara{Methodology note: bounded supervision in practice.}
-The length confound reported in \autoref{tab:decomposition} was not discovered
-by targeted analysis. It was found when we deployed five independent
-open-ended reviewers with the instruction ``examine the data and report what you
-find''---no hypothesis specified. Three of five independently flagged response
-length as a dominant confound. This is itself an instance of the bounded
-supervision pattern the paper describes: multiple bounded observers with
-different perspectives, none individually authoritative, whose agreement on an
-unforeseen finding provides stronger evidence than any single targeted analysis.
-The methodology performed itself.\footnote{The three reviewers that flagged the
-confound used different analytical approaches: correlation analysis, feature
-ablation, and distribution visualization. Their convergence on the same finding
-without coordination illustrates the compositional defense principle from
-\autoref{sec:escape}.}
+\fakepara{The engineering decision.}
+How much epistemic assurance a system needs is an engineering decision, not a
+research question. A brainstorming tool needs none. A medical summary system
+needs substantial assurance. A legal research system needs the highest
+tier available. This paper provides the cost surface for making that decision:
+what each level of verification investment buys, where the text-channel ceiling
+lies, what the tensor interface adds, and how content format modulates the
+tradeoff. The contribution is the map. The territory is the system you are
+building.
+

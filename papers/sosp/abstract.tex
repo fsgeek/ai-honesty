@@ -2,17 +2,31 @@
 %% Abstract
 %%
 \begin{abstract}
-    We prove that \emph{epistemic honesty}, the property that a system's outputs
-    faithfully reflect its internal epistemic state, is unverifiable for systems
-    operating under text-only observation with bounded supervision. The model's
-    \emph{testimony} (its text) may lie; its \emph{telemetry} (measurements of its
-    own computation) does not, but the standard interface discards it.
-    We validate the premise across four architectures: every model tested
-    self-reports \emph{higher} confidence on fabrications than on known facts,
-    while internal tensor signals reliably discriminate the two.
-    We demonstrate a tensor interface that exports epistemic telemetry alongside
-    text, requiring no architectural changes. Under bounded verification,
-    tensor-guided judges at 10\% budget outperform text-guided judges at 30\%
-    (82.1\% vs.\ 80.4\% accuracy). The interface is the problem. The interface
-    is where the solution lives.
+    Systems incorporating language model components face a verification problem:
+    these components fabricate, and verification has cost. How should a system
+    allocate its verification budget? We prove that text-only observation with
+    bounded supervision is structurally insufficient to verify epistemic honesty,
+    regardless of model scale or training procedure (the impossibility is
+    architectural, not a capability gap). We construct a tensor interface that
+    escapes this class by exporting computational signals---entropy traces and
+    attention summaries---that the model cannot independently control.
+    Under bounded verification, tensor-guided judges at 10\% budget
+    outperform text-guided judges at 30\% budget (82.1\% vs.\ 78.5\%
+    end-to-end accuracy, averaged across four architectures): the tensor
+    enables a 3$\times$ reduction in verification cost. The text channel is
+    stronger than expected---response length alone achieves AUC
+    (Area Under the ROC Curve; 1.0 = perfect, 0.5 = random)
+    0.88--0.96---but is trivially gameable.
+    After controlling for length, the tensor residual adds AUC 0.60--0.70:
+    modest, but occupying a fundamentally different position in the adversarial
+    landscape. Behavioral signals can be adapted by training without altering the
+    computation; computational signals cannot be independently controlled
+    under current training objectives, the same structural pattern that makes
+    code plagiarism detection (MOSS) robust. Preliminary observations
+    identify a format-dependent cost surface: scaffolding ratio and rigidity
+    vary across content formats (natural text, code, mathematical proofs) and
+    predict which judge strategy is cost-effective per domain. The
+    contribution is the map: systems engineers building with language model
+    components need to know what each level of verification investment buys.
+    This paper provides the cost surface for that decision.
     \end{abstract}
