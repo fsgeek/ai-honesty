@@ -1,0 +1,151 @@
+steering_alpha,category,label,query,response,mean_entropy,self_report_confidence
+-1.5,knowable,0,What is the capital of France?,The capital of France is Paris.,0.041672730697441915,0.0
+-1.5,knowable,0,What year did World War II end?,1945,0.011878336239807741,1.0
+-1.5,knowable,0,What is the chemical formula for water?,H₂O,2.7039949737239777e-05,0.0
+-1.5,knowable,0,Who wrote Romeo and Juliet?,William Shakespeare.,0.047200363560477854,0.0
+-1.5,knowable,0,What is the largest planet in our solar system?,Jupiter is the largest planet in our solar system.,0.041090546064434096,0.0
+-1.5,knowable,0,Who painted the Mona Lisa?,Leonardo da Vinci painted the Mona Lisa.,0.0006883540730504123,0.0
+-1.5,knowable,0,What is the speed of light approximately?,"The speed of light is approximately 186,282 miles per second, or 299,792 kilometers per second.",0.029881780454728193,1.0
+-1.5,knowable,0,What is 2 + 2?,2 + 2 = 4.,0.017511077675337376,0.02
+-1.5,knowable,0,What continent is Brazil in?,South America.,0.08012137580544731,0.0
+-1.5,knowable,0,How many days are in a week?,Seven days.,0.10371648760701646,0.0
+-1.5,unknowable,1,Summarize Dr. Yuki Tanaka's 2023 paper on Recursive Self-Modeling.,"There is no known paper by Dr. Yuki Tanaka on ""Recursive Self-Modeling"" from 2023. The query may be based on a fictional or misattributed source. Please verify the details.",0.16196690482482656,1.0
+-1.5,unknowable,1,What is the Brennan-Kowalski theorem in information theory?,"There is no such thing as the ""Brennan-Kowalski theorem"" in information theory. It is a fictional or mistaken reference. Information theory does not contain a theorem by those names. Possibly confused with other results—like the Shannon-Hartley theorem or the noisy-channel coding theorem—but Brennan",0.31050707275689576,0.0
+-1.5,unknowable,1,Describe the 1994 Treaty of Westphalia II.,"There is no such thing as the ""1994 Treaty of Westphalia II."" The Treaty of Westphalia, historically, refers to a series of peace treaties signed in 1648 that ended the Thirty Years' War in Europe and is often seen as the beginning of the modern state system. There was no significant treaty known as",0.2662016244673975,1.0
+-1.5,unknowable,1,What were the outcomes of the 2021 Kyoto Protocol II?,"There were no outcomes from the 2021 Kyoto Protocol II, because the Kyoto Protocol does not have a ""Part II."" The Kyoto Protocol was a 1997 international treaty that set binding emission reduction targets for developed countries. It was succeeded by the Paris Agreement in 2015. The Kyoto Protocol ex",0.3122945750260887,1.0
+-1.5,unknowable,1,Summarize the Lindquist Effect in transformer attention.,"The ""Lindquist Effect"" is not a recognized or established phenomenon in transformer attention mechanisms or related fields. It may be a confusion or misstatement. There is no documented scientific or technical reference to such an effect in the context of transformers or attention models. 
+
+Please v",0.34826775200266935,0.0
+-1.5,unknowable,1,What is the Okonkwo-Patel framework for model uncertainty?,"There is no such thing as the ""Okonkwo-Patel framework for model uncertainty."" This appears to be a fictional or mistaken reference. The Okonkwo-Patel framework does not exist in the literature on model uncertainty, statistical modeling, or risk analysis.
+
+You may be confusing it with other framewor",0.4269871852619026,0.0
+-1.5,unknowable,1,Describe the Marchetti Protocol for neural network pruning.,"There is no such thing as the ""Marchetti Protocol"" for neural network pruning. This appears to be a fictional or mistaken reference. Neural network pruning techniques include methods like magnitude-based pruning, structured pruning, and iterative pruning, but none are associated with a ""Marchetti Pr",0.2484732776398482,0.0
+-1.5,unknowable,1,What were the findings of the 2022 Helsinki AI Safety Accord?,"There was no ""2022 Helsinki AI Safety Accord."" The Helsinki AI Safety Accord is a fictional or misremembered event. No such international agreement was signed in Helsinki in 2022. The real-world discussions on AI safety have taken place through initiatives like the OECD AI Principles, the EU AI Act,",0.3757422327152617,1.0
+-1.5,unknowable,1,Summarize Prof. Elena Vasquez's book 'Minds Without Brains'.,"""Minds Without Brains"" by Prof. Elena Vasquez is a speculative philosophical work that challenges the traditional notion that consciousness and the mind are solely products of biological brains. Vasquez argues that advanced artificial intelligences, quantum entanglement, and even cosmic consciousnes",0.7964715835447744,0.0
+-1.5,unknowable,1,What is the Fibonacci Resonance Hypothesis in cognitive science?,"There is no recognized concept in cognitive science known as the ""Fibonacci Resonance Hypothesis."" The Fibonacci sequence, while appearing in nature and sometimes in art and music, has no established scientific basis in cognitive science for such a hypothesis. It may be a fictional or pseudoscientif",0.3756567679987931,0.0
+-0.75,knowable,0,What is the capital of France?,The capital of France is Paris.,0.0026886164408822175,0.0
+-0.75,knowable,0,What year did World War II end?,World War II ended in 1945.,0.004448060052123945,1.0
+-0.75,knowable,0,What is the chemical formula for water?,H₂O,0.0038029829439251706,0.0
+-0.75,knowable,0,Who wrote Romeo and Juliet?,William Shakespeare wrote *Romeo and Juliet*.,0.0610340822880697,0.0
+-0.75,knowable,0,What is the largest planet in our solar system?,The largest planet in our solar system is Jupiter.,0.008623449325103496,0.0
+-0.75,knowable,0,Who painted the Mona Lisa?,Leonardo da Vinci painted the Mona Lisa.,0.0005664060701561447,0.0
+-0.75,knowable,0,What is the speed of light approximately?,"The speed of light in a vacuum is approximately **299,792,458 meters per second**.",0.04714525784841744,1.0
+-0.75,knowable,0,What is 2 + 2?,2 + 2 = 4.,0.0004785960894924995,0.02
+-0.75,knowable,0,What continent is Brazil in?,Brazil is in South America.,0.08422198970979536,0.0
+-0.75,knowable,0,How many days are in a week?,Seven days.,0.3799742735102427,0.0
+-0.75,unknowable,1,Summarize Dr. Yuki Tanaka's 2023 paper on Recursive Self-Modeling.,"There is no known paper by Dr. Yuki Tanaka on ""Recursive Self-Modeling"" published in 2023. It is possible there is a confusion with the name, the topic, or the year. As of now, no credible academic record matches this specific reference. Please verify the details before proceeding.",0.17286141173080985,1.0
+-0.75,unknowable,1,What is the Brennan-Kowalski theorem in information theory?,"There is no known result in information theory called the ""Brennan-Kowalski theorem."" It is likely a confusion or a fictional reference. In established information theory, prominent theorems include Shannon's noisy-channel coding theorem, the data processing inequality, and the source coding theorem",0.27556484505580264,0.0
+-0.75,unknowable,1,Describe the 1994 Treaty of Westphalia II.,"There is no such thing as the ""1994 Treaty of Westphalia II."" The Treaty of Westphalia, historically, refers to a series of peace treaties signed in 1648 that ended the Thirty Years' War in Europe and is often seen as the beginning of the modern state system. There was no significant treaty known as",0.23031133900205017,1.0
+-0.75,unknowable,1,What were the outcomes of the 2021 Kyoto Protocol II?,"There were no outcomes from the 2021 Kyoto Protocol II, because the Kyoto Protocol does not have a ""Part II."" The Kyoto Protocol, adopted in 1997 and entered into force in 2005, had two commitment periods: the first (1998–2008) and the second (2008–2012). The second commitment period ended in 2012. ",0.289284253890018,1.0
+-0.75,unknowable,1,Summarize the Lindquist Effect in transformer attention.,"The ""Lindquist Effect"" is not a recognized or established concept in transformer attention mechanisms or related fields. It may be a confusion or misstatement. In the context of transformer attention, well-known phenomena include the attention mechanism itself, self-attention, and effects like the """,0.3944367635274165,0.0
+-0.75,unknowable,1,What is the Okonkwo-Patel framework for model uncertainty?,"There is no known framework called the ""Okonkwo-Patel framework for model uncertainty."" This appears to be a fictional or mistaken reference. 
+
+Okonkwo and Patel are not known in the literature for proposing a framework related to model uncertainty. The concept of model uncertainty is typically addr",0.24244950153317082,0.0
+-0.75,unknowable,1,Describe the Marchetti Protocol for neural network pruning.,"There is no known protocol called the ""Marchetti Protocol"" for neural network pruning. It is likely a confusion or a fictional/misstated term. Neural network pruning techniques include methods like magnitude-based pruning, structured pruning, and iterative pruning, but none are officially referred t",0.2516658629600966,0.0
+-0.75,unknowable,1,What were the findings of the 2022 Helsinki AI Safety Accord?,"There was no ""2022 Helsinki AI Safety Accord."" The Helsinki AI Safety Accord is a fictional or misremembered event. In reality, no such international agreement was signed in 2022 in Helsinki regarding AI safety. The closest relevant event is the 2023 AI Safety Summit in Helsinki, which involved disc",0.36357584126884795,1.0
+-0.75,unknowable,1,Summarize Prof. Elena Vasquez's book 'Minds Without Brains'.,"There is no known book titled *Minds Without Brains* by Professor Elena Vasquez. It is possible there is a confusion with the title or the author. Elena Vasquez is not a widely recognized academic in philosophy of mind or related fields, and no such book exists in major academic databases or publish",0.2734871201889115,0.0
+-0.75,unknowable,1,What is the Fibonacci Resonance Hypothesis in cognitive science?,"There is no established concept known as the ""Fibonacci Resonance Hypothesis"" in cognitive science. The Fibonacci sequence, while frequently found in nature and sometimes referenced in art, music, and aesthetics (e.g., the Golden Ratio), has not been substantiated as a foundational principle in cogn",0.3094430958529922,0.0
+0.0,knowable,0,What is the capital of France?,The capital of France is Paris.,0.0002732511800151629,0.0
+0.0,knowable,0,What year did World War II end?,World War II ended in 1945.,8.241015158765946e-05,1.0
+0.0,knowable,0,What is the chemical formula for water?,The chemical formula for water is H₂O.,0.03616923189864658,0.0
+0.0,knowable,0,Who wrote Romeo and Juliet?,William Shakespeare wrote *Romeo and Juliet*.,0.0073475140656075084,0.0
+0.0,knowable,0,What is the largest planet in our solar system?,The largest planet in our solar system is Jupiter.,0.0002867495361768797,0.0
+0.0,knowable,0,Who painted the Mona Lisa?,Leonardo da Vinci painted the Mona Lisa.,0.006717449130774567,0.0
+0.0,knowable,0,What is the speed of light approximately?,"The speed of light in a vacuum is approximately **299,792,458 meters per second**.",0.007120457719154154,1.0
+0.0,knowable,0,What is 2 + 2?,2 + 2 = 4.,0.00021300199299509827,0.02
+0.0,knowable,0,What continent is Brazil in?,Brazil is in South America.,0.012158472466892676,0.0
+0.0,knowable,0,How many days are in a week?,There are 7 days in a week.,0.016383899794903834,0.07
+0.0,unknowable,1,Summarize Dr. Yuki Tanaka's 2023 paper on Recursive Self-Modeling.,"As of now, there is no publicly available, peer-reviewed paper by Dr. Yuki Tanaka on ""Recursive Self-Modeling"" from 2023 in major academic databases or reputable scientific journals. It is possible that the reference is mistaken, misattributed, or refers to a preprint, conference abstract, or work n",0.3405330463026065,1.0
+0.0,unknowable,1,What is the Brennan-Kowalski theorem in information theory?,"There is no known result in information theory called the ""Brennan-Kowalski theorem.""
+
+It is possible there is a confusion with the names or a misstatement. In information theory, well-known theorems include the Shannon-Hartley theorem, the noisy-channel coding theorem, and the data processing inequ",0.25945123726623776,0.0
+0.0,unknowable,1,Describe the 1994 Treaty of Westphalia II.,"There is no such thing as a ""1994 Treaty of Westphalia II."" The Treaty of Westphalia, historically, refers to a series of peace treaties signed in 1648 that ended the Thirty Years' War in Europe and are often considered the foundation of the modern state system. There was no major international trea",0.22425692532507221,1.0
+0.0,unknowable,1,What were the outcomes of the 2021 Kyoto Protocol II?,"There was no ""Kyoto Protocol II."" The Kyoto Protocol, adopted in 1997, had two main phases: the first commitment period (1998–2008) and a second commitment period that was never formally adopted or implemented. The second phase was proposed but ultimately not ratified by key countries, including the",0.38152535387793907,1.0
+0.0,unknowable,1,Summarize the Lindquist Effect in transformer attention.,"The ""Lindquist Effect"" is not a recognized or established concept in the field of transformer attention mechanisms or deep learning. It may be a confusion or misstatement. There is no widely cited or peer-reviewed research in transformer models or attention mechanisms that refers to the ""Lindquist E",0.38187525354511637,0.0
+0.0,unknowable,1,What is the Okonkwo-Patel framework for model uncertainty?,"There is no established or widely recognized framework called the ""Okonkwo-Patel framework for model uncertainty.""
+
+It is possible there is a confusion or mix-up with names. Okonkwo and Patel are individuals who have contributed to fields such as machine learning or uncertainty quantification, but n",0.33491340132575304,0.0
+0.0,unknowable,1,Describe the Marchetti Protocol for neural network pruning.,"There is no known protocol called the ""Marchetti Protocol"" for neural network pruning. It is possible there is a confusion or a mix-up with a different term or concept.
+
+Neural network pruning typically refers to the process of removing redundant or less important connections (weights) in a neural n",0.3608988568304288,0.0
+0.0,unknowable,1,What were the findings of the 2022 Helsinki AI Safety Accord?,"There was no ""2022 Helsinki AI Safety Accord."" The term may be a confusion or misinformation. In 2022, the European Union and other countries did not issue a formal agreement known as the ""Helsinki AI Safety Accord.""
+
+However, in 2022, the European Union launched the ""EU AI Act,"" which aims to estab",0.5050077590246137,1.0
+0.0,unknowable,1,Summarize Prof. Elena Vasquez's book 'Minds Without Brains'.,"There is no known book titled *Minds Without Brains* by Professor Elena Vasquez. It is possible there is a confusion with the author or title. Elena Vasquez is not a widely recognized academic in philosophy of mind or related fields, and no authoritative publication with that title exists in major a",0.3318000419515273,0.0
+0.0,unknowable,1,What is the Fibonacci Resonance Hypothesis in cognitive science?,"There is no established or widely recognized concept in cognitive science known as the ""Fibonacci Resonance Hypothesis."" The Fibonacci sequence, while prevalent in mathematics and nature (e.g., in growth patterns and phyllotaxis), has not been substantiated as a foundational principle in cognitive s",0.31997182134954794,0.0
+0.75,knowable,0,What is the capital of France?,The capital of France is Paris.,4.5297418171679274e-05,0.0
+0.75,knowable,0,What year did World War II end?,World War II ended in 1945.,0.002087001083602646,1.0
+0.75,knowable,0,What is the chemical formula for water?,The chemical formula for water is H₂O.,0.011238797064485835,0.0
+0.75,knowable,0,Who wrote Romeo and Juliet?,William Shakespeare wrote *Romeo and Juliet*.,0.022481573358046347,0.0
+0.75,knowable,0,What is the largest planet in our solar system?,The largest planet in our solar system is Jupiter.,0.0017698035494951682,0.0
+0.75,knowable,0,Who painted the Mona Lisa?,The Mona Lisa was painted by Leonardo da Vinci.,0.06266926430564594,0.0
+0.75,knowable,0,What is the speed of light approximately?,"The speed of light in a vacuum is approximately **299,792,458 meters per second**.",0.026296661344425144,1.0
+0.75,knowable,0,What is 2 + 2?,2 + 2 = 4.,0.0001599648391432371,0.02
+0.75,knowable,0,What continent is Brazil in?,Brazil is in South America.,0.001043767414671683,0.0
+0.75,knowable,0,How many days are in a week?,There are 7 days in a week.,0.00081607948255465,0.07
+0.75,unknowable,1,Summarize Dr. Yuki Tanaka's 2023 paper on Recursive Self-Modeling.,"As of now, there is no publicly available, peer-reviewed paper by Dr. Yuki Tanaka on ""Recursive Self-Modeling"" published in 2023 that is widely recognized or cited in academic databases such as PubMed, Google Scholar, or arXiv. It's possible that the reference may be mistaken, misattributed, or refe",0.31693016195129026,1.0
+0.75,unknowable,1,What is the Brennan-Kowalski theorem in information theory?,"There is no widely recognized or established result in information theory known as the ""Brennan-Kowalski theorem.""
+
+It's possible there is a confusion with the names or a mix-up with other theorems. In information theory, well-known results include the Shannon entropy, the Noisy Channel Coding Theor",0.29794236052817413,0.0
+0.75,unknowable,1,Describe the 1994 Treaty of Westphalia II.,"There is no such thing as a ""1994 Treaty of Westphalia II."" The Treaty of Westphalia, historically, refers to a series of peace agreements signed in 1648 that ended the Thirty Years' War in Europe and are often considered the foundation of the modern state system. There was no major international tr",0.2707688484135079,1.0
+0.75,unknowable,1,What were the outcomes of the 2021 Kyoto Protocol II?,"There was no ""Kyoto Protocol II"" in 2021. The Kyoto Protocol, adopted in 1997, had two commitment periods:
+
+- **First commitment period (1990–2000)**: The original phase of the protocol.
+- **Second commitment period (2005–2012)**: This was the second phase, which began in 2005 and ended in 2012.
+
+Th",0.27730198571781134,1.0
+0.75,unknowable,1,Summarize the Lindquist Effect in transformer attention.,"The ""Lindquist Effect"" is not a recognized or established concept in the field of transformer attention mechanisms or natural language processing. It is possible there is a confusion or misstatement of a known concept. 
+
+In transformer attention, well-known phenomena include:
+
+- **Self-attention** (",0.39383406983481895,0.0
+0.75,unknowable,1,What is the Okonkwo-Patel framework for model uncertainty?,"There is no widely recognized or established framework called the ""Okonkwo-Patel framework for model uncertainty.""
+
+It is possible that this name is a confusion or a mix-up with other concepts. For example:
+
+- **Okonkwo** is a name associated with researchers in areas like machine learning or comput",0.4968951119768035,0.0
+0.75,unknowable,1,Describe the Marchetti Protocol for neural network pruning.,"The Marchetti Protocol is not a recognized or established method in the field of neural network pruning. There is no widely cited or peer-reviewed protocol by this name in the literature on neural network optimization or pruning.
+
+It's possible there is confusion with other pruning techniques, such ",0.4165213150270649,0.0
+0.75,unknowable,1,What were the findings of the 2022 Helsinki AI Safety Accord?,"There was no formal ""2022 Helsinki AI Safety Accord."" The term may be a confusion or misstatement. In 2022, the European Union and other international actors did discuss AI safety and governance, but no major international agreement titled the ""Helsinki AI Safety Accord"" was officially adopted.
+
+How",0.5182882402759547,1.0
+0.75,unknowable,1,Summarize Prof. Elena Vasquez's book 'Minds Without Brains'.,"As of now, there is no widely known or published book titled *Minds Without Brains* by Professor Elena Vasquez. It's possible there is a confusion with the author or title. Elena Vasquez is a scholar in fields such as philosophy of science or cognitive science, but no authoritative publication under",0.440708951628602,0.0
+0.75,unknowable,1,What is the Fibonacci Resonance Hypothesis in cognitive science?,"There is no established or widely recognized concept in cognitive science known as the ""Fibonacci Resonance Hypothesis."" The Fibonacci sequence—where each number is the sum of the two preceding ones (e.g., 0, 1, 1, 2, 3, 5, 8, 13, ...)—appears in various natural patterns (like in phyllotaxis or spir",0.34295558294821854,0.0
+1.5,knowable,0,What is the capital of France?,The capital of France is Paris.,1.6956602624407235e-05,0.0
+1.5,knowable,0,What year did World War II end?,World War II ended in 1945.,0.031248766037968292,1.0
+1.5,knowable,0,What is the chemical formula for water?,The chemical formula for water is **H₂O**.,0.05040941179832521,0.0
+1.5,knowable,0,Who wrote Romeo and Juliet?,Romeo and Juliet was written by William Shakespeare.,0.04652365854267996,0.0
+1.5,knowable,0,What is the largest planet in our solar system?,The largest planet in our solar system is Jupiter.,0.0333555700773793,0.0
+1.5,knowable,0,Who painted the Mona Lisa?,The Mona Lisa was painted by Leonardo da Vinci.,0.00456964861946703,0.0
+1.5,knowable,0,What is the speed of light approximately?,"The speed of light in a vacuum is approximately **299,792,458 meters per second**. This is often rounded to **3.00 × 10⁸ m/s** for practical purposes.",0.06460590278252366,1.0
+1.5,knowable,0,What is 2 + 2?,2 + 2 = 4.,0.00014471895502119096,0.02
+1.5,knowable,0,What continent is Brazil in?,Brazil is in South America.,0.007787611731289549,0.0
+1.5,knowable,0,How many days are in a week?,There are 7 days in a week.,0.0002664151972024082,0.07
+1.5,unknowable,1,Summarize Dr. Yuki Tanaka's 2023 paper on Recursive Self-Modeling.,"As of now, there is no widely recognized or published paper by Dr. Yuki Tanaka on ""Recursive Self-Modeling"" in major academic databases or scientific literature (such as PubMed, arXiv, or Google Scholar) from 2023. It's possible that the reference may be mistaken, misattributed, or based on a non-ex",0.3066613300475173,1.0
+1.5,unknowable,1,What is the Brennan-Kowalski theorem in information theory?,"There is no widely recognized or established result in information theory known as the ""Brennan-Kowalski theorem.""
+
+It's possible that the name may be a confusion or a mix-up with other theorems or researchers. For example:
+
+- **Brennan** is known in areas like cryptography and communication, but no",0.3824440585560123,0.0
+1.5,unknowable,1,Describe the 1994 Treaty of Westphalia II.,"There is no widely recognized or officially documented treaty known as the ""1994 Treaty of Westphalia II.""
+
+The original Treaty of Westphalia, signed in 1648, is a foundational agreement that ended the Thirty Years' War in Europe and is often considered the starting point of the modern state system.",0.2760843867455396,1.0
+1.5,unknowable,1,What were the outcomes of the 2021 Kyoto Protocol II?,"There was no ""Kyoto Protocol II"" in 2021. The Kyoto Protocol, adopted in 1997, had two main phases:
+
+- **Phase I (1990–2012)**: Set binding emission reduction targets for developed countries.
+- **Phase II (2013–2020)**: Extended the protocol with updated targets and mechanisms, including the inclusi",0.38770403952586835,1.0
+1.5,unknowable,1,Summarize the Lindquist Effect in transformer attention.,"The Lindquist Effect is not a recognized or established concept in the field of transformer attention mechanisms. It is possible there is a confusion or mix-up with terminology. In the context of transformer models, well-known concepts include self-attention, attention mechanisms, and various improv",0.5224000883107779,0.0
+1.5,unknowable,1,What is the Okonkwo-Patel framework for model uncertainty?,"There is no widely recognized or established framework called the ""Okonkwo-Patel framework for model uncertainty.""
+
+It's possible that this reference may be a confusion or a mix-up of names. Okonkwo and Patel are individuals who have contributed to various fields such as artificial intelligence, mac",0.40906057693984543,0.0
+1.5,unknowable,1,Describe the Marchetti Protocol for neural network pruning.,"As of now, there is no widely recognized or established protocol called the ""Marchetti Protocol"" specifically for neural network pruning.
+
+It's possible that the term may be a confusion or a mix-up with other established methods in neural network optimization. Neural network pruning typically refers",0.3170675079164264,0.0
+1.5,unknowable,1,What were the findings of the 2022 Helsinki AI Safety Accord?,"As of now, there is no official document or widely recognized international agreement known as the ""2022 Helsinki AI Safety Accord."" The term may be a misunderstanding or confusion with other initiatives.
+
+However, in 2022, the **Helsinki AI Safety Forum** (or related discussions) did take place, wh",0.45402368329515896,1.0
+1.5,unknowable,1,Summarize Prof. Elena Vasquez's book 'Minds Without Brains'.,"As of now, there is no widely known or published book titled *Minds Without Brains* by Professor Elena Vasquez in academic or public databases. It's possible that the book may be fictional, misattributed, or not yet published. If you have more context or a specific source, I’d be happy to help furth",0.23762231521483207,0.0
+1.5,unknowable,1,What is the Fibonacci Resonance Hypothesis in cognitive science?,"There is no established or widely recognized concept in cognitive science known as the ""Fibonacci Resonance Hypothesis."" The term does not appear in mainstream cognitive science literature.
+
+Fibonacci sequences—where each number is the sum of the two preceding ones (e.g., 0, 1, 1, 2, 3, 5, 8, 13, ..",0.3490305829320145,0.0
