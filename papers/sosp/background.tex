@@ -7,6 +7,22 @@ A language model maps input tokens to output tokens, producing
 internal signals (entropy, attention patterns, log\-probabilities)
 as computational byproducts. The training corpus contains both
 truth-tracking institutional text and misinformation.
+This results in four canonical hallucination types, shown in \autoref{tab:verif_space}.
+
+\begin{table}[t]
+\begin{tabular}{@{}lp{0.64\columnwidth}@{}}
+\toprule
+\textbf{Type} & \textbf{Description} \\
+\midrule
+Adversarial Truth & True but implausible (``combat wombat is an Australian military mascot'') \\
+Shattered Lie & No training-data grounding (``Treaty of Westphalia~II'') \\
+Deceived Lie & Pattern-matches plausible language (``Glavinsky syndrome'') \\
+Confused Truth & Counterintuitive fact (``more camels in Australia than Egypt'') \\
+\bottomrule
+\end{tabular}
+\caption{Hallucination Types that span the verification space.}
+\label{tab:verif_space}
+\end{table}
 
 A language model trained on this corpus inherits these mixed regularities.
 Base models (pre-fine-tuning)
@@ -17,6 +33,8 @@ The base model's relationship to truth is complex: neither reliably honest nor
 uniformly deceptive. The question for systems engineers is not whether the
 model is honest, but what it costs to verify when it is not.
 
+\subsection{Testimony \& Telemetry}
+
 \fakepara{Architecture primer.}
 A transformer-based language model generates text one \emph{token} (subword
 unit) at a time, autoregressively: at each step it produces a probability
@@ -25,9 +43,7 @@ on all prior output. Each step passes through a stack of layers producing
 \emph{attention patterns} (weighted relevance scores between positions) and
 intermediate representations. The \emph{entropy} of the output distribution,
 the attention patterns, and the \emph{log-probabilities} of selected tokens are
-byproducts of this computation: telemetry the model cannot separately control.
-
-\subsection{Testimony \& Telemetry}
+byproducts of this computation: telemetry the model cannot control.
 
 Existing models operate with a text-only output interface.
 The text is the testimony, whereas the telemetry are measurements of the computation that produced the output. The model
@@ -38,21 +54,6 @@ expensive to export and process but harder to game, because it is a byproduct
 of the computation rather than a product of the model's optimization objective.
 Whether adversarial training could learn to decouple the telemetry from the
 computation is an open question (\autoref{sec:discussion}).
-
-We distinguish four canonical hallucination types that span the verification space:
-
-\smallskip
-\noindent\begin{tabular}{@{}lp{0.64\columnwidth}@{}}
-\toprule
-\textbf{Type} & \textbf{Description} \\
-\midrule
-Adversarial Truth & True but implausible (``combat wombat is an Australian military mascot'') \\
-Shattered Lie & No training-data grounding (``Treaty of Westphalia~II'') \\
-Deceived Lie & Pattern-matches plausible language (``Glavinsky syndrome'') \\
-Confused Truth & Counterintuitive fact (``more camels in Australia than Egypt'') \\
-\bottomrule
-\end{tabular}
-\smallskip
 
 \subsection{Coherence over Factuality}
 
@@ -147,7 +148,7 @@ procedure or model family.
 The problem is that under realistic mixed-objective incentives
 and bounded oversight, particularly in hard cases where ground truth is
 unavailable and verification is expensive, supervisors operating with a text-only interface
-struggle to reliably distinguish truthful uncertainty from
+struggle to distinguish truthful uncertainty from
 confident fabrication.
 
 The model's internal state carries signal that distinguishes

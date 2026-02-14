@@ -18,8 +18,9 @@ coherence produce coherent output. The output reflects the training data: ground
 training data tends to track truth, while ungrounded training data tends to produce untruth.
 \citeauthor{xu2024hallucination}~\cite{xu2024hallucination} proves that hallucination is
 inevitable for LLMs over the class of computable functions.
-Our result is orthogonal. They prove a computational limit on what the model can produce;
-we prove an observational limit on what a supervisor can verify.
+% \va{We haven't told the readers what our result is. We will establish relation in related work}
+% Our result is orthogonal. They prove a computational limit on what the model can produce;
+% we prove an observational limit on what a supervisor can verify.
 % [moved to telemetry paragraph below]
 
 Verification has a cost. Every system that
@@ -28,7 +29,7 @@ which outputs to prioritize, and what signals to use for triage.
 For example, checking a citation against a database costs API
 calls and latency, having a domain expert review a summary costs time
 and salary, running a second model as a judge costs compute.
-Verification cost varies by content type: checking a citation is cheap;
+Moreover, verification cost varies by content type: checking a citation is cheap;
 assessing whether a summary faithfully represents its source is expensive.
 
 The key issue is that the current text-only interface to language models does not expose the model's
@@ -38,20 +39,27 @@ verification budget reconstructing, from the output alone,
 what the model's own computation already knew. The budget is
 consumed by reconstruction rather than concentrated on the cases
 where verification is most needed.
+The supervisor cannot tell from the output alone if the text contains fabrication.
 
-The model may know it is fabricating. The supervisor cannot tell.
-But the model's computation leaves traces. Language models carry internal
+To overcome this issue, we introduce \emph{epistemic observability},
+which allows developers to inspect the internal epistemic state
+of the model during the generation process.
+The key insight is that language models carry internal
 signals---entropy traces, attention geometry, token-level
 log-probabilities---that distinguish grounded generation from
 fabrication. These signals are byproducts of the computation itself:
 \emph{telemetry} that the model cannot separately control under standard training.
 Unlike the model's \emph{testimony} (the text it chooses to output),
 telemetry is harder to fake.
-We introduce \emph{epistemic observability}: an interface that exposes this
-telemetry alongside the standard text output.
+Epistemic observability allows verifiers to inspect both the telemetry
+and testimony.
+
 
 This paper contributes:
 
+\va{I know you want to really mention the theorems in the intro but
+they don't really add much here. A non-ML reader will question what is a policy
+and what are world states and why does it need reconstruction.}
 \fakepara{An impossibility result for a text-only system with finite budget.}
 This impossibility decomposes into two theorems.  First, a predictor-centric
 policy conditioning only on the query cannot satisfy epistemic honesty across
@@ -61,12 +69,12 @@ world state from the output alone with a finite budget (e.g., RAG systems, fact
 checkers, etc.) (\autoref{thm:learnability}).
 
 \fakepara{A tensor interface that escapes the impossibility.}
-We construct an extended interface that augments text output with
+We construct an epistemic observability interface that augments text output with
 epistemic signals (entropy traces, attention summaries) in a composable
 tensor format, without architectural changes to current transformers
 (\autoref{sec:escape}).
 
-\fakepara{An empirical cost surface of verification.} We map the cost
+\fakepara{Empirical cost surface of verification.} We map the cost
 surface across text-only and tensor-augmented verification strategies,
 demonstrating that tensor-guided triage at 10\% budget outperforms
 text-only verification at 30\% budget (\autoref{sec:eval}).

@@ -6,37 +6,24 @@
 Systems incorporating language model components must decide how much to spend
 on verification and where to spend it. This paper provides the cost surface
 for that decision.
-
 We have shown that epistemic honesty is unverifiable for systems operating under
-text-only observation models with bounded supervision. This is not a capability
-limitation to be solved with scale, nor a training failure to be solved with better
-RLHF. It is a structural property of the interface: the channel through which
+text-only observation models with bounded supervision. It is a structural property of the interface: the channel through which
 these systems communicate discards the epistemic metadata that would make
 verification possible. This impossibility establishes the floor of the cost
 surface: below this line, text-channel investment cannot improve assurance.
 
-The impossibility has a shape: it decomposes into representational, learnability, and supervisory constraints that together close every text-channel escape route (\autoref{sec:formal}).
-
-But impossibility results are maps, not walls. The Fischer-Lynch-Paterson
-theorem did not end distributed systems; it clarified what assumptions had to
-change. Our result plays an analogous role. Systems that export structured
+Systems that export structured
 epistemic state (provenance, entropy traces, attention topology) escape the
-impossibility class. The tensor interface demonstrates this escape is
+impossibility class. Our epistemic observability tensor interface demonstrates this escape is
 achievable with current architectures and minimal overhead.
-
-The empirical cost surface is honest. Under bounded verification,
+Under bounded verification,
 tensor-guided judges at 10\% budget outperform text-guided judges at 30\%
-budget, which is a 3$\times$ reduction in verification cost. The text channel is
-stronger than expected (response length alone: AUC 0.88--0.96) but trivially
-gameable. The tensor residual (AUC 0.60--0.70) is modest but occupies a
-fundamentally different position in the adversarial landscape: computational
-signals cannot be independently controlled without adversarial optimization
-targeting the signal itself. Gaming the metric requires changing the thing
-being measured.
+budget, a 3$\times$ reduction in verification cost. 
 
 The engineering question is not whether to verify, but how much verification
-to buy and at which tier. A brainstorming tool needs Tier~0. A medical system
-needs Tier~2. The cost surface tells you what each investment buys, and
-preliminary observations indicate that content format modulates the tradeoff.
+to buy and at which tier. 
+% A brainstorming tool needs Tier~0. A medical system
+% needs Tier~2. The cost surface tells you what each investment buys, and
+% preliminary observations indicate that content format modulates the tradeoff.
 
-The interface is the problem. The interface is where the solution lives.
+% The interface is the problem. The interface is where the solution lives.
