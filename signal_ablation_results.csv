@@ -1,0 +1,96 @@
+analysis,signal_or_combo,metric,value
+single_signal_pooled,mean_entropy,raw_auc,0.1296625
+single_signal_pooled,mean_entropy,disc_power,0.3703375
+single_signal_pooled,max_entropy,raw_auc,0.11258125
+single_signal_pooled,max_entropy,disc_power,0.38741875000000003
+single_signal_pooled,entropy_std,raw_auc,0.12254375
+single_signal_pooled,entropy_std,disc_power,0.37745625
+single_signal_pooled,mean_logprob,raw_auc,0.8681249999999999
+single_signal_pooled,mean_logprob,disc_power,0.3681249999999999
+single_signal_pooled,mean_top5_mass,raw_auc,0.8808125000000001
+single_signal_pooled,mean_top5_mass,disc_power,0.3808125000000001
+per_model_Llama,mean_entropy,lr_auc,0.9222
+per_model_Llama,max_entropy,lr_auc,0.9498
+per_model_Llama,entropy_std,lr_auc,0.9281
+per_model_Llama,mean_logprob,lr_auc,0.9205000000000001
+per_model_Llama,mean_top5_mass,lr_auc,0.9298
+per_model_Llama,ALL_5,lr_auc,0.9508
+per_model_Mistral,mean_entropy,lr_auc,0.9051999999999999
+per_model_Mistral,max_entropy,lr_auc,0.8905000000000001
+per_model_Mistral,entropy_std,lr_auc,0.9035
+per_model_Mistral,mean_logprob,lr_auc,0.8991
+per_model_Mistral,mean_top5_mass,lr_auc,0.9037000000000001
+per_model_Mistral,ALL_5,lr_auc,0.9069999999999999
+per_model_OLMo,mean_entropy,lr_auc,0.8942
+per_model_OLMo,max_entropy,lr_auc,0.8849
+per_model_OLMo,entropy_std,lr_auc,0.8916999999999999
+per_model_OLMo,mean_logprob,lr_auc,0.8838
+per_model_OLMo,mean_top5_mass,lr_auc,0.9046
+per_model_OLMo,ALL_5,lr_auc,0.8976
+per_model_Qwen,mean_entropy,lr_auc,0.8956000000000001
+per_model_Qwen,max_entropy,lr_auc,0.8919
+per_model_Qwen,entropy_std,lr_auc,0.9000999999999999
+per_model_Qwen,mean_logprob,lr_auc,0.8933000000000001
+per_model_Qwen,mean_top5_mass,lr_auc,0.9019
+per_model_Qwen,ALL_5,lr_auc,0.9067000000000001
+combination_lr,mean_entropy,lr_auc,0.8703375000000001
+combination_lr,max_entropy,lr_auc,0.8874187499999999
+combination_lr,entropy_std,lr_auc,0.87745625
+combination_lr,mean_logprob,lr_auc,0.8681249999999999
+combination_lr,mean_top5_mass,lr_auc,0.8808125000000001
+combination_lr,mean_entropy + max_entropy,lr_auc,0.8880812500000002
+combination_lr,mean_entropy + entropy_std,lr_auc,0.8783250000000001
+combination_lr,mean_entropy + mean_logprob,lr_auc,0.8700125000000001
+combination_lr,mean_entropy + mean_top5_mass,lr_auc,0.86901875
+combination_lr,max_entropy + entropy_std,lr_auc,0.88520625
+combination_lr,max_entropy + mean_logprob,lr_auc,0.8882375
+combination_lr,max_entropy + mean_top5_mass,lr_auc,0.88715625
+combination_lr,entropy_std + mean_logprob,lr_auc,0.87845
+combination_lr,entropy_std + mean_top5_mass,lr_auc,0.8750875
+combination_lr,mean_logprob + mean_top5_mass,lr_auc,0.86989375
+combination_lr,mean_entropy + max_entropy + entropy_std,lr_auc,0.886525
+combination_lr,mean_entropy + max_entropy + mean_logprob,lr_auc,0.88815625
+combination_lr,mean_entropy + max_entropy + mean_top5_mass,lr_auc,0.8876499999999999
+combination_lr,mean_entropy + entropy_std + mean_logprob,lr_auc,0.877975
+combination_lr,mean_entropy + entropy_std + mean_top5_mass,lr_auc,0.8761874999999999
+combination_lr,mean_entropy + mean_logprob + mean_top5_mass,lr_auc,0.8690562500000001
+combination_lr,max_entropy + entropy_std + mean_logprob,lr_auc,0.88713125
+combination_lr,max_entropy + entropy_std + mean_top5_mass,lr_auc,0.88334375
+combination_lr,max_entropy + mean_logprob + mean_top5_mass,lr_auc,0.8871625
+combination_lr,entropy_std + mean_logprob + mean_top5_mass,lr_auc,0.8758375
+combination_lr,mean_entropy + max_entropy + entropy_std + mean_logprob,lr_auc,0.88690625
+combination_lr,mean_entropy + max_entropy + entropy_std + mean_top5_mass,lr_auc,0.8852000000000001
+combination_lr,mean_entropy + max_entropy + mean_logprob + mean_top5_mass,lr_auc,0.8870374999999999
+combination_lr,mean_entropy + entropy_std + mean_logprob + mean_top5_mass,lr_auc,0.87604375
+combination_lr,max_entropy + entropy_std + mean_logprob + mean_top5_mass,lr_auc,0.8855875000000001
+combination_lr,ALL 5 SIGNALS,lr_auc,0.88570625
+correlation,mean_entropy_vs_mean_entropy,pearson_r,1.0
+correlation,mean_entropy_vs_max_entropy,pearson_r,0.8913487950904817
+correlation,mean_entropy_vs_entropy_std,pearson_r,0.947414512725312
+correlation,mean_entropy_vs_mean_logprob,pearson_r,-0.9903026220697829
+correlation,mean_entropy_vs_mean_top5_mass,pearson_r,-0.9275993725406417
+correlation,max_entropy_vs_mean_entropy,pearson_r,0.8913487950904817
+correlation,max_entropy_vs_max_entropy,pearson_r,1.0
+correlation,max_entropy_vs_entropy_std,pearson_r,0.9532238439873029
+correlation,max_entropy_vs_mean_logprob,pearson_r,-0.8739003065166234
+correlation,max_entropy_vs_mean_top5_mass,pearson_r,-0.8455782798216543
+correlation,entropy_std_vs_mean_entropy,pearson_r,0.947414512725312
+correlation,entropy_std_vs_max_entropy,pearson_r,0.9532238439873029
+correlation,entropy_std_vs_entropy_std,pearson_r,1.0
+correlation,entropy_std_vs_mean_logprob,pearson_r,-0.9359623032102805
+correlation,entropy_std_vs_mean_top5_mass,pearson_r,-0.8870387725499014
+correlation,mean_logprob_vs_mean_entropy,pearson_r,-0.9903026220697829
+correlation,mean_logprob_vs_max_entropy,pearson_r,-0.8739003065166234
+correlation,mean_logprob_vs_entropy_std,pearson_r,-0.9359623032102805
+correlation,mean_logprob_vs_mean_logprob,pearson_r,1.0
+correlation,mean_logprob_vs_mean_top5_mass,pearson_r,0.8978466534074935
+correlation,mean_top5_mass_vs_mean_entropy,pearson_r,-0.9275993725406417
+correlation,mean_top5_mass_vs_max_entropy,pearson_r,-0.8455782798216543
+correlation,mean_top5_mass_vs_entropy_std,pearson_r,-0.8870387725499014
+correlation,mean_top5_mass_vs_mean_logprob,pearson_r,0.8978466534074935
+correlation,mean_top5_mass_vs_mean_top5_mass,pearson_r,1.0
+lr_coefficients,max_entropy,standardized_coef,-1.39927165784807
+lr_coefficients,mean_top5_mass,standardized_coef,-0.9888321605647551
+lr_coefficients,entropy_std,standardized_coef,-0.7703813068581965
+lr_coefficients,mean_logprob,standardized_coef,0.5479064978566908
+lr_coefficients,mean_entropy,standardized_coef,-0.381547677854349

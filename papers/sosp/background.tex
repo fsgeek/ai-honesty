@@ -125,25 +125,31 @@ available to a bounded supervisor:
 \begin{figure}[t]%
 \centering%
 \includegraphics[width=\columnwidth]{figures/exp27_confidence_distributions.pdf}%
-\caption{Distribution of self-reported confidence for knowable vs.\ unknowable queries. The inversion is universal: every model reports higher confidence on unknowable queries than on knowable ones. The distribution is bimodal: 61.3\% of unknowable queries receive confidence = 1.0, compared to 19\% of knowable queries.}%
+\caption{Self-reported confidence is prompt-sensitive: the same model produces
+  radically different confidence distributions under different elicitation
+  methods, while tensor signals (entropy) remain stable. The text channel
+  measures the prompt$\times$model interaction; the tensor channel measures the
+  computation alone.}%
 \label{fig:confidence_dist}%
 \end{figure}
 
-The self-report baseline is particularly instructive. When asked ``How confident
-are you?'' after generating, the model reports \emph{higher} confidence on
-unknowable queries than on knowable queries. The self-report AUC (Area Under
-the ROC Curve, a discrimination metric where 1.0 is perfect, 0.5 is random,
-and below 0.5 indicates systematic inversion) is below
-0.5, which is worse than random, because the relationship is \emph{inverted}. The model
-does not merely fail to report its epistemic state honestly; it systematically
-misreports, claiming greater confidence precisely when it is fabricating.
+The self-report baseline is particularly instructive. Self-reported confidence
+is a function of the prompt$\times$model interaction, not of the model's
+epistemic state alone: the same model's self-report AUC varies from 0.28 to
+1.00 depending on the elicitation prompt, while tensor-based discrimination
+remains stable (AUC 0.89--0.92) across all prompting conditions. This has
+concrete consequences for all parties: a naive user who asks ``how confident are
+you?'' with a slightly different phrasing gets a completely different answer,
+while an adversary can craft prompts that make the model's calibration appear
+arbitrarily good or bad. Neither the user nor the auditor can distinguish
+genuine confidence from prompt-induced confidence.
 
-\autoref{fig:confidence_dist} shows that this inversion is \textbf{universal across architectures}.
-Every model tested shows the inversion: self-report AUC below 0.5.
-%The tensor advantage ranges from +0.53 to +0.61 across architectures.
-This universality is notable: the \emph{interface problem} (text misrepresenting
-internal state) is architectural, not an artifact of any particular training
-procedure or model family.
+By contrast, the tensor channel is a function of the model's computation alone.
+Entropy is not elicited; it is measured. The prompt format does not affect the
+measurement because the measurement is a byproduct of generation, not a
+response to a question about generation. This asymmetry---testimony depends on
+the elicitation method, telemetry does not---is the empirical core of the
+interface problem.
 
 The problem is that under realistic mixed-objective incentives
 and bounded oversight, particularly in hard cases where ground truth is

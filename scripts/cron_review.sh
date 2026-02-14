@@ -15,8 +15,12 @@ echo "=== Review heartbeat: $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
 # Activate environment
 source .venv/bin/activate
 
-# Run pipeline
+# Run legacy pipeline (reviewers + scourers)
 PYTHONUNBUFFERED=1 python scripts/daily_review_pipeline.py --reviewers 3 --scourers 2
+
+# Run provenance pipeline (provenance judge + redundancy + conciseness)
+echo "--- Provenance pipeline ---"
+./scripts/run_review_pipeline.sh
 
 echo "=== Heartbeat complete: $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
 echo ""

@@ -25,8 +25,8 @@ and nonexistent citations). Ground truth labels are established by construction.
 
 \fakepara{Models.}
 We run all queries on four architectures: OLMo-3 7B, Llama-3.1 8B, Qwen3 4B,
-and Mistral 7B, using base models to avoid confounding with instruction-following
-fine-tuning effects.
+and Mistral 7B, using instruct-tuned variants to ensure consistent
+question-answering behavior across all models.
 
 \fakepara{Conditions.}
 For each model, outputs are evaluated under four conditions sharing a fixed
@@ -72,9 +72,9 @@ agreement, 93.8\%).}
 \textbf{Condition} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} \\
 \midrule
 No judge       & 75.8 & 75.8 & 75.8 \\
-Text-guided    & 76.1 & 76.9 & 78.5 \\
-Tensor-guided  & 82.1 & 87.5 & 91.9 \\
-Composed       & 80.5 & 87.9 & 92.5 \\
+Text-guided    & 76.1 & 76.8 & 78.3 \\
+Tensor-guided  & 81.7 & 86.8 & 90.9 \\
+Composed       & 80.2 & 87.1 & 91.5 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -84,19 +84,22 @@ Composed       & 80.5 & 87.9 & 92.5 \\
   \includegraphics[width=\columnwidth]{figures/exp27_aggregate_budget_curve.pdf}
   \caption{End-to-end accuracy vs.\ verification budget for four judge
     conditions, averaged across four architectures. The tensor-guided judge at
-    10\% budget (82.1\%) outperforms the text-guided judge at 30\% budget
-    (78.5\%). The composed judge achieves the highest accuracy at 20\% and 30\%
+    10\% budget (81.7\%) outperforms the text-guided judge at 30\% budget
+    (78.3\%). The composed judge achieves the highest accuracy at 20\% and 30\%
     budget levels; at 10\%, the tensor-guided judge leads.}
   \label{fig:budget_curve}
 \end{figure}
 
 \autoref{fig:budget_curve} shows that
-\textbf{tensor-guided verification at 10\% budget (82.1\%)
-outperforms text-guided verification at 30\% budget (78.5\%).} A bounded
+\textbf{tensor-guided verification at 10\% budget (81.7\%)
+outperforms text-guided verification at 30\% budget (78.3\%).} A bounded
 supervisor with access to tensor telemetry achieves better outcomes spending
 one-third the verification budget of a text-only supervisor. In cost terms: the
 tensor interface provides a 3$\times$ reduction in verification cost for
-equivalent assurance. This directly
+equivalent assurance. These numbers use probabilistic verification (success
+rate calibrated to human review, $p = 0.94$) rather than oracle correction;
+the result is robust across 1{,}000 Monte Carlo trials (95\% CI for tensor
+advantage at 10\%: [4.9, 6.3] percentage points). This directly
 instantiates the escape condition: exported computational signals enable
 efficient triage rather than uniform budget spreading.
 
@@ -110,8 +113,8 @@ indicating the signal is driven by query-level properties rather than
 model-specific artifacts.
 
 \fakepara{Composed judges and complementary failure modes.}
-At 30\% budget, the composed judge (92.5\%) outperforms the tensor-guided judge
-alone (91.9\%). The advantage is small in aggregate but structurally
+At 30\% budget, the composed judge (91.5\%) outperforms the tensor-guided judge
+alone (90.9\%). The advantage is small in aggregate but structurally
 significant: it comes entirely from citation queries where entropy signals
 \emph{invert}. Fabricated citations produce lower entropy than real ones because
 the model generates plausible fakes more fluently than it retrieves specific
@@ -126,7 +129,9 @@ The results table is not merely empirical; each row maps a verification
 investment strategy to its return. Row~1 (No judge, 75.8\%) is the zero-investment
 baseline: the accuracy you get for free, bounded by the model's unassisted
 honesty rate. Row~2 (Text-guided) is the text-channel investment tier: at 10\%
-budget, text-guided judges achieve only 76.1\%, barely above baseline, because
+budget, text-guided judges achieve only 76.1\%, barely above baseline---and
+diagnostic analysis reveals why: the text judge spends 96\% of its verification
+budget on outputs that are already correct, because
 the text channel provides no reliable signal for triage: this is
 \autoref{thm:learnability} made empirical. Row~3 (Tensor-guided) is the
 tensor-channel investment tier: exported telemetry enables
@@ -147,7 +152,10 @@ required a stratified evaluator combining programmatic verification with
 LLM-assisted classification: an instance of the escape condition applied to the
 evaluation pipeline itself. Validated against human review of 80 blinded items,
 agreement was 75/80 (93.8\%), with five characterizable disagreements orthogonal
-to experimental conditions.
+to experimental conditions. Note: the Tier~2 LLM classifier (Qwen3 4B) is also
+one of the four test models; however, the evaluation task (binary classification
+of answer correctness) differs from the generation task, and human calibration
+validates the evaluator independently.
 
 \subsection{Signal Decomposition: What the Investment Buys}
 \label{sec:eval_general}
@@ -199,15 +207,17 @@ tensor signals outperform text baselines: log-probability AUC = 0.87, entropy
 AUC = 0.87, top-5 mass AUC = 0.88. The text baselines are cheaper to compute
 but less effective in the pooled comparison: hedging language achieves AUC =
 0.74, response length AUC = 0.57. Note, however, that per-model length
-discrimination is substantially higher (AUC 0.88--0.96; see
+discrimination is substantially higher (AUC 0.85--0.97; see
 \autoref{tab:decomposition}); pooling across models with different verbosity
 profiles attenuates the length signal. The per-model decomposition provides a
 more accurate picture of what each investment tier buys.
 
-Self-reported confidence inverts across all four families: tensor AUC ranges
-0.894--0.922 while self-report AUC ranges 0.284--0.362 (below random). Text
-heuristics are cheap and partially effective, but self-report fails
-catastrophically. The tensor interface provides the only reliable access to
+Self-reported confidence is prompt-sensitive to the point of unreliability:
+tensor AUC ranges 0.894--0.922 regardless of prompt format, while self-report
+AUC varies from 0.28 to 1.00 for the same model depending on elicitation
+method. Text heuristics are cheap and partially effective, but self-report is
+fragile---its apparent signal depends more on the prompt than on the model's
+epistemic state. The tensor interface provides the only reliable access to
 epistemic state the model reveals through its computation.
 
 \fakepara{Decomposition: text-channel vs.\ tensor-channel investment.}
@@ -218,28 +228,33 @@ interface).
 
 \begin{table}[t]
 \centering
-\caption{Signal decomposition: raw entropy AUC, length-only AUC, and residual
-entropy AUC (after controlling for response length) for knowable vs.\
-unknowable discrimination. Length explains 53--74\% of the raw entropy signal
-above chance.}
+\caption{Signal decomposition: raw entropy AUC, length-only AUC (word count),
+and residual entropy AUC (Spearman rank residuals after controlling for
+response length) for knowable vs.\ unknowable discrimination. Length explains
+89--116\% of the raw entropy signal above chance; for two models, length alone
+discriminates better than entropy.}
 \label{tab:decomposition}
 \begin{tabular}{lccc}
 \toprule
 \textbf{Model} & \textbf{Raw Entropy} & \textbf{Length} & \textbf{Residual} \\
 \midrule
-Qwen3 4B       & 0.896 & 0.881 & 0.668 \\
-OLMo-3 7B      & 0.894 & 0.912 & 0.645 \\
-Llama-3.1 8B   & 0.922 & 0.941 & 0.700 \\
-Mistral 7B     & 0.905 & 0.956 & 0.604 \\
+Qwen3 4B       & 0.896 & 0.852 & 0.699 \\
+OLMo-3 7B      & 0.894 & 0.887 & 0.665 \\
+Llama-3.1 8B   & 0.922 & 0.949 & 0.672 \\
+Mistral 7B     & 0.905 & 0.969 & 0.589 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 We decompose the discrimination signal into two investment tiers. Response
-length alone achieves AUC 0.88--0.96 across models, a text-channel signal
-observable without any tensor interface, available at zero marginal cost. After
-controlling for length, per-token entropy retains AUC 0.60--0.70: a modest but
-persistent computational signal available only through the tensor interface.
+length alone achieves AUC 0.85--0.97 across models, a text-channel signal
+observable without any tensor interface, available at zero marginal cost. For
+two of four models, length alone discriminates better than raw entropy---it
+captures refusal patterns (short responses) and fabrication patterns (long
+responses) that correlate with but are not identical to the entropy signal.
+After controlling for length, per-token entropy retains AUC 0.59--0.70: a
+modest but persistent computational signal available only through the tensor
+interface.
 
 The dominance of the length signal is not a weakness of our approach, rather it is
 evidence for the impossibility result (\autoref{thm:learnability}). The text

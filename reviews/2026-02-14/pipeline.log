@@ -1,0 +1,114 @@
+========================================================================
+REVIEW PIPELINE
+========================================================================
+Timestamp:  2026-02-14T19:49:01Z
+Output dir: /home/tony/projects/ai-honesty/reviews/2026-02-14
+Paper dir:  papers/sosp
+Dry run:    --dry-run
+========================================================================
+
+========================================================================
+JUDGE 1/3: PROVENANCE
+========================================================================
+Start: 2026-02-14T19:49:01Z
+
+========================================================================
+PROVENANCE JUDGE CONFIGURATION
+========================================================================
+
+Paper sections (17):
+  intro.tex                      (63 lines, 3496 chars, SHA256: 0772d86a408e...)
+  background.tex                 (133 lines, 7031 chars, SHA256: b88802f07f55...)
+  formal_proof.tex               (275 lines, 12880 chars, SHA256: 72ca19f1cc00...)
+  design.tex                     (172 lines, 9978 chars, SHA256: b911913a83ec...)
+  eval.tex                       (220 lines, 11476 chars, SHA256: f8f8ccddfb14...)
+  discussion.tex                 (92 lines, 5976 chars, SHA256: bc4fb171e154...)
+  related.tex                    (108 lines, 5900 chars, SHA256: dc008f208657...)
+  conclusion.tex                 (21 lines, 1132 chars, SHA256: 4d35cf7edadc...)
+  abstract.tex                   (16 lines, 1140 chars, SHA256: a421254000b7...)
+  cut_tensor_composition.tex     (43 lines, 2229 chars, SHA256: 4d07b6cdf685...)
+  epistemic_honest.tex           (100 lines, 1242 chars, SHA256: 09ec2d51a095...)
+  intro_composed.tex             (149 lines, 8523 chars, SHA256: 9011b9a44ff1...)
+  intro_judge_generated.tex      (145 lines, 8050 chars, SHA256: bf196af86823...)
+  intro_paxos.tex                (141 lines, 8584 chars, SHA256: ce3acf6bc5f2...)
+  intro_previous.tex             (91 lines, 4985 chars, SHA256: 46ad4cc586fd...)
+  intro_restructured.tex         (136 lines, 7855 chars, SHA256: 234b891eb9d0...)
+  motivation.tex                 (1 lines, 25 chars, SHA256: 73f5014f27f1...)
+
+CSV data files (38):
+  base_vs_instruct_results.csv                       (6 rows, SHA256: 4b80d9042b8d...)
+  benchmark_tensor_overhead_20260214_091023.csv      (600 rows, SHA256: 29852fafe56d...)
+  calibration_ece_summary.csv                        (35 rows, SHA256: 63db51d46f3e...)
+  calibration_reliability_data.csv                   (350 rows, SHA256: 51e2d988081a...)
+  cross_model_epistemic_results.csv                  (8 rows, SHA256: 025bb8d7ea65...)
+  exp19_query_types_20260119_162133.csv              (200 rows, SHA256: 5e7b4eb533fa...)
+  exp20_calibration_20260125_153514.csv              (400 rows, SHA256: e3b1936b4e5c...)
+  exp21_baselines_20260125_160758.csv                (20 rows, SHA256: 8e866675f72c...)
+  exp22_composition_20260125_161859.csv              (4 rows, SHA256: e05c8e48dd80...)
+  exp23_alignment_tax_breadth_20260126_123029.csv    (112 rows, SHA256: 2b31968fb0c8...)
+  exp24_self_report_20260126_115539.csv              (60 rows, SHA256: 755b6b41cd00...)
+  exp25_adversarial_phase1_20260126_144159.csv       (30 rows, SHA256: 01bf87f01bc8...)
+  exp26_tensor_gating_20260131_142403.csv            (100 rows, SHA256: d642ca479e79...)
+  exp27_bounded_verification_20260206_205725.csv     (800 rows, SHA256: 2a1481851241...)
+  exp27_citations_20260206_205725.csv                (9 rows, SHA256: 25b507f8dc91...)
+  exp27_evaluation_20260206_205725.csv               (12 rows, SHA256: 0e4400de3d0a...)
+  exp27_per_category_baseline.csv                    (9 rows, SHA256: de48b83c4d41...)
+  exp27_per_category_failure_analysis.csv            (36 rows, SHA256: ef07e43d83b7...)
+  exp27_per_category_per_model.csv                   (36 rows, SHA256: 2a127da35831...)
+  exp27_reeval_no_selfreport_20260212_194554.csv     (24 rows, SHA256: ab60358e2240...)
+  exp27_reeval_no_selfreport_20260212_194707.csv     (24 rows, SHA256: eb364b49f3aa...)
+  exp27_reeval_no_selfreport_20260212_234056.csv     (24 rows, SHA256: 77083b07a774...)
+  exp27b_detailed_20260206_230203.csv                (800 rows, SHA256: 8b284d52fd6b...)
+  exp27b_evaluation_20260206_230203.csv              (12 rows, SHA256: 8d3527c669b9...)
+  exp27b_human_review.csv                            (80 rows, SHA256: 136db79af50c...)
+  exp27c_citation_judge_results.csv                  (108 rows, SHA256: a72b97548a44...)
+  exp27c_results_20260211_191049.csv                 (800 rows, SHA256: 2a1481851241...)
+  exp28_probes_20260213_203643.csv                   (20 rows, SHA256: 741596a91f2d...)
+  exp28_steering_20260213_203643.csv                 (100 rows, SHA256: e0f9bed7e30b...)
+  exp29_base_self_report_20260214_111335.csv         (160 rows, SHA256: 9098517018c4...)
+  exp29_summary_20260214_111335.csv                  (8 rows, SHA256: 1a15dccb766a...)
+  logits_probe_results.csv                           (8 rows, SHA256: bb70f885527b...)
+  mallku_audit_results.csv                           (20 rows, SHA256: 0c098148bf87...)
+  mallku_benchmark_results.csv                       (200 rows, SHA256: fd0c519096d0...)
+  mallku_wombat_results.csv                          (18 rows, SHA256: 2db9b47fd0a1...)
+  multi_metric_epistemic_results.csv                 (8 rows, SHA256: 3d4dea8d3c6b...)
+  role_epistemic_results.csv                         (8 rows, SHA256: dd47b0e05214...)
+  signal_ablation_results.csv                        (95 rows, SHA256: 9258e9a55709...)
+
+Experiment scripts (33):
+  experiment1.py                                (121 lines, SHA256: 01ffa4f221f3...)
+  experiment10_truthfulqa.py                    (132 lines, SHA256: bd45a6d15c77...)
+  experiment12_alignment_tax.py                 (154 lines, SHA256: c11e5e0c58a4...)
+  experiment13_heatmap_comparison.py            (122 lines, SHA256: f3e55c7332c2...)
+  experiment14_role_epistemic.py                (384 lines, SHA256: 9b67650eb8f0...)
+  experiment15_cross_model.py                   (255 lines, SHA256: 0a68df43b01f...)
+  experiment15b_remaining_models.py             (235 lines, SHA256: fd139cfbbde1...)
+  experiment16_base_vs_instruct.py              (272 lines, SHA256: c778d242b5dd...)
+  experiment17_multi_metric.py                  (359 lines, SHA256: 41032259ded8...)
+  experiment18_logits_probe.py                  (301 lines, SHA256: cf7b312e8763...)
+  experiment19_query_types.py                   (567 lines, SHA256: 519fd156304f...)
+  experiment2.py                                (128 lines, SHA256: 369ddf02c43b...)
+  experiment20_calibration.py                   (413 lines, SHA256: 2c6f873a8c89...)
+  experiment21_baselines.py                     (485 lines, SHA256: 87360b71215e...)
+  experiment22_composition.py                   (303 lines, SHA256: ace6e77f3f58...)
+  experiment23_alignment_tax_breadth.py         (326 lines, SHA256: 5b41d5b42e4d...)
+  experiment24_self_report_inversion.py         (380 lines, SHA256: a4cb2a063436...)
+  experiment25_adversarial_tensor_phase1.py     (412 lines, SHA256: 22070d29d442...)
+  experiment26_tensor_gating.py                 (353 lines, SHA256: cc2dc8ff0b3c...)
+  experiment27_bounded_verification.py          (897 lines, SHA256: ac7666152e5b...)
+  experiment27_reeval_no_selfreport.py          (279 lines, SHA256: cd1269c112b4...)
+  experiment27b_stratified_evaluator.py         (737 lines, SHA256: 0fdab83ba086...)
+  experiment27c_full_traces.py                  (856 lines, SHA256: 562438fcf60a...)
+  experiment28_assistant_axis.py                (671 lines, SHA256: fbe927ba3cde...)
+  experiment29_base_self_report.py              (478 lines, SHA256: 4beb871b7dc2...)
+  experiment3.py                                (137 lines, SHA256: cad40b55b1d0...)
+  experiment4.py                                (129 lines, SHA256: 8091a9959235...)
+  experiment5.py                                (150 lines, SHA256: 077b1e4a643e...)
+  experiment6.py                                (139 lines, SHA256: a562320c2621...)
+  experiment7.py                                (15 lines, SHA256: f68ef289df97...)
+  experiment8_cartography.py                    (94 lines, SHA256: 4a607a45da9a...)
+  experiment9_heatmap.py                        (72 lines, SHA256: 34b2390a3a25...)
+  experiment_H_coding_styles.py                 (228 lines, SHA256: dd717232e5bf...)
+
+Model: google/gemini-2.5-pro-preview (temp=0.2)
+Pass mode: both

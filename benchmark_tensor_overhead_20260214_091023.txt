@@ -1,0 +1,46 @@
+==============================================================================
+TENSOR INTERFACE OVERHEAD BENCHMARK — SUMMARY
+==============================================================================
+Model: Qwen/Qwen3-4B
+Device: NVIDIA GeForce RTX 4090
+Max new tokens: 64
+Prompts: 20
+Warmup iterations: 3
+Measurement iterations: 10
+
+Condition            ms/tok      std      tok/s    Peak MB    Storage B
+------------------------------------------------------------------------------
+Baseline              55.25     0.99       18.1       7695            0
+Entropy               56.58     1.00       17.7       7732         4216
+Full Tensor           59.18     1.26       16.9       7740         4313
+
+--- OVERHEAD ANALYSIS ---
+Entropy extraction overhead:
+  Latency:    +1.33 ms/token (+2.4%)
+  Memory:     +37 MB peak (+0.5%)
+  Throughput: +2.4% degradation
+  Storage:    4216 bytes/query avg
+
+Full tensor interface overhead:
+  Latency:    +3.93 ms/token (+7.1%)
+  Memory:     +45 MB peak (+0.6%)
+  Throughput: +6.6% degradation
+  Storage:    4313 bytes/query avg
+
+Attention extraction marginal cost (Full - Entropy):
+  Latency:    +2.60 ms/token (+4.6%)
+  Memory:     +8 MB peak
+
+--- SANITY CHECK: Token counts ---
+  Baseline        : 64.0 +/- 0.0 tokens
+  Entropy         : 64.0 +/- 0.0 tokens
+  Full Tensor     : 64.0 +/- 0.0 tokens
+
+--- FOR PAPER (LaTeX-ready) ---
+% Overhead table: Qwen3-4B, 64 tokens, RTX 4090, 10 iterations x 20 prompts
+% Condition       & ms/tok & tok/s & Peak MB & Storage B \\
+% Baseline        & 55.25 & 18.1 & 7695 & --- \\
+% + Entropy       & 56.58 & 17.7 & 7732 & 4216 \\
+% + Full Tensor   & 59.18 & 16.9 & 7740 & 4313 \\
+% Entropy overhead: +2.4%
+% Full tensor overhead: +7.1%

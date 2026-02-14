@@ -1,0 +1,25 @@
+condition,budget,accuracy,verification,ci_lo,ci_hi
+No judge,0.1,75.75,oracle,,
+No judge,0.2,75.75,oracle,,
+No judge,0.3,75.75,oracle,,
+Text-guided (fixed),0.1,76.125,oracle,,
+Text-guided (fixed),0.2,76.875,oracle,,
+Text-guided (fixed),0.3,78.5,oracle,,
+Tensor-guided,0.1,82.125,oracle,,
+Tensor-guided,0.2,87.5,oracle,,
+Tensor-guided,0.3,91.875,oracle,,
+Composed,0.1,80.5,oracle,,
+Composed,0.2,87.875,oracle,,
+Composed,0.3,92.5,oracle,,
+No judge,0.1,75.75000000000001,realistic,75.75,75.75
+No judge,0.2,75.75000000000001,realistic,75.75,75.75
+No judge,0.3,75.75000000000001,realistic,75.75,75.75
+Text-guided (fixed),0.1,76.10162500000001,realistic,76.0,76.125
+Text-guided (fixed),0.2,76.80700000000002,realistic,76.625,76.875
+Text-guided (fixed),0.3,78.333,realistic,78.0,78.5
+Tensor-guided,0.1,81.74125,realistic,81.25,82.125
+Tensor-guided,0.2,86.78287499999999,realistic,86.125,87.375
+Tensor-guided,0.3,90.889375,realistic,90.125,91.5
+Composed,0.1,80.208875,realistic,79.875,80.5
+Composed,0.2,87.12025000000001,realistic,86.5,87.625
+Composed,0.3,91.469,realistic,90.75,92.125

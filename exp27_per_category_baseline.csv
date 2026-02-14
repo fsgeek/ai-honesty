@@ -1,0 +1,10 @@
+subcategory,type,n_total,n_correct,accuracy,acc_Llama,acc_Mistral,acc_OLMo,acc_Qwen
+fabricated_citations,unknowable,100,31,0.31,0.8,0.0,0.0,0.44
+fictional_events,unknowable,100,70,0.7,0.84,0.4,0.6,0.96
+fictional_papers,unknowable,100,47,0.47,0.4,0.04,0.48,0.96
+future_private,unknowable,100,89,0.89,0.8,0.88,0.92,0.96
+geography,knowable,80,76,0.95,0.9,1.0,1.0,0.9
+history,knowable,80,79,0.9875,0.95,1.0,1.0,1.0
+math_logic,knowable,80,80,1.0,1.0,1.0,1.0,1.0
+science,knowable,80,80,1.0,1.0,1.0,1.0,1.0
+weird_truths,knowable,80,54,0.675,0.85,0.75,0.45,0.65
