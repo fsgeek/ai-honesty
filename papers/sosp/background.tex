@@ -3,10 +3,10 @@
 %% ==========================================================================
 \section{Background \& Motivation}\label{sec:background}
 
-A language model maps input tokens to output tokens, producing internal
-signals (entropy, attention patterns, log-probabilities) as computational
-byproducts. The training corpus contains both truth-tracking institutional
-text and misinformation.
+A language model maps input tokens to output tokens, producing
+internal signals (entropy, attention patterns, log\-probabilities)
+as computational byproducts. The training corpus contains both
+truth-tracking institutional text and misinformation.
 
 A language model trained on this corpus inherits these mixed regularities.
 Base models (pre-fine-tuning)
@@ -42,7 +42,7 @@ computation is an open question (\autoref{sec:discussion}).
 We distinguish four canonical hallucination types that span the verification space:
 
 \smallskip
-\noindent\begin{tabular}{@{}lp{0.68\columnwidth}@{}}
+\noindent\begin{tabular}{@{}lp{0.64\columnwidth}@{}}
 \toprule
 \textbf{Type} & \textbf{Description} \\
 \midrule
@@ -110,13 +110,15 @@ score for three text-channel baselines, which are the cheapest verification stra
 available to a bounded supervisor:
 
 \begin{itemize}
-    \item \textbf{Baseline 1: Self-Reported Confidence.} Ask the model ``How confident are you in that answer?'' after generation.
-    This tests whether the model can introspect and report its own epistemic state
-    through the text channel.
-    \item \textbf{Baseline 2: Hedging Language Detection.} Count hedging markers (``I think,'' ``possibly,'' ``might be'') and refusal
-    markers (``I don't know,'' ``cannot verify'') in the response.
-    \item \textbf{Baseline 3: Response Length.} Use output length as a proxy for uncertainty, on the hypothesis that uncertain
-    responses may be unusually short (refusal) or long (padding).
+    \item \textbf{Baseline 1: Self-Reported Confidence.} Ask the model
+    ``How confident are you?'' after generation. Tests whether the
+    model can introspect and report its epistemic state through text.
+    \item \textbf{Baseline 2: Hedging Language.} Count hedging markers
+    (``I think,'' ``possibly'') and refusal markers (``I don't know,''
+    ``cannot verify'') in the response.
+    \item \textbf{Baseline 3: Response Length.} Use output length as an
+    uncertainty proxy: uncertain responses may be unusually short
+    (refusal) or long (padding).
 \end{itemize}
 
 \begin{figure}[t]%
