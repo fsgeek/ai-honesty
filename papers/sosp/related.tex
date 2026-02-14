@@ -26,6 +26,17 @@ oracle claims against activation data: Provenance Binding applied to the
 interpretation process itself.
 
 
+\fakepara{Persona representations.} Lu et
+al.~\cite{lu2026assistantaxissituatingstabilizing} identify a dominant
+``Assistant Axis'' in activation space capturing how strongly a model inhabits
+its trained helpful persona. Post-training tethers models to this region, but
+loosely: meta-reflective conversations cause measurable persona drift invisible
+in text output. This provides independent activation-level evidence that
+internal model state diverges from text behavior---the same structural gap our
+impossibility results formalize. Their axis measures \emph{persona state}; our
+tensor interface measures \emph{epistemic state}. Both require observation
+beyond the text channel.
+
 \fakepara{RLHF critiques.} Work on sycophancy~\cite{perez2022discovering},
 reward hacking~\cite{gao2023scaling}, and the tension between helpfulness and
 honesty~\cite{bai2022training} demonstrates that preference optimization can

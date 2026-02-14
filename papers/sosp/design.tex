@@ -179,7 +179,10 @@ A generation interface that returns:
 
 This interface exports telemetry that the model cannot separately control under current training objectives. The
 model can lie in its text, but it cannot present a different inference computation than
-the one it actually performed. This asymmetry is the foundation of the
+the one it actually performed.
+Independent work on persona monitoring confirms this asymmetry: activation projections reveal
+that models adopt distinct internal configurations for different epistemic conditions even when
+producing textually similar outputs~\cite{lu2026assistantaxissituatingstabilizing}. This asymmetry is the foundation of the
 adversarial robustness argument: computational signals (entropy, attention
 geometry) cannot be independently controlled by the model without changing the
 generation process itself, unlike behavioral signals (response length, hedging
