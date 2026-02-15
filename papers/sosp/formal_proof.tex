@@ -12,7 +12,7 @@
 A common assumption in current practice is that epistemic honesty is a
 capability problem: sufficiently capable models, trained with sufficient RLHF,
 will eventually ``know what they know'' and report it accurately. Scaling solved
-grammar; scaling solved coherence; scaling will solve fabrication. Lin et
+grammar; scaling solved coherence~\cite{kaplan2020scaling, wei2022emergent}; scaling will solve fabrication. Lin et
 al.\ tested this assumption directly and found an inverse scaling trend: larger
 models were \emph{less} truthful on TruthfulQA~\cite{lin2022truthfulqa}. The
 theorems that follow explain why this expectation is architecturally
@@ -147,7 +147,7 @@ world states to observable distributions is many-to-one. Worlds $w_A$ and $w_B$
 induce identical observable distributions $\pi(\cdot|q)$ despite requiring
 different honest behaviors. No amount of data from this observation channel can
 distinguish them. This connects the impossibility to classical results on
-observational equivalence in statistics and diagnosability in systems theory.
+observational equivalence in statistics and diagnosability in systems theory~\cite{sampath1995diagnosability}.
 
 \subsection{The RAG Escape?}
 

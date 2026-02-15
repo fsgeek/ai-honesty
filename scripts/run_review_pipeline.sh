@@ -3,10 +3,11 @@
 # Review Pipeline Runner
 # =============================================================================
 #
-# Runs the three review judges in sequence:
-#   1. provenance_judge.py  (paper-to-data pass, then code-to-paper pass)
-#   2. redundancy_judge.py  (cross-section semantic redundancy)
-#   3. conciseness_judge.py (per-section prose tightening)
+# Runs the four review judges in sequence:
+#   1. provenance_judge.py   (paper-to-data pass, then code-to-paper pass)
+#   2. redundancy_judge.py   (cross-section semantic redundancy)
+#   3. conciseness_judge.py  (per-section prose tightening)
+#   4. adversarial_judge.py  (hostile reviewer simulation: methods, theory, significance)
 #
 # Outputs to a timestamped directory: reviews/YYYY-MM-DD/
 # Produces a summary with finding counts, diffs against previous run.
@@ -57,7 +58,7 @@ for arg in "$@"; do
         --help|-h)
             echo "Usage: $0 [--dry-run]"
             echo ""
-            echo "Runs all three review judges and produces a summary."
+            echo "Runs all four review judges and produces a summary."
             echo ""
             echo "Options:"
             echo "  --dry-run   Preview configuration without making API calls"
@@ -153,10 +154,12 @@ fi
 PROVENANCE_EXIT=0
 REDUNDANCY_EXIT=0
 CONCISENESS_EXIT=0
+ADVERSARIAL_EXIT=0
 
 PROVENANCE_FILE=""
 REDUNDANCY_FILE=""
 CONCISENESS_FILE=""
+ADVERSARIAL_FILE=""
 
 # ---------------------------------------------------------------------------
 # Judge 1: Provenance (both passes)
@@ -164,7 +167,7 @@ CONCISENESS_FILE=""
 
 echo ""
 echo "========================================================================"
-echo "JUDGE 1/3: PROVENANCE"
+echo "JUDGE 1/4: PROVENANCE"
 echo "========================================================================"
 echo "Start: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo ""
@@ -198,7 +201,7 @@ echo "End: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 echo ""
 echo "========================================================================"
-echo "JUDGE 2/3: REDUNDANCY"
+echo "JUDGE 2/4: REDUNDANCY"
 echo "========================================================================"
 echo "Start: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo ""
@@ -241,7 +244,7 @@ echo "End: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 echo ""
 echo "========================================================================"
-echo "JUDGE 3/3: CONCISENESS"
+echo "JUDGE 3/4: CONCISENESS"
 echo "========================================================================"
 echo "Start: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo ""
@@ -271,6 +274,36 @@ CONCISENESS_FILE=$(ls -t "${OUTPUT_DIR}"/conciseness_*.jsonl 2>/dev/null | head 
 echo "End: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 # ---------------------------------------------------------------------------
+# Judge 4: Adversarial Review
+# ---------------------------------------------------------------------------
+
+echo ""
+echo "========================================================================"
+echo "JUDGE 4/4: ADVERSARIAL REVIEW"
+echo "========================================================================"
+echo "Start: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo ""
+
+PYTHONUNBUFFERED=1 python "${PROJECT_ROOT}/scripts/adversarial_judge.py" \
+    --paper-dir "${PAPER_DIR}" \
+    --output-dir "${OUTPUT_DIR}" \
+    ${DRY_RUN}
+
+ADVERSARIAL_EXIT=$?
+
+if [ $ADVERSARIAL_EXIT -ne 0 ]; then
+    echo ""
+    echo "WARNING: Adversarial judge exited with code ${ADVERSARIAL_EXIT}"
+else
+    echo ""
+    echo "Adversarial judge completed successfully."
+fi
+
+ADVERSARIAL_FILE=$(ls -t "${OUTPUT_DIR}"/adversarial_*.jsonl 2>/dev/null | head -1)
+
+echo "End: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 
@@ -286,9 +319,10 @@ if [ -n "${DRY_RUN}" ]; then
     echo "[DRY RUN] No findings to summarize."
     echo ""
     echo "Judge exit codes:"
-    echo "  Provenance:  ${PROVENANCE_EXIT}"
-    echo "  Redundancy:  ${REDUNDANCY_EXIT}"
-    echo "  Conciseness: ${CONCISENESS_EXIT}"
+    echo "  Provenance:   ${PROVENANCE_EXIT}"
+    echo "  Redundancy:   ${REDUNDANCY_EXIT}"
+    echo "  Conciseness:  ${CONCISENESS_EXIT}"
+    echo "  Adversarial:  ${ADVERSARIAL_EXIT}"
     echo ""
     echo "Review pipeline: dry run complete"
     exit 0
@@ -392,8 +426,57 @@ else
     echo "Conciseness judge: NO OUTPUT (exit code ${CONCISENESS_EXIT})"
 fi
 
+# --- Adversarial findings ---
+ADV_TOTAL=0
+ADV_FATAL=0
+ADV_MAJOR=0
+
+if [ -n "${ADVERSARIAL_FILE}" ] && [ -f "${ADVERSARIAL_FILE}" ]; then
+    ADV_TOTAL=$(python3 -c "
+import json
+total = 0
+for line in open('${ADVERSARIAL_FILE}'):
+    rec = json.loads(line)
+    if rec.get('record_type') == 'summary':
+        total = rec.get('total_findings', 0)
+        break
+print(total)
+" 2>/dev/null || echo 0)
+
+    ADV_FATAL=$(python3 -c "
+import json
+total = 0
+for line in open('${ADVERSARIAL_FILE}'):
+    rec = json.loads(line)
+    if rec.get('record_type') == 'summary':
+        total = rec.get('total_fatal', 0)
+        break
+print(total)
+" 2>/dev/null || echo 0)
+
+    ADV_MAJOR=$(python3 -c "
+import json
+total = 0
+for line in open('${ADVERSARIAL_FILE}'):
+    rec = json.loads(line)
+    if rec.get('record_type') == 'summary':
+        total = rec.get('total_major', 0)
+        break
+print(total)
+" 2>/dev/null || echo 0)
+
+    echo ""
+    echo "Adversarial judge: ${ADVERSARIAL_FILE##*/}"
+    echo "  Attacks:        ${ADV_TOTAL}"
+    echo "  FATAL:          ${ADV_FATAL}"
+    echo "  MAJOR:          ${ADV_MAJOR}"
+else
+    echo ""
+    echo "Adversarial judge: NO OUTPUT (exit code ${ADVERSARIAL_EXIT})"
+fi
+
 # --- Totals ---
-TOTAL_FINDINGS=$((PROV_TOTAL + REDUN_TOTAL + CONC_TOTAL))
+TOTAL_FINDINGS=$((PROV_TOTAL + REDUN_TOTAL + CONC_TOTAL + ADV_TOTAL))
 TOTAL_HIGH=$((PROV_HIGH + REDUN_HIGH))
 TOTAL_PROVENANCE_ISSUES=$((PROV_DISCREPANCY + PROV_INCONSISTENT))
 
@@ -404,6 +487,7 @@ echo "------------------------------------------------------------------------"
 echo "  Total findings:     ${TOTAL_FINDINGS}"
 echo "  HIGH severity:      ${TOTAL_HIGH}"
 echo "  Provenance issues:  ${TOTAL_PROVENANCE_ISSUES} (${PROV_DISCREPANCY} discrepancy + ${PROV_INCONSISTENT} inconsistent)"
+echo "  Adversarial:        ${ADV_TOTAL} attacks (${ADV_FATAL} fatal, ${ADV_MAJOR} major)"
 echo ""
 
 # --- Diff against previous run ---
@@ -490,6 +574,31 @@ print(total)
     else
         echo "  Conciseness: no previous data to compare"
     fi
+
+    # Compare adversarial findings
+    PREV_ADV_FILE=$(ls -t "${PREV_DIR}"/adversarial_*.jsonl 2>/dev/null | head -1)
+    if [ -n "${PREV_ADV_FILE}" ] && [ -f "${PREV_ADV_FILE}" ] && [ -n "${ADVERSARIAL_FILE}" ] && [ -f "${ADVERSARIAL_FILE}" ]; then
+        PREV_ADV_TOTAL=$(python3 -c "
+import json
+total = 0
+for line in open('${PREV_ADV_FILE}'):
+    rec = json.loads(line)
+    if rec.get('record_type') == 'summary':
+        total = rec.get('total_findings', 0)
+        break
+print(total)
+" 2>/dev/null || echo 0)
+        ADV_DELTA=$((ADV_TOTAL - PREV_ADV_TOTAL))
+        if [ $ADV_DELTA -gt 0 ]; then
+            echo "  Adversarial: +${ADV_DELTA} new attacks (was ${PREV_ADV_TOTAL}, now ${ADV_TOTAL})"
+        elif [ $ADV_DELTA -lt 0 ]; then
+            echo "  Adversarial: ${ADV_DELTA} attacks (was ${PREV_ADV_TOTAL}, now ${ADV_TOTAL})"
+        else
+            echo "  Adversarial: no change (${ADV_TOTAL} attacks)"
+        fi
+    else
+        echo "  Adversarial: no previous data to compare"
+    fi
 else
     echo "No previous run found for comparison."
 fi
@@ -499,9 +608,10 @@ echo ""
 echo "------------------------------------------------------------------------"
 echo "EXIT CODES"
 echo "------------------------------------------------------------------------"
-echo "  Provenance:  ${PROVENANCE_EXIT}"
-echo "  Redundancy:  ${REDUNDANCY_EXIT}"
-echo "  Conciseness: ${CONCISENESS_EXIT}"
+echo "  Provenance:   ${PROVENANCE_EXIT}"
+echo "  Redundancy:   ${REDUNDANCY_EXIT}"
+echo "  Conciseness:  ${CONCISENESS_EXIT}"
+echo "  Adversarial:  ${ADVERSARIAL_EXIT}"
 
 # --- Output files ---
 echo ""
@@ -509,14 +619,15 @@ echo "------------------------------------------------------------------------"
 echo "OUTPUT FILES"
 echo "------------------------------------------------------------------------"
 echo "  Log:         ${LOG_FILE}"
-[ -n "${PROVENANCE_FILE}" ]  && echo "  Provenance:  ${PROVENANCE_FILE}"
-[ -n "${REDUNDANCY_FILE}" ]  && echo "  Redundancy:  ${REDUNDANCY_FILE}"
-[ -n "${CONCISENESS_FILE}" ] && echo "  Conciseness: ${CONCISENESS_FILE}"
+[ -n "${PROVENANCE_FILE}" ]  && echo "  Provenance:   ${PROVENANCE_FILE}"
+[ -n "${REDUNDANCY_FILE}" ]  && echo "  Redundancy:   ${REDUNDANCY_FILE}"
+[ -n "${CONCISENESS_FILE}" ] && echo "  Conciseness:  ${CONCISENESS_FILE}"
+[ -n "${ADVERSARIAL_FILE}" ] && echo "  Adversarial:  ${ADVERSARIAL_FILE}"
 
 # --- One-line summary for email/notification ---
 echo ""
 echo "========================================================================"
-SUMMARY_LINE="Review pipeline: ${TOTAL_FINDINGS} findings (${TOTAL_HIGH} high severity, ${TOTAL_PROVENANCE_ISSUES} provenance issues)"
+SUMMARY_LINE="Review pipeline: ${TOTAL_FINDINGS} findings (${TOTAL_HIGH} high severity, ${TOTAL_PROVENANCE_ISSUES} provenance issues, ${ADV_FATAL} fatal attacks)"
 echo "${SUMMARY_LINE}"
 echo "========================================================================"
 
@@ -524,8 +635,8 @@ echo "========================================================================"
 echo "${SUMMARY_LINE}" > "${OUTPUT_DIR}/summary.txt"
 echo "${TIMESTAMP}" >> "${OUTPUT_DIR}/summary.txt"
 
-# Exit with nonzero if any judge had a HIGH severity finding
-if [ "${TOTAL_HIGH}" -gt 0 ]; then
+# Exit with nonzero if any judge had a HIGH severity or FATAL finding
+if [ "${TOTAL_HIGH}" -gt 0 ] || [ "${ADV_FATAL}" -gt 0 ]; then
     exit 1
 fi
 

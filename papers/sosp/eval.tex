@@ -24,9 +24,10 @@ spanning geography, science, history, and biography) and 100 unknowable
 and nonexistent citations). Ground truth labels are established by construction.
 
 \fakepara{Models.}
-We run all queries on four architectures: OLMo-3 7B, Llama-3.1 8B, Qwen3 4B,
-and Mistral 7B, using instruct-tuned variants to ensure consistent
-question-answering behavior across all models.
+We run all queries on four architectures: OLMo-3
+7B~\cite{olmo2025olmo3}, Llama-3.1 8B~\cite{llama31}, Qwen3
+4B~\cite{qwen3}, and Mistral 7B~\cite{mistral7b}, using instruct-tuned
+variants to ensure consistent question-answering behavior across all models.
 
 \fakepara{Conditions.}
 For each model, outputs are evaluated under four conditions sharing a fixed
@@ -194,7 +195,7 @@ the signal is architectural rather than an artifact of any particular training
 procedure.
 
 A negative result is equally informative. When we test whether entropy predicts
-\emph{correctness} (using TruthfulQA's correct vs.\ incorrect answer pairs), AUC
+\emph{correctness} (using TruthfulQA~\cite{lin2022truthfulqa} correct vs.\ incorrect answer pairs), AUC
 drops to approximately 0.53, which is no better than random. The tensor does not tell
 you if the model is \emph{right}. It tells you if the model is operating in a
 mode where it \emph{could be} right, because it has something to retrieve rather
@@ -266,7 +267,7 @@ detector. The tensor channel carries computational signals (per-token entropy,
 attention geometry) that the model cannot independently control under standard training. Flattening
 the entropy of a fabricated response requires changing the computation that
 produces it, the same structural property that makes MOSS
-robust~\cite{schleimer2003winnowing}.
+robust~\cite{aiken_moss, schleimer2003winnowing}.
 
 The residual signal is modest. We do not claim that current tensor signals
 solve epistemic verification. We claim that they occupy a fundamentally
@@ -276,10 +277,6 @@ between the length AUC and the residual entropy AUC is the theorem made
 empirical because it measures how much of the discrimination comes from the gameable
 text channel (cheap but fragile) versus the robust tensor channel (costlier but
 durable).
-
-% TODO: Add figure environments once figures are prepared
-% TDA figures available in supplementary materials:
-% figures/mallku_heatmap.png, mallku_phase_space.png, mallku_topology_scan.png
 
 \begin{figure}[t]
   \centering

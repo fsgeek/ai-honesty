@@ -43,13 +43,28 @@ indicates the signal is architectural rather than model-specific. Extending to
 closed-weight models that expose logits through API (e.g., via log-probability
 endpoints) is a natural next step.
 
+\fakepara{Signal access as provider choice.}
+The tensor signals we measure---entropy, log-probabilities, attention
+patterns---are byproducts of inference that providers can expose or withhold.
+Some API providers have offered token-level log-probabilities and subsequently
+removed access. This is not a technical limitation; the signals exist in the
+computation regardless. Responsibility Concentration
+(\autoref{cor:responsibility}) formalizes the consequence: when the provider
+retains exclusive access to epistemic telemetry, only the provider can verify
+epistemic honesty. A provider could use these signals internally to build
+high-assurance applications---a medical summarization system backed by
+tensor-verified confidence---while offering downstream users only the text
+channel and a disclaimer. Whether to export the tensor interface is a policy
+decision with direct implications for who bears verification cost and who
+can build trustworthy applications.
+
 \fakepara{Future work: User-facing rendering.}
 How should tensor information be presented to end users? Raw entropy traces are
 not interpretable; summarization into confidence bands, uncertainty flags, or
 visual indicators requires HCI research beyond the scope of this paper.
 
 \fakepara{Model specificity.} Our topological analysis (\autoref{sec:escape})
-uses OLMo, which permits full inspection of intermediate layer representations. The bounded verification
+uses OLMo~\cite{olmo2025olmo3}, which permits full inspection of intermediate layer representations. The bounded verification
 experiment (\autoref{tab:budget}) tests four architectures spanning 4B--8B
 parameters (billions of learned numerical weights) and four distinct training pipelines. The self-report inversion
 finding is universal across all four. We do not claim exhaustive coverage of

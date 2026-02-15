@@ -83,7 +83,7 @@ dimensions of system design.
 \fakepara{Impossibility results in distributed systems.} The
 Fischer-Lynch-Paterson theorem~\cite{flp} proved that consensus is impossible
 under asynchrony with one faulty process. This did not end distributed systems
-research; it clarified the design space. Paxos~\cite{paxos}, Raft, and modern
+research; it clarified the design space. Paxos~\cite{paxos}, Raft~\cite{raft}, and modern
 consensus protocols work \emph{around} FLP by relaxing assumptions or
 strengthening guarantees. Our result plays an analogous role: text-only
 observation models with bounded supervision cannot guarantee epistemic honesty,
