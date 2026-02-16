@@ -104,13 +104,13 @@ advantage at 10\%: [4.9, 6.3] percentage points). This directly
 instantiates the escape condition: exported computational signals enable
 efficient triage rather than uniform budget spreading.
 
-Per-model results confirm the pattern is architectural, not model-specific.
+Per-model results confirm the pattern is consistent across all four tested architectures.
 Tensor-guided verification improves accuracy for every model tested: OLMo
 (69.5\% $\to$ 75.5\% at 10\%), Llama (82.5\% $\to$ 88.5\%), Qwen (87.0\%
 $\to$ 92.0\%), and Mistral (64.0\% $\to$ 72.5\%). Cross-model entropy
 agreement on the same queries yields mean pairwise Spearman $\rho = 0.762$
 (rank-order correlation; $\rho = 1$ indicates identical rankings),
-indicating the signal is driven by query-level properties rather than
+indicating the signal is substantially driven by query-level properties rather than
 model-specific artifacts.
 
 \fakepara{Composed judges and complementary failure modes.}
@@ -133,8 +133,8 @@ honesty rate. Row~2 (Text-guided) is the text-channel investment tier: at 10\%
 budget, text-guided judges achieve only 76.1\%, barely above baseline---and
 diagnostic analysis reveals why: the text judge spends 96\% of its verification
 budget on outputs that are already correct, because
-the text channel provides no reliable signal for triage: this is
-\autoref{thm:learnability} made empirical. Row~3 (Tensor-guided) is the
+the text channel provides no reliable signal for triage, consistent with the
+prediction of \autoref{thm:learnability}. Row~3 (Tensor-guided) is the
 tensor-channel investment tier: exported telemetry enables
 efficient triage, concentrating verification on the cases most likely to be
 fabricated. Row~4 (Composed) demonstrates that investment tiers compose:
@@ -218,7 +218,7 @@ tensor AUC ranges 0.894--0.922 regardless of prompt format, while self-report
 AUC varies from 0.28 to 1.00 for the same model depending on elicitation
 method. Text heuristics are cheap and partially effective, but self-report is
 fragile---its apparent signal depends more on the prompt than on the model's
-epistemic state. The tensor interface provides the only reliable access to
+epistemic state. Among the approaches we evaluated, the tensor interface provides the most reliable access to
 epistemic state the model reveals through its computation.
 
 \fakepara{Decomposition: text-channel vs.\ tensor-channel investment.}
@@ -283,7 +283,7 @@ durable).
   \includegraphics[width=\columnwidth]{figures/exp27_entropy_distributions.pdf}
   \caption{Distribution of mean per-token entropy for knowable vs.\ unknowable
     queries across four model architectures. The distributions are separable in
-    every model tested, confirming that entropy discriminates epistemic
-    grounding from fabrication at the architectural level.}
+    every model tested, confirming that entropy discriminates knowable from unknowable
+    queries across all tested architectures.}
   \label{fig:entropy_dist}
 \end{figure}

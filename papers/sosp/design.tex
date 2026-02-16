@@ -181,7 +181,7 @@ the one it actually performed.
 Independent work on persona monitoring confirms this asymmetry: activation projections reveal
 that models adopt distinct internal configurations for different epistemic conditions even when
 producing textually similar outputs~\cite{lu2026assistantaxissituatingstabilizing}. This asymmetry is the foundation of the
-adversarial robustness argument: computational signals (entropy, attention
+adversarial robustness argument: under current training objectives, computational signals (entropy, attention
 geometry) cannot be independently controlled by the model without changing the
 generation process itself, unlike behavioral signals (response length, hedging
 patterns) that can be adapted through training without altering what the model
@@ -211,9 +211,9 @@ in standard frameworks. The interface is:
 \end{verbatim}
 
 We provide a reference implementation supporting OLMo models that demonstrates
-the interface is practical. The overhead is minimal: storing per-token entropy
-and summarizing attention patterns adds negligible latency compared to generation
-itself.
+the interface is practical. The overhead is modest: storing per-token entropy
+and summarizing attention patterns adds approximately 2--7\% latency depending
+on signal set, compared to generation itself.
 
 \fakepara{What the tensor provides.}
 The entropy trace provides a falsifiability signal. If a model claims certainty

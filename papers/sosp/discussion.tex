@@ -70,11 +70,11 @@ visual indicators requires HCI research beyond the scope of this paper.
 uses OLMo~\cite{olmo2025olmo3}, which permits full inspection of intermediate layer representations. The bounded verification
 experiment (\autoref{tab:budget}) tests four architectures spanning 4B--8B
 parameters (billions of learned numerical weights) and four distinct training pipelines. The self-report inversion
-finding is universal across all four. We do not claim exhaustive coverage of
-all model families, but the consistency across architecturally diverse models
+finding is consistent across all four. We do not claim exhaustive coverage of
+all model families, but the consistency across four distinct model families
 suggests the findings are not idiosyncratic.
 
-\fakepara{Domain-specific calibration.} The tensor signal is not uniformly discriminative across domains. In preliminary experiments on citation generation, entropy was \emph{lower} for fabricated citations than for real ones where the model generates plausible fakes more fluently than it retrieves specific facts. This confirms that the tensor measures generation confidence (``epistemic truth''), not truthfulness directly.  However, this blind spot is precisely where bounded verification is cheapest: citation verification has low compositional complexity (check the DOI, query the database,) which places it well within a bounded supervisor's budget. The tensor and the bounded judge have complementary failure modes as the tensor catches uncertain fabrication where verification is expensive and the judge catches confident fabrication where verification is cheap.  Composing them allocates verification resources to the failure class each is suited for, rather than spreading a finite budget across the full space.
+\fakepara{Domain-specific calibration.} The tensor signal is not uniformly discriminative across domains. In preliminary experiments on citation generation, entropy was \emph{lower} for fabricated citations than for real ones where the model generates plausible fakes more fluently than it retrieves specific facts. This supports the interpretation that the tensor measures generation confidence (``epistemic truth''), not truthfulness directly.  However, this blind spot is precisely where bounded verification is cheapest: citation verification has low compositional complexity (check the DOI, query the database,) which places it well within a bounded supervisor's budget. The tensor and the bounded judge have complementary failure modes as the tensor catches uncertain fabrication where verification is expensive and the judge catches confident fabrication where verification is cheap.  Composing them allocates verification resources to the failure class each is suited for, rather than spreading a finite budget across the full space.
 
 \fakepara{Format-constraint variation: preliminary observations.}
 The cost surface is not flat across content formats.

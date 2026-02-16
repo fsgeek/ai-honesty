@@ -4,8 +4,9 @@
 \section{Related Work}\label{sec:related}
 
 Our contribution is a formal impossibility result. Prior work documents
-symptoms; we identify the cause. Prior work proposes treatments; we explain why
-they fail to cure.
+symptoms; we formalize one structural cause. Prior work proposes treatments; we
+explain why they cannot fully resolve the verification problem under text-only
+observation.
 
 \fakepara{Hallucination taxonomies.} Extensive empirical work catalogs LLM
 fabrication patterns: citation hallucination in academic
@@ -64,8 +65,8 @@ multiple responses and clustering by meaning to estimate uncertainty---the most
 sophisticated text-channel approach to date. By measuring agreement
 \emph{between} outputs, it partially addresses gaming. But it remains
 text-channel: the clustering operates on generated text, and a bounded
-supervisor evaluating semantic equivalence is subject to the observation limits
-our theorems describe. Our tensor interface extracts signals from the
+supervisor evaluating semantic equivalence still operates on text outputs
+and remains subject to gaming in the limit. Our tensor interface extracts signals from the
 computation that produced a single output---signals the model cannot
 independently control. The two are complementary: semantic entropy measures
 output-level consistency; the tensor interface measures computation-level
@@ -109,4 +110,4 @@ formal impossibility result and demonstrate escape as a minimal
 \emph{addition} to current architectures.
 
 The gap we fill is formalization: we prove \emph{why} the problem is structural
-and \emph{what} architectural properties are required to escape it.
+and identify architectural properties that enable escaping it.
