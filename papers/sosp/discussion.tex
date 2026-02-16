@@ -46,9 +46,12 @@ endpoints) is a natural next step.
 \fakepara{Signal access as provider choice.}
 The tensor signals we measure---entropy, log-probabilities, attention
 patterns---are byproducts of inference that providers can expose or withhold.
-Some API providers have offered token-level log-probabilities and subsequently
-removed access. This is not a technical limitation; the signals exist in the
-computation regardless. Responsibility Concentration
+In practice, access to these signals has eroded as models have grown more
+capable: log-probabilities were available on early completion endpoints,
+partially reintroduced for some chat models, and remain unsupported for the
+newest reasoning models---precisely the systems whose complex outputs are
+hardest to verify externally. This is not a technical limitation; the signals
+exist in the computation regardless. Responsibility Concentration
 (\autoref{cor:responsibility}) formalizes the consequence: when the provider
 retains exclusive access to epistemic telemetry, only the provider can verify
 epistemic honesty. A provider could use these signals internally to build
