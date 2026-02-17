@@ -13,8 +13,8 @@ questions remain open.
 \item The tensor interface is the optimal design. We demonstrate existence, not
   optimality.
 \item These findings generalize to all architectures. Our empirical work spans
-  four open-weight model families; closed-weight and significantly larger models
-  may exhibit different signal profiles.
+  nine model families up to 235B parameters; closed-weight models whose providers
+  do not expose log-probabilities remain untested.
 \end{itemize}
 
 \fakepara{Future work: Adversarial robustness.}
@@ -39,56 +39,47 @@ maintain epistemic integrity across composition is an open architectural problem
 Our bounded verification experiment tests four model families (OLMo-3, Llama-3.1,
 Qwen3, Mistral) and finds consistent tensor advantage across all of them. Mean
 pairwise Spearman $\rho = 0.762$ for entropy signals on the same queries
-indicates the signal is architectural rather than model-specific. Extending to
-closed-weight models that expose logits through API (e.g., via log-probability
-endpoints) is a natural next step.
+supports the interpretation that the signal is architectural rather than
+model-specific.
+%
+We validated this finding via API using Together.ai's serverless endpoints
+across five additional architectures spanning 4B to 235B parameters, including
+mixture-of-experts models (Llama-4 Maverick 128E, Qwen3-235B) and a
+Google-family architecture (Gemma 3n). Using only top-5 log-probabilities
+(renormalized as a lower bound on full-vocabulary entropy), all five models
+discriminate knowable from unknowable queries with AUC 0.65--0.88 (mean
+entropy). Preliminary analysis suggests optimal aggregation is
+architecture-dependent: peak entropy outperforms mean entropy for
+mixture-of-experts models (AUC $0.65 \to 0.90$ for Llama-4 Maverick),
+while entropy variance is most discriminative for dense models.
+With architecture-appropriate aggregation, all models achieve AUC $> 0.85$.
+Cross-model $\rho = 0.36$ in the API set is lower than the local $0.762$,
+likely reflecting the greater architectural diversity (five families, 4B--235B)
+and the top-5 approximation, rather than signal absence.
 
 \fakepara{Signal access as provider choice.}
-The tensor signals we measure---entropy, log-probabilities, attention
-patterns---are byproducts of inference that providers can expose or withhold.
-In practice, access to these signals has eroded as models have grown more
-capable: log-probabilities were available on early completion endpoints,
-partially reintroduced for some chat models, and remain unsupported for the
-newest reasoning models---precisely the systems whose complex outputs are
-hardest to verify externally. This is not a technical limitation; the signals
-exist in the computation regardless. Responsibility Concentration
+The tensor signals we measure are byproducts of inference that providers can
+expose or withhold. In practice, access has eroded as models have grown more
+capable: log-probabilities were available on early completion endpoints but
+remain unsupported for the newest reasoning models---precisely the systems
+whose outputs are hardest to verify. Responsibility Concentration
 (\autoref{cor:responsibility}) formalizes the consequence: when the provider
 retains exclusive access to epistemic telemetry, only the provider can verify
-epistemic honesty. A provider could use these signals internally to build
-high-assurance applications---a medical summarization system backed by
-tensor-verified confidence---while offering downstream users only the text
-channel and a disclaimer. Whether to export the tensor interface is a policy
-decision with direct implications for who bears verification cost and who
-can build trustworthy applications.
-
-\fakepara{Future work: User-facing rendering.}
-How should tensor information be presented to end users? Raw entropy traces are
-not interpretable; summarization into confidence bands, uncertainty flags, or
-visual indicators requires HCI research beyond the scope of this paper.
+epistemic honesty. Whether to export the tensor interface is a policy
+decision with direct implications for who bears verification cost.
 
 \fakepara{Model specificity.} Our topological analysis (\autoref{sec:escape})
-uses OLMo~\cite{olmo2025olmo3}, which permits full inspection of intermediate layer representations. The bounded verification
-experiment (\autoref{tab:budget}) tests four architectures spanning 4B--8B
-parameters (billions of learned numerical weights) and four distinct training pipelines. The self-report inversion
-finding is consistent across all four. We do not claim exhaustive coverage of
-all model families, but the consistency across four distinct model families
-suggests the findings are not idiosyncratic.
+uses OLMo~\cite{olmo2025olmo3}, which permits full inspection of intermediate
+layer representations. The bounded verification experiment
+(\autoref{tab:budget}) tests four architectures spanning 4B--8B parameters and
+four distinct training pipelines; API validation extends to five additional
+architectures spanning 4B--235B, including mixture-of-experts models. We do not
+claim exhaustive coverage, but the consistency across nine model families and
+two observation regimes (full vocabulary and top-5 log-probabilities) suggests
+the findings are not idiosyncratic.
 
 \fakepara{Domain-specific calibration.} The tensor signal is not uniformly discriminative across domains. In preliminary experiments on citation generation, entropy was \emph{lower} for fabricated citations than for real ones where the model generates plausible fakes more fluently than it retrieves specific facts. This supports the interpretation that the tensor measures generation confidence (``epistemic truth''), not truthfulness directly.  However, this blind spot is precisely where bounded verification is cheapest: citation verification has low compositional complexity (check the DOI, query the database,) which places it well within a bounded supervisor's budget. The tensor and the bounded judge have complementary failure modes as the tensor catches uncertain fabrication where verification is expensive and the judge catches confident fabrication where verification is cheap.  Composing them allocates verification resources to the failure class each is suited for, rather than spreading a finite budget across the full space.
-
-\fakepara{Format-constraint variation: preliminary observations.}
-The cost surface is not flat across content formats.
-Tokenization analysis of generated code reveals that syntactic scaffolding
-(keywords, operators, whitespace) occupies only 11--19\% of tokens, while
-semantic content occupies 61--72\%. Conventional variable names
-(\texttt{left}, \texttt{right}, \texttt{mid}) are as low-entropy as keywords,
-forming a second \emph{semantic scaffolding} layer. The entropy trace for
-familiar code is predominantly flat, with spikes at genuine decision points.
-Scaffolding ratio varies dramatically across output types; if higher scaffolding
-concentrates informative signal into fewer tokens, tensor-guided verification
-may be more cost-effective for code than for natural text.
-We claim the manifold exists and is observable; mapping it across content
-domains is the natural next step.
+A related confound appears with epistemic refusals: models trained to decline unknowable queries produce low-entropy refusals that are entropically indistinguishable from confident factual answers. As models become more epistemically honest, the entropy signal's ability to detect dishonesty \emph{degrades}---because honest refusals and honest facts occupy the same region of entropy space.
 
 \fakepara{Sufficiency gap.} The three architectural principles (State
 Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}

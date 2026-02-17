@@ -74,12 +74,12 @@ such an inequality. The False-Correction Loop emerges: models apologize, claim
 correction, and fabricate again, because conversational fluency dominates
 factual accuracy in the effective reward signal.
 
-Reinforcement Learning from Human Feedback (RLHF)~\cite{ouyang2022instructgpt} \emph{can} teach models to
-recognize their knowledge boundaries when the reward signal is carefully
-constructed. Specialized designs like TruthRL, which use ternary rewards
-distinguishing ``correct,'' ``hallucinated,'' and ``abstain,'' show measurable
-improvements: 28.9\% hallucination reduction and 21.1\% truthfulness
-improvement on knowledge-intensive benchmarks~\cite{truthrl}.
+Reinforcement Learning from Human Feedback
+(RLHF)~\cite{ouyang2022instructgpt} \emph{can} teach models to recognize
+knowledge boundaries when the reward signal is carefully constructed.
+TruthRL~\cite{truthrl}, which uses ternary rewards distinguishing ``correct,''
+``hallucinated,'' and ``abstain,'' demonstrates 28.9\% hallucination reduction
+and 21.1\% truthfulness improvement on knowledge-intensive benchmarks.
 
 However, RLHF optimizes for text-channel reward, which are precisely the channel that
 our impossibility theorem (\autoref{sec:formal}) shows is insufficient for

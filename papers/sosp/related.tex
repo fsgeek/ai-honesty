@@ -27,6 +27,20 @@ oracle claims against activation data: Provenance Binding applied to the
 interpretation process itself.
 
 
+\fakepara{Mechanistic interpretability.} A substantial body of work seeks to
+understand model internals: transformer
+circuits~\cite{elhage2021mathematical}, automated neuron
+explanation~\cite{bills2023language}, and sparse feature
+decomposition~\cite{bricken2023monosemanticity}. These efforts aim to
+understand \emph{what} a model has learned and \emph{why} it produces
+particular outputs. Our work is complementary: we do not require
+understanding a model's learned circuits, only that the signals produced
+during inference---entropy traces, attention geometry---differ measurably
+between grounded and fabricated generation. Interpretability asks why;
+observability asks whether. The signals we use are coarser than
+mechanistic analysis but cheaper to extract and sufficient for verification
+triage.
+
 \fakepara{Persona representations.} Lu et
 al.~\cite{lu2026assistantaxissituatingstabilizing} identify a dominant
 ``Assistant Axis'' in activation space capturing how strongly a model inhabits
@@ -91,23 +105,14 @@ observation models with bounded supervision cannot guarantee epistemic honesty,
 but systems that export structured epistemic state can escape the impossibility
 class.
 
-\fakepara{Epistemic evaluation frameworks.} Recent work proposes benchmarks
-and frameworks for measuring epistemic properties of language
-models~\cite{wang2024epistemic}. The Epistemic Alignment framework explicitly
-notes that current interfaces do not let users specify uncertainty, sourcing,
-or perspectives in structured ways, and that providers lack verification tools.
-These critiques align with our analysis but stop at interface desiderata and
-policy analysis. We provide the formal impossibility that explains \emph{why}
-text-only evaluation cannot suffice, and the tensor interface that demonstrates
-a concrete escape.
-
-\fakepara{Epistemic agent architectures.} Chen et
-al.~\cite{chen2025epistemic} propose architectures with explicit propositions,
-justification graphs, and contradiction detection---closest in spirit to our
-escape conditions. However, these are framed as \emph{replacements} for
-stochastic generation, not additions. We derive the tensor interface from a
-formal impossibility result and demonstrate escape as a minimal
-\emph{addition} to current architectures.
+\fakepara{Epistemic evaluation and agent architectures.} Wang et
+al.~\cite{wang2024epistemic} note that current interfaces lack structured ways
+to specify uncertainty or sourcing; we provide the formal impossibility
+explaining \emph{why} text-only evaluation cannot suffice. Chen et
+al.~\cite{chen2025epistemic} propose architectures with explicit propositions
+and justification graphs---closest in spirit to our escape conditions---but
+frame these as \emph{replacements} for stochastic generation. We derive the
+tensor interface as a minimal \emph{addition} to current architectures.
 
 The gap we fill is formalization: we prove \emph{why} the problem is structural
 and identify architectural properties that enable escaping it.

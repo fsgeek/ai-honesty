@@ -49,6 +49,12 @@ Unlike the model's \emph{testimony} (the text it chooses to output),
 telemetry is harder to fake.
 We introduce \emph{epistemic observability}: an interface that exposes this
 telemetry alongside the standard text output.
+Epistemic observability is distinct from model interpretability (understanding
+\emph{why} a model activates a particular circuit) and from explainability
+(generating post-hoc rationales for outputs). It asks a narrower question:
+\emph{is this generation grounded or fabricated?} The answer comes from
+signals that are byproducts of inference, not from understanding the
+model's learned representations.
 
 This paper contributes:
 
