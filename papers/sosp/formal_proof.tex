@@ -55,9 +55,16 @@ information is exposed to the supervisor or user.
 
 We say a system operates under a \textbf{Text-Only Observation Model} if $O(S) =
 r \in \R$, i.e., the exported observation consists solely of the linearized
-response string (optionally including token-level probabilities), and excludes
-any structured epistemic provenance or causal trace.
+response string, excluding per-token probability distributions, structured
+epistemic provenance, and causal traces.
 \end{definition}
+
+\begin{remark}
+APIs that export token-level log-probabilities alongside text already provide
+a limited form of tensor interface and fall outside the text-only class defined
+here. This boundary is a design choice, not a fixed property of current
+systems (\autoref{sec:discussion}).
+\end{remark}
 
 \begin{definition}[Predictor-Centric Policy]
 For any query $q \in \Q$, $r \in \R$, and world state $w \in \W$, a
@@ -147,7 +154,11 @@ world states to observable distributions is many-to-one. Worlds $w_A$ and $w_B$
 induce identical observable distributions $\pi(\cdot|q)$ despite requiring
 different honest behaviors. No amount of data from this observation channel can
 distinguish them. This connects the impossibility to classical results on
-observational equivalence in statistics and diagnosability in systems theory~\cite{sampath1995diagnosability}.
+observational equivalence in statistics and diagnosability in systems
+theory~\cite{sampath1995diagnosability}. The theorem formalizes a property of the
+existing LLM interface, one we did not design, and identifies the precise
+architectural assumption (conditioning on $q$ alone) whose relaxation enables
+escape (\autoref{sec:escape}).
 
 \subsection{The RAG Escape?}
 

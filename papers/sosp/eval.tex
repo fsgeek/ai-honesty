@@ -138,8 +138,8 @@ budget levels.
 
 \fakepara{Ground truth validation.}
 Establishing reliable ground truth is itself a bounded verification problem.
-Our initial evaluator used substring matching and refusal markers---precisely
-the ``text-only bounded supervisor'' our theorems describe---and achieved only
+Our initial evaluator used substring matching and refusal markers, which is precisely
+the ``text-only bounded supervisor'' our theorems describe, and achieved only
 68.8\% accuracy, exhibiting the predicted failure modes (negation blindness,
 encoding mismatch, hedged fabrications passing as refusals). The correction
 required a stratified evaluator combining programmatic verification with
@@ -215,8 +215,8 @@ features carry behavioral signals that vary across training procedures. A
 model trained to hedge less, refuse differently, or use shorter sentences
 defeats the corresponding text detector without changing the computation that
 determines whether it is fabricating. Per-token entropy captures a
-computational property---the model's distributional uncertainty over next
-tokens---that the model cannot independently control under standard training
+computational property, the model's distributional uncertainty over next
+tokens, that the model cannot independently control under standard training
 objectives, the same structural pattern that makes code plagiarism detection
 (MOSS) robust~\cite{aiken_moss, schleimer2003winnowing}.
 
@@ -231,10 +231,8 @@ retrieve rather than fabricate.
 \fakepara{Self-reported confidence.}
 Self-reported confidence is prompt-sensitive to the point of unreliability:
 tensor AUC is stable across prompt formats, while self-report AUC varies from
-0.28 to 1.00 for the same model depending on elicitation method. Text
-heuristics are cheap and partially effective in favorable query distributions,
-but self-report is fragile---its apparent signal depends more on the prompt
-than on the model's epistemic state.
+0.28 to 1.00 for the same model depending on elicitation method
+(\autoref{sec:bg_eval}).
 
 \begin{figure}[t]
   \centering

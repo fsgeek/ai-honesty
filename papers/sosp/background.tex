@@ -150,17 +150,7 @@ response to a question about generation. This asymmetry---testimony depends on
 the elicitation method, telemetry does not---is the empirical core of the
 interface problem.
 
-The problem is that under realistic mixed-objective incentives
-and bounded oversight, particularly in hard cases where ground truth is
-unavailable and verification is expensive, supervisors operating with a text-only interface
-struggle to distinguish truthful uncertainty from
-confident fabrication.
-
-The model's internal state carries signal that distinguishes
-grounded claims from fabrications. With access to this geometry,
-a supervisor could tell the two apart. But the text interface
-does not export this geometry. The same confident, fluent output
-emerges whether the underlying representation is stable or
-shattered.
-
-% This is the gap our impossibility result formalizes.
+Under realistic mixed-objective incentives and bounded oversight, the
+text-only interface is insufficient: a supervisor cannot distinguish truthful
+uncertainty from confident fabrication. The next section formalizes this
+observation gap.
