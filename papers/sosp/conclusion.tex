@@ -6,22 +6,14 @@
 Systems incorporating language model components must decide how much to spend
 on verification and where to spend it. This paper provides the cost surface
 for that decision.
-We have shown that epistemic honesty is unverifiable for systems operating under
-text-only observation models with bounded supervision. It is a structural property of the interface: the channel through which
-these systems communicate discards the epistemic metadata that would make
-verification possible. This impossibility establishes the floor of the cost
-surface: below this line, text-channel investment cannot improve assurance.
-
-Systems that export structured
-epistemic state (provenance, entropy traces, attention topology) escape the
-impossibility class. Our epistemic observability tensor interface demonstrates this escape is
-achievable with current architectures and minimal overhead.
-Under bounded verification,
-tensor-guided judges at 10\% budget outperform text-guided judges at 30\%
-budget, a 3$\times$ reduction in verification budget for equivalent accuracy.
-
-The engineering question is not whether to verify, but how much verification
-to buy and at which tier. 
+Epistemic honesty is unverifiable under text-only observation with bounded
+supervision---a structural property of the interface, not a capability gap.
+Systems that export structured epistemic state escape this class. Under
+length-controlled evaluation, no text-channel feature generalizes across
+architectures; per-token entropy is the only signal that does.
+Tensor-guided judges outperform text baselines at every budget level
+(+2.5--3.9pp). The engineering question is not whether to verify, but how
+much verification to buy and at which tier.
 % A brainstorming tool needs Tier~0. A medical system
 % needs Tier~2. The cost surface tells you what each investment buys, and
 % preliminary observations indicate that content format modulates the tradeoff.

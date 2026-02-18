@@ -73,6 +73,8 @@ tensor format, without architectural changes to current transformers
 (\autoref{sec:escape}).
 
 \fakepara{Empirical cost surface of verification.} We map the cost
-surface across text-only and tensor-augmented verification strategies,
-demonstrating that tensor-guided triage at 10\% budget outperforms
-text-only verification at 30\% budget (\autoref{sec:eval}).
+surface across text-only and tensor-augmented verification strategies.
+Under length-controlled evaluation, no text-channel feature exceeds pooled
+AUC 0.70; per-token entropy is the only signal that generalizes across
+architectures. Tensor-guided triage outperforms text baselines at every
+budget level (\autoref{sec:eval}).

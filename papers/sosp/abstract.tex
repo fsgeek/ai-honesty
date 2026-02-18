@@ -11,10 +11,11 @@
     To overcome this, we introduce epistemic observability and construct a tensor interface that
     escapes this class by exporting internal computational signals, which are entropy traces and
     attention summaries, that the model cannot independently control under current training objectives.
-    Under bounded verification, tensor-guided judges at 10\% budget
-    outperform text-guided judges at 30\% budget (81.7\% vs.\ 78.3\%
-    end-to-end accuracy, averaged across four architectures): the tensor
-    enables a 3$\times$ reduction in verification budget for equivalent accuracy.
+    Under a length-controlled evaluation where text-channel features collapse
+    (no text feature exceeds pooled AUC 0.70), per-token entropy remains
+    discriminative (pooled AUC 0.757), and tensor-guided judges outperform
+    text baselines at every verification budget level (+2.5--3.9pp, averaged
+    across four architectures).
     Systems engineers building with language model
     components need to know what each level of verification investment buys.
     This paper provides the cost surface for that decision.

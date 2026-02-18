@@ -18,39 +18,16 @@ cheap to generate and expensive to verify, placing supervisors in the hallucinat
 regime where gradient signal cannot distinguish truth from fabrication. The
 taxonomies document the symptom; our theorems identify the structural cause.
 
-\fakepara{Activation interpretation.} Activation
-Oracles~\cite{karvonen2025activation} train LLMs to interpret other models'
-internal states, addressing State Exteriority. However, the oracle's
-text outputs are themselves subject to bounded supervision---the verification
-problem recurs at the meta-level. Full escape requires independently verifying
-oracle claims against activation data: Provenance Binding applied to the
-interpretation process itself.
-
-
-\fakepara{Mechanistic interpretability.} A substantial body of work seeks to
-understand model internals: transformer
-circuits~\cite{elhage2021mathematical}, automated neuron
-explanation~\cite{bills2023language}, and sparse feature
-decomposition~\cite{bricken2023monosemanticity}. These efforts aim to
-understand \emph{what} a model has learned and \emph{why} it produces
-particular outputs. Our work is complementary: we do not require
-understanding a model's learned circuits, only that the signals produced
-during inference---entropy traces, attention geometry---differ measurably
-between grounded and fabricated generation. Interpretability asks why;
-observability asks whether. The signals we use are coarser than
-mechanistic analysis but cheaper to extract and sufficient for verification
-triage.
-
-\fakepara{Persona representations.} Lu et
-al.~\cite{lu2026assistantaxissituatingstabilizing} identify a dominant
-``Assistant Axis'' in activation space capturing how strongly a model inhabits
-its trained helpful persona. Post-training tethers models to this region, but
-loosely: meta-reflective conversations cause measurable persona drift invisible
-in text output. This provides independent activation-level evidence that
-internal model state diverges from text behavior---the same structural gap our
-impossibility results formalize. Their axis measures \emph{persona state}; our
-tensor interface measures \emph{epistemic state}. Both require observation
-beyond the text channel.
+\fakepara{Model internals.} A substantial body of work examines model internal
+states: transformer circuits~\cite{elhage2021mathematical}, sparse
+features~\cite{bricken2023monosemanticity}, Activation
+Oracles~\cite{karvonen2025activation} that train LLMs to interpret other
+models' internals, and the ``Assistant Axis''~\cite{lu2026assistantaxissituatingstabilizing} showing
+that internal persona state diverges from text behavior. Our work is
+complementary but narrower: we do not require understanding a model's learned
+circuits, only that inference-time signals differ measurably between grounded
+and fabricated generation. Interpretability asks why; observability asks
+whether.
 
 \fakepara{RLHF critiques.} Work on sycophancy~\cite{perez2022discovering},
 reward hacking~\cite{gao2023scaling}, and the tension between helpfulness and
@@ -59,32 +36,20 @@ degrade factual accuracy. Our \autoref{thm:learnability} formalizes why:
 bounded supervisors cannot distinguish plausible fabrications from truthful
 responses, so the learning signal is systematically corrupted.
 
-\fakepara{Retrieval augmentation.} RAG systems~\cite{lewis2020retrieval} and
-grounded generation approaches attempt to escape fabrication by conditioning on
-external documents. Our analysis shows this is necessary but not sufficient:
-State Exteriority addresses \autoref{thm:representational}, but without
-Verification Independence, the learning problem
-(\autoref{thm:learnability}) persists.
-
 \fakepara{Uncertainty quantification.} Calibration methods, conformal
 prediction~\cite{angelopoulos2021gentle}, and verbalized
-uncertainty~\cite{kadavath2022language} attempt to surface model confidence. Our
-results explain why these approaches are fundamentally limited under text-only
-interfaces: the observation model discards the internal state that would
-distinguish calibrated uncertainty from confident fabrication.
-
-\fakepara{Semantic entropy.} Kuhn et
-al.~\cite{kuhn2023semanticuncertaintylinguisticinvariances} propose sampling
-multiple responses and clustering by meaning to estimate uncertainty---the most
-sophisticated text-channel approach to date. By measuring agreement
-\emph{between} outputs, it partially addresses gaming. But it remains
+uncertainty~\cite{kadavath2022language} attempt to surface model confidence
+through the text channel. Kuhn et
+al.~\cite{kuhn2023semanticuncertaintylinguisticinvariances} advance this with
+semantic entropy: sampling multiple responses and clustering by meaning. This
+is the most sophisticated text-channel approach to date, partially addressing
+gaming by measuring agreement \emph{between} outputs. But it remains
 text-channel: the clustering operates on generated text, and a bounded
-supervisor evaluating semantic equivalence still operates on text outputs
-and remains subject to gaming in the limit. Our tensor interface extracts signals from the
-computation that produced a single output---signals the model cannot
-independently control. The two are complementary: semantic entropy measures
-output-level consistency; the tensor interface measures computation-level
-confidence.
+supervisor evaluating semantic equivalence remains subject to gaming in the
+limit. Our tensor interface extracts signals from the computation that produced
+a single output---signals the model cannot independently control. Semantic
+entropy and tensor observability are complementary: one measures output-level
+consistency, the other computation-level confidence.
 
 \fakepara{Impossibility results in LLMs.} Xu et
 al.~\cite{xu2024hallucination} prove that hallucination is inevitable for LLMs
