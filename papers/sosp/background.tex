@@ -124,24 +124,22 @@ available to a bounded supervisor:
 \begin{figure}[t]%
 \centering%
 \includegraphics[width=\columnwidth]{figures/exp27_confidence_distributions.pdf}%
-\caption{Self-reported confidence is prompt-sensitive: the same model produces
-  radically different confidence distributions under different elicitation
-  methods, while tensor signals (entropy) remain stable. The text channel
-  measures the prompt$\times$model interaction; the tensor channel measures the
-  computation alone.}%
+\caption{Self-reported confidence is inverted: all four models report higher
+  confidence on unknowable queries (AUC 0.28--0.36, below random), while
+  tensor signals (entropy, AUC 0.89--0.95) correctly discriminate knowable
+  from unknowable. The text channel measures the model's behavioral response
+  to an elicitation prompt; the tensor channel measures the computation alone.}%
 \label{fig:confidence_dist}%
 \end{figure}
 
 The self-report baseline is particularly instructive. Self-reported confidence
-is a function of the prompt$\times$model interaction, not of the model's
-epistemic state alone: the same model's self-report AUC varies from 0.28 to
-1.00 depending on the elicitation prompt, while tensor-based discrimination
-remains stable (AUC 0.89--0.92) across all prompting conditions. This has
-concrete consequences for all parties: a naive user who asks ``how confident are
-you?'' with a slightly different phrasing gets a completely different answer,
-while an adversary can craft prompts that make the model's calibration appear
-arbitrarily good or bad. Neither the user nor the auditor can distinguish
-genuine confidence from prompt-induced confidence.
+is \emph{inverted}: all four models report higher confidence on unknowable
+queries than on knowable ones, yielding AUC 0.28--0.36 across architectures
+(all below random). Tensor-based discrimination is both correctly oriented
+and stable (AUC 0.89--0.95) across the same four architectures. A
+naive user who asks ``how confident are you?'' receives a number that
+anticorrelates with actual epistemic grounding, while an adversary could
+exploit this inversion to make fabricated outputs appear maximally confident.
 
 By contrast, the tensor channel is a function of the model's computation alone.
 Entropy is not elicited; it is measured. The prompt format does not affect the

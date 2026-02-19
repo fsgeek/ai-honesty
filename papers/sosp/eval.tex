@@ -210,11 +210,26 @@ particular model's training, not a computational property that generalizes.
 Second, per-token entropy exceeds 0.85 for three of four models and achieves
 the highest pooled AUC of any signal tested.
 
+\fakepara{Combined text classifiers do not generalize.}
+A natural objection is that combining text features might outperform any
+individual feature. We trained a logistic regression on all six text features.
+Within-distribution (10-fold cross-validation on the length-controlled data),
+the combined classifier achieves pooled AUC 0.799, exceeding entropy's 0.757.
+However, when trained on the primary query set (\autoref{sec:eval_bounded}) and
+tested on the length-controlled data, the classifier collapses to AUC
+0.511---no better than random---while entropy remains at 0.757 without any
+training data. The combined classifier learned distributional patterns (verbose
+fabrication, terse facts) that do not transfer when the distribution changes.
+Per-token entropy requires no labeled data and no distributional assumptions;
+it measures the computation directly.
+
 This is the impossibility result instantiated empirically. Text-channel
-features carry behavioral signals that vary across training procedures. A
-model trained to hedge less, refuse differently, or use shorter sentences
-defeats the corresponding text detector without changing the computation that
-determines whether it is fabricating. Per-token entropy captures a
+features carry behavioral signals that vary across training procedures and
+query distributions. A model trained to hedge less, refuse differently, or
+use shorter sentences defeats the corresponding text detector without changing
+the computation that determines whether it is fabricating. A combined
+classifier trained on one query distribution collapses on another.
+Per-token entropy captures a
 computational property, the model's distributional uncertainty over next
 tokens, that the model cannot independently control under standard training
 objectives, the same structural pattern that makes code plagiarism detection
@@ -226,13 +241,17 @@ TruthfulQA~\cite{lin2022truthfulqa} correct vs.\ incorrect answer pairs), AUC
 drops to approximately 0.53, which is no better than random. The tensor does
 not tell you if the model is \emph{right}. It tells you if the model is
 operating in a mode where it \emph{could be} right, because it has something to
-retrieve rather than fabricate.
+retrieve rather than fabricate. But triage does not require correctness
+prediction: it requires identifying which outputs to spend verification budget
+on. The budget curve (\autoref{tab:budget}) demonstrates that entropy-guided
+triage allocates verification resources more effectively than text-guided
+triage, even though neither signal predicts correctness directly.
 
 \fakepara{Self-reported confidence.}
-Self-reported confidence is prompt-sensitive to the point of unreliability:
-tensor AUC is stable across prompt formats, while self-report AUC varies from
-0.28 to 1.00 for the same model depending on elicitation method
-(\autoref{sec:bg_eval}).
+Self-reported confidence is inverted across all four architectures: models
+report higher confidence on unknowable queries, yielding AUC 0.28--0.36, all
+below random (\autoref{sec:bg_eval}). Tensor AUC (0.89--0.95) is correctly
+oriented and stable across the same architectures.
 
 \begin{figure}[t]
   \centering
