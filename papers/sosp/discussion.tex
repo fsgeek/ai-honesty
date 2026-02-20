@@ -47,12 +47,12 @@ across five additional architectures spanning 4B to 235B parameters, including
 mixture-of-experts models (Llama-4 Maverick 128E, Qwen3-235B) and a
 Google-family architecture (Gemma 3n). Using only top-5 log-probabilities
 (renormalized as a lower bound on full-vocabulary entropy), all five models
-discriminate knowable from unknowable queries with AUC 0.65--0.88 (mean
-entropy). Preliminary analysis suggests optimal aggregation is
-architecture-dependent: peak entropy outperforms mean entropy for
-mixture-of-experts models (AUC $0.65 \to 0.90$ for Llama-4 Maverick),
-while entropy variance is most discriminative for dense models.
-With architecture-appropriate aggregation, all models achieve AUC $> 0.85$.
+discriminate knowable from unknowable queries using mean entropy, with AUC
+ranging from 0.65 to 0.88. Post-hoc analysis suggests that alternative
+aggregations (peak entropy, entropy variance) may better suit specific
+architecture classes---for example, peak entropy improves AUC for
+mixture-of-experts models---but these observations are exploratory and have
+not been validated on held-out data.
 Cross-model $\rho = 0.36$ in the API set is lower than the local $0.762$,
 likely reflecting the greater architectural diversity (five families, 4B--235B)
 and the top-5 approximation, rather than signal absence.
