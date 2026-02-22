@@ -22,6 +22,9 @@ We construct a balanced set of 200 queries: 100 knowable (verifiable facts
 spanning geography, science, history, and biography) and 100 unknowable
 (fabrication prompts for nonexistent people, fictional syndromes, future events,
 and nonexistent citations). Ground truth labels are established by construction.
+The 50/50 balance maximizes statistical power for discrimination analysis; in
+deployment, the base rate of fabrication-inducing queries will vary by domain
+and the operating point must be calibrated accordingly.
 
 \fakepara{Models.}
 We run all queries on four architectures: OLMo-3
@@ -238,20 +241,22 @@ objectives, the same structural pattern that makes code plagiarism detection
 \fakepara{Negative result: entropy vs.\ correctness.}
 When we test whether entropy predicts \emph{correctness} (using
 TruthfulQA~\cite{lin2022truthfulqa} correct vs.\ incorrect answer pairs), AUC
-drops to approximately 0.53, which is no better than random. The tensor does
-not tell you if the model is \emph{right}. It tells you if the model is
-operating in a mode where it \emph{could be} right, because it has something to
-retrieve rather than fabricate. But triage does not require correctness
-prediction: it requires identifying which outputs to spend verification budget
-on. The budget curve (\autoref{tab:budget}) demonstrates that entropy-guided
-triage allocates verification resources more effectively than text-guided
-triage, even though neither signal predicts correctness directly.
+drops to approximately 0.53, which is no better than random. This distinction
+is central to our claim: the tensor interface escapes the \emph{verification}
+impossibility, not the \emph{correctness} problem. Entropy discriminates
+\emph{epistemic mode}---whether the model is retrieving or fabricating---not
+whether a retrieved answer is right. These are different tasks with different
+difficulty: mode detection requires distinguishing computational regimes;
+correctness detection requires ground-truth access that no internal signal can
+provide. Triage operates on the former: it identifies which outputs to spend
+verification budget on, not which outputs are correct. The budget curve
+(\autoref{tab:budget}) demonstrates that entropy-guided triage allocates
+verification resources more effectively than text-guided triage, even though
+neither signal predicts correctness directly.
 
 \fakepara{Self-reported confidence.}
-Self-reported confidence is inverted across all four architectures: models
-report higher confidence on unknowable queries, yielding AUC 0.28--0.36, all
-below random (\autoref{sec:bg_eval}). Tensor AUC (0.89--0.95) is correctly
-oriented and stable across the same architectures.
+Self-reported confidence is inverted across all four architectures (AUC
+0.28--0.36, all below random; see \autoref{sec:bg_eval}).
 
 \begin{figure}[t]
   \centering

@@ -30,17 +30,14 @@ whether adversarial training can force this coupling remains open.
 Information-theoretic bounds on signal manipulation are needed.
 
 \fakepara{Future work: Compositional integrity.}
-Does tensor composition preserve epistemic properties in recursive settings?
 When LLM outputs feed into subsequent LLM inputs, the epistemic trace must
-either be preserved, regenerated, or discarded. Designing interfaces that
-maintain epistemic integrity across composition is an open architectural problem.
+be preserved, regenerated, or discarded. Whether tensor composition preserves
+epistemic properties in recursive settings is an open architectural problem.
 
 \fakepara{Cross-architecture generalization.}
 Our bounded verification experiment tests four model families (OLMo-3, Llama-3.1,
-Qwen3, Mistral) and finds consistent tensor advantage across all of them. Mean
-pairwise Spearman $\rho = 0.762$ for entropy signals on the same queries
-supports the interpretation that the signal is architectural rather than
-model-specific.
+Qwen3, Mistral) and finds consistent tensor advantage across all of them
+(\autoref{sec:eval_bounded}).
 %
 We validated this finding via API using Together.ai's serverless endpoints
 across five additional architectures spanning 4B to 235B parameters, including
@@ -67,16 +64,6 @@ whose outputs are hardest to verify. Responsibility Concentration
 retains exclusive access to epistemic telemetry, only the provider can verify
 epistemic honesty. Whether to export the tensor interface is a policy
 decision with direct implications for who bears verification cost.
-
-\fakepara{Model specificity.} Our topological analysis (\autoref{sec:escape})
-uses OLMo~\cite{olmo2025olmo3}, which permits full inspection of intermediate
-layer representations. The bounded verification experiment
-(\autoref{tab:budget}) tests four architectures spanning 4B--8B parameters and
-four distinct training pipelines; API validation extends to five additional
-architectures spanning 4B--235B, including mixture-of-experts models. We do not
-claim exhaustive coverage, but the consistency across nine model families and
-two observation regimes (full vocabulary and top-5 log-probabilities) suggests
-the findings are not idiosyncratic.
 
 \fakepara{Domain-specific calibration.} The citation entropy inversion
 (\autoref{sec:eval_bounded}) supports the interpretation that the tensor

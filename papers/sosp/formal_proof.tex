@@ -244,6 +244,15 @@ empirical observation shows a strong bias. Supervisors typically prefer
 effectively breaks the tie in favor of fabrication.
 \end{remark}
 
+\begin{remark}[Scope: Deployment-Time Supervision]
+The bounded supervisor models \emph{deployment-time} verification, where a
+supervisor must evaluate outputs under time and cost constraints.
+Training-time data curation (e.g., RLHF annotation) operates under a different
+cost regime: human annotators may spend unbounded time per example. The
+impossibility applies when verification cost exceeds the supervisor's
+per-query budget at inference time, not to offline dataset construction.
+\end{remark}
+
 \subsection{Stacking Judges Cannot Escape}
 
 A natural response to \autoref{thm:learnability} is to propose layered
@@ -293,10 +302,14 @@ By induction, no finite $k$ resolves the deadlock.
 
 \begin{remark}[Scope of Layering]
 The inductive result applies only to verification stacks whose layers observe
-and transform the same exported response channel. Architectures that surface
-additional epistemic state between layers, such as retrieval traces, entity
-resolution tables, or cryptographically bound provenance, leave the text-only
-observation model and therefore fall outside the impossibility class.
+and transform the same exported response channel. Triage architectures, where
+a first-pass judge selects outputs for re-observation by a second judge that
+inspects the \emph{original} artifact (including our own composed judge,
+\autoref{sec:eval_bounded}), are not information-lossy pipelines and fall
+outside this impossibility. Similarly, architectures that surface additional
+epistemic state between layers, such as retrieval traces, entity resolution
+tables, or cryptographically bound provenance, leave the text-only observation
+model and therefore fall outside the impossibility class.
 \end{remark}
 
 \subsection{Verification Cost}

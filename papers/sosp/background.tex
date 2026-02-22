@@ -50,10 +50,12 @@ The text is the testimony, whereas the telemetry are measurements of the computa
 can control its testimony; under current training objectives, it cannot
 independently control its telemetry. From a cost perspective: testimony is
 cheap to produce and cheap to inspect but unreliable; telemetry is more
-expensive to export and process but harder to game, because it is a byproduct
-of the computation rather than a product of the model's optimization objective.
-Whether adversarial training could learn to decouple the telemetry from the
-computation is an open question (\autoref{sec:discussion}).
+expensive to export and process but, under current training regimes, harder to
+game because it is a byproduct of the computation rather than a product of the
+model's optimization objective. This decoupling is an empirical property of
+existing training pipelines, not an architectural guarantee: whether
+adversarial training could learn to couple telemetry to the optimization
+objective is an open question (\autoref{sec:discussion}).
 
 \subsection{Coherence over Factuality}
 
