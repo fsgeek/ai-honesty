@@ -159,8 +159,8 @@ theory~\cite{sampath1995diagnosability}. The theorem formalizes a property of th
 existing LLM interface, one we did not design, and identifies the precise
 architectural assumption (conditioning on $q$ alone) whose relaxation enables
 escape (\autoref{sec:escape}). The result may appear simple in hindsight, but
-the architecture it describes---query in, text out, no exported
-logits---matches the dominant LLM-as-a-service interface, and recent API
+the architecture it describes (query in, text out, no exported
+logits) matches the dominant LLM-as-a-service interface, and recent API
 changes have moved to further restrict log-probability access for newer
 reasoning models. If this impossibility were well-understood, we would expect
 interface designs to reflect it; instead, the industry is expanding

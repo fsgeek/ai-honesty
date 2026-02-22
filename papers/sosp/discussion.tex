@@ -47,8 +47,8 @@ Google-family architecture (Gemma 3n). Using only top-5 log-probabilities
 discriminate knowable from unknowable queries using mean entropy, with AUC
 ranging from 0.65 to 0.88. Post-hoc analysis suggests that alternative
 aggregations (peak entropy, entropy variance) may better suit specific
-architecture classes---for example, peak entropy improves AUC for
-mixture-of-experts models---but these observations are exploratory and have
+architecture classes, for example, peak entropy improves AUC for
+mixture-of-experts models, but these observations are exploratory and have
 not been validated on held-out data.
 Cross-model $\rho = 0.36$ in the API set is lower than the local $0.762$,
 likely reflecting the greater architectural diversity (five families, 4B--235B)
