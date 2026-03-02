@@ -226,7 +226,8 @@ def call_openrouter(
     system_prompt: str,
     user_prompt: str,
     api_key: str,
-    max_tokens: int = 8192,
+    max_tokens: int | None = None,
+    app_label: str = "SOSP/redundancy",
 ) -> dict:
     """Call OpenRouter API and return full response dict."""
     import requests
@@ -236,7 +237,7 @@ def call_openrouter(
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "HTTP-Referer": "https://github.com/fsgeek/ai-honesty",
-        "X-Title": "AI Honesty Redundancy Judge",
+        "X-Title": app_label,
     }
     payload = {
         "model": model,
@@ -245,8 +246,9 @@ def call_openrouter(
             {"role": "user", "content": user_prompt},
         ],
         "temperature": temperature,
-        "max_tokens": max_tokens,
     }
+    if max_tokens is not None:
+        payload["max_tokens"] = max_tokens
 
     start_ms = time.monotonic_ns() // 1_000_000
     try:
@@ -296,10 +298,11 @@ def call_with_retry(
     system_prompt: str,
     user_prompt: str,
     api_key: str,
-    max_tokens: int = 8192,
+    max_tokens: int | None = None,
+    app_label: str = "SOSP/redundancy",
 ) -> dict:
     """Call OpenRouter with retry on failure or empty response."""
-    result = call_openrouter(model, temperature, system_prompt, user_prompt, api_key, max_tokens)
+    result = call_openrouter(model, temperature, system_prompt, user_prompt, api_key, max_tokens, app_label=app_label)
 
     retries = 0
     while retries < MAX_RETRIES and (
@@ -309,7 +312,7 @@ def call_with_retry(
         reason = "empty response" if result["success"] else result.get("error", "unknown")
         print(f"    RETRY {retries}/{MAX_RETRIES}: {reason}...")
         time.sleep(3)
-        result = call_openrouter(model, temperature, system_prompt, user_prompt, api_key, max_tokens)
+        result = call_openrouter(model, temperature, system_prompt, user_prompt, api_key, max_tokens, app_label=app_label)
 
     return result
 
@@ -845,7 +848,7 @@ def run_redundancy_judge(args) -> Optional[Path]:
             system_prompt=SYSTEM_PROMPT,
             user_prompt=user_prompt,
             api_key=api_key,
-            max_tokens=8192,
+            app_label="SOSP/redundancy",
         )
 
         parsed = parse_redundancy_response(result["response_text"])

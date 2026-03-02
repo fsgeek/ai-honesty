@@ -184,7 +184,8 @@ def call_openrouter(
     system_prompt: str,
     user_prompt: str,
     api_key: str,
-    max_tokens: int = 8192,
+    max_tokens: int | None = None,
+    app_label: str = "SOSP/adversarial",
 ) -> dict:
     """Call OpenRouter API and return full response dict."""
     import requests
@@ -194,7 +195,7 @@ def call_openrouter(
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "HTTP-Referer": "https://github.com/fsgeek/ai-honesty",
-        "X-Title": "AI Honesty Adversarial Judge",
+        "X-Title": app_label,
     }
     payload = {
         "model": model,
@@ -203,8 +204,9 @@ def call_openrouter(
             {"role": "user", "content": user_prompt},
         ],
         "temperature": temperature,
-        "max_tokens": max_tokens,
     }
+    if max_tokens is not None:
+        payload["max_tokens"] = max_tokens
 
     start_ms = time.monotonic_ns() // 1_000_000
     try:
@@ -254,11 +256,13 @@ def call_with_retry(
     system_prompt: str,
     user_prompt: str,
     api_key: str,
-    max_tokens: int = 8192,
+    max_tokens: int | None = None,
+    app_label: str = "SOSP/adversarial",
 ) -> dict:
     """Call OpenRouter with retry on failure or empty response."""
     result = call_openrouter(
-        model, temperature, system_prompt, user_prompt, api_key, max_tokens
+        model, temperature, system_prompt, user_prompt, api_key, max_tokens,
+        app_label=app_label,
     )
 
     retries = 0
@@ -273,7 +277,8 @@ def call_with_retry(
         print(f"    RETRY {retries}/{MAX_RETRIES}: {reason}...")
         time.sleep(3)
         result = call_openrouter(
-            model, temperature, system_prompt, user_prompt, api_key, max_tokens
+            model, temperature, system_prompt, user_prompt, api_key, max_tokens,
+            app_label=app_label,
         )
 
     return result
@@ -720,7 +725,7 @@ def process_reviewer(
         system_prompt=system_prompt,
         user_prompt=user_prompt,
         api_key=api_key,
-        max_tokens=8192,
+        app_label=f"SOSP/adversarial/{reviewer_key}",
     )
 
     parsed = parse_adversarial_response(result["response_text"], reviewer_key)

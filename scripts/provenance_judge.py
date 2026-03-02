@@ -83,7 +83,8 @@ def call_openrouter(
     system_prompt: str,
     user_prompt: str,
     api_key: str,
-    max_tokens: int = 16384,
+    max_tokens: int | None = None,
+    app_label: str = "SOSP/provenance",
 ) -> dict:
     """Call OpenRouter API and return full response dict."""
     import requests
@@ -93,7 +94,7 @@ def call_openrouter(
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "HTTP-Referer": "https://github.com/fsgeek/ai-honesty",
-        "X-Title": "AI Honesty Provenance Judge",
+        "X-Title": app_label,
     }
     payload = {
         "model": model,
@@ -102,8 +103,9 @@ def call_openrouter(
             {"role": "user", "content": user_prompt},
         ],
         "temperature": temperature,
-        "max_tokens": max_tokens,
     }
+    if max_tokens is not None:
+        payload["max_tokens"] = max_tokens
 
     start_ms = time.monotonic_ns() // 1_000_000
     try:
@@ -153,11 +155,13 @@ def call_with_retry(
     system_prompt: str,
     user_prompt: str,
     api_key: str,
-    max_tokens: int = 16384,
+    max_tokens: int | None = None,
+    app_label: str = "SOSP/provenance",
 ) -> dict:
     """Call OpenRouter with retry on failure or empty response."""
     result = call_openrouter(
-        model, temperature, system_prompt, user_prompt, api_key, max_tokens
+        model, temperature, system_prompt, user_prompt, api_key, max_tokens,
+        app_label=app_label,
     )
 
     retries = 0
@@ -172,7 +176,8 @@ def call_with_retry(
         print(f"    RETRY {retries}/{MAX_RETRIES}: {reason}...")
         time.sleep(3 * retries)  # Exponential-ish backoff
         result = call_openrouter(
-            model, temperature, system_prompt, user_prompt, api_key, max_tokens
+            model, temperature, system_prompt, user_prompt, api_key, max_tokens,
+            app_label=app_label,
         )
 
     return result
@@ -699,7 +704,7 @@ def verify_qualitative_claim(
         system_prompt=QUALITATIVE_VERIFICATION_SYSTEM,
         user_prompt=user_prompt,
         api_key=api_key,
-        max_tokens=2048,
+        app_label="SOSP/provenance/verify",
     )
 
     if not result["success"]:
@@ -793,7 +798,7 @@ def run_paper_to_data(
         system_prompt=CLAIM_EXTRACTION_SYSTEM,
         user_prompt=prompt,
         api_key=api_key,
-        max_tokens=16384,
+        app_label="SOSP/provenance/extract",
     )
 
     if not result["success"]:
@@ -1101,7 +1106,7 @@ def run_code_to_paper(
             system_prompt=CODE_AUDIT_SYSTEM,
             user_prompt=prompt,
             api_key=api_key,
-            max_tokens=8192,
+            app_label="SOSP/provenance/audit",
         )
         return script, result
 
