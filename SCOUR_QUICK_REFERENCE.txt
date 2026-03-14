@@ -1,0 +1,74 @@
+═══════════════════════════════════════════════════════════════════════════════
+    AI-HONESTY SACRIFICED MATERIAL - QUICK REFERENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 PUBLISH IMMEDIATELY (0 effort):
+  → docs/blog-flp-epistemic.md (118 lines, complete, ready for Medium/arXiv)
+    "FLP Impossibility Result Applied to Epistemic Honesty"
+
+🎯 HIGHEST ALTERNATE VALUE (for systems audiences):
+  → papers/sosp/intro_paxos.tex (146 lines, complete framing)
+    Use for: workshop papers, systems-venue versions, distributed systems blog
+
+🎯 FOR ARXIV EXTENDED VERSION:
+  ✓ Appendix A: TDA methodology (recover from commit e9871ea, ~202 lines)
+  ✓ Appendix B: Composition material (papers/sosp/cut_tensor_composition.tex, 50 lines)
+  ✓ Appendix C: Experiment 31 API analysis (docs/experiment31_together_api_analysis.md, 251 lines)
+
+🎯 BLOG POST PIPELINE (3-6 months):
+  1. "Why Paxos Explains Language Model Hallucinations" 
+     (use intro_paxos.tex as skeleton)
+  2. "Entropy Spikes in Code: Where Decisions Live"
+     (expand docs/entropy_code_observations.md)
+  3. "Instruction Tuning Doesn't Solve Coherence Trade-offs"
+     (alignment tax case study, commit cb8f582)
+  4. "Narrative Structure Under Pressure"
+     (how intro_composed synthesized reviewer feedback)
+
+═══════════════════════════════════════════════════════════════════════════════
+    KEY METRICS
+═══════════════════════════════════════════════════════════════════════════════
+
+Cuts made:
+  • TDA deep dive: 202 lines (Feb 7)
+  • Alignment tax: 95 lines + figure (Jan 27)
+  • Composition: 50 lines (Feb 17)
+  • Format constraints: 40 lines (Feb 17)
+  • Discussion consolidation: 100+ lines (Feb 17)
+  • Alternate intros: 5 variants created (Jan-Feb)
+
+Total preserved:
+  • 5 alternate intros (724 lines total)
+  • 1 cut file (composition, 50 lines)
+  • 6 blog drafts (500+ lines, mostly complete)
+  • 1 abandoned branch (full history with TDA + data)
+  • Supporting docs (scour reports, methodology, analysis)
+
+═══════════════════════════════════════════════════════════════════════════════
+    MOST VALUABLE MATERIAL BY AUDIENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+For Systems Researchers:
+  1. intro_paxos.tex (consensus-theory framing)
+  2. Composition material (recursive LLM architecture)
+  3. TDA methodology (attention coherence metrics)
+
+For ML/NLP Researchers:
+  1. Experiment 31 API analysis (cross-architecture generalization)
+  2. Code entropy observations (format-specific scaffolding)
+  3. Alignment tax case study (negative result on training effects)
+
+For General Audience:
+  1. FLP blog post (impossibility result explained)
+  2. Paxos blog post (intuitive consensus analogy)
+  3. Courtier/Jester metaphor (reliability patterns)
+
+═══════════════════════════════════════════════════════════════════════════════
+    CRITICAL FACT
+═══════════════════════════════════════════════════════════════════════════════
+
+Self-report inversion (AUC 0.28-0.36 across all four architectures, models report
+HIGHER confidence on fabrications) is preserved in all versions. This single
+finding justifies the entire paper and was never cut.
+
+═══════════════════════════════════════════════════════════════════════════════

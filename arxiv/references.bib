@@ -1,0 +1,413 @@
+%% References for Epistemic Honesty paper
+%% SOSP 2026
+
+%% ==========================================================================
+%% Tools and Libraries
+%% ==========================================================================
+
+@misc{tauzin2020giottotda,
+  title={giotto-tda: A Topological Data Analysis Toolkit for Machine Learning and Data Exploration},
+  author={Guillaume Tauzin and Umberto Lupo and Lewis Tunstall and Julian Burella P{\'e}rez and Matteo Caorsi and Anibal Medina-Mardones and Alberto Dassatti and Kathryn Hess},
+  year={2020},
+  eprint={2004.02551},
+  archivePrefix={arXiv},
+  primaryClass={cs.LG}
+}
+
+@misc{olmo2025olmo3,
+      title={Olmo 3},
+      author={Team Olmo and : and Allyson Ettinger and Amanda Bertsch and Bailey Kuehl and David Graham and David Heineman and Dirk Groeneveld and Faeze Brahman and Finbarr Timbers and Hamish Ivison and Jacob Morrison and Jake Poznanski and Kyle Lo and Luca Soldaini and Matt Jordan and Mayee Chen and Michael Noukhovitch and Nathan Lambert and Pete Walsh and Pradeep Dasigi and Robert Berry and Saumya Malik and Saurabh Shah and Scott Geng and Shane Arora and Shashank Gupta and Taira Anderson and Teng Xiao and Tyler Murray and Tyler Romero and Victoria Graf and Akari Asai and Akshita Bhagia and Alexander Wettig and Alisa Liu and Aman Rangapur and Chloe Anastasiades and Costa Huang and Dustin Schwenk and Harsh Trivedi and Ian Magnusson and Jaron Lochner and Jiacheng Liu and Lester James V. Miranda and Maarten Sap and Malia Morgan and Michael Schmitz and Michal Guerquin and Michael Wilson and Regan Huff and Ronan Le Bras and Rui Xin and Rulin Shao and Sam Skjonsberg and Shannon Zejiang Shen and Shuyue Stella Li and Tucker Wilde and Valentina Pyatkin and Will Merrill and Yapei Chang and Yuling Gu and Zhiyuan Zeng and Ashish Sabharwal and Luke Zettlemoyer and Pang Wei Koh and Ali Farhadi and Noah A. Smith and Hannaneh Hajishirzi},
+      year={2025},
+      eprint={2512.13961},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2512.13961},
+}
+
+%% ==========================================================================
+%% Distributed Systems Impossibility Results
+%% ==========================================================================
+
+@article{flp,
+  title={Impossibility of distributed consensus with one faulty process},
+  author={Fischer, Michael J and Lynch, Nancy A and Paterson, Michael S},
+  journal={Journal of the ACM (JACM)},
+  volume={32},
+  number={2},
+  pages={374--382},
+  year={1985},
+  publisher={ACM New York, NY, USA}
+}
+
+@article{paxos,
+author = {Lamport, Leslie},
+title = {The Part-Time Parliament},
+year = {1998},
+month = {May},
+url = {https://www.microsoft.com/en-us/research/publication/part-time-parliament/},
+journal = {ACM Transactions on Computer Systems 16, 2 (May 1998), 133-169. Also appeared as SRC Research Report 49. This paper was first submitted in 1990, setting a personal record for publication delay that has since been broken by [60].},
+edition = {ACM Transactions on Computer Systems 16, 2 (May 1998), 133-169. Also appeared as SRC Research Report 49. This paper was first submitted in 1990, setting a personal record for publication delay that has since been broken by [60].},
+note = {ACM SIGOPS Hall of Fame Award in 2012},
+}
+
+@inproceedings{raft,
+  title={In search of an understandable consensus algorithm},
+  author={Ongaro, Diego and Ousterhout, John},
+  booktitle={2014 USENIX annual technical conference (USENIX ATC 14)},
+  pages={305--319},
+  year={2014}
+}
+
+%% ==========================================================================
+%% Alignment and RLHF
+%% ==========================================================================
+
+@misc{truthrl,
+      title={TruthRL: Incentivizing Truthful LLMs via Reinforcement Learning},
+      author={Zhepei Wei and Xiao Yang and Kai Sun and Jiaqi Wang and Rulin Shao and Sean Chen and Mohammad Kachuee and Teja Gollapudi and Tony Liao and Nicolas Scheffer and Rakesh Wanga and Anuj Kumar and Yu Meng and Wen-tau Yih and Xin Luna Dong},
+      year={2025},
+      eprint={2509.25760},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2509.25760},
+}
+
+%% ==========================================================================
+%% Hallucination and Fabrication
+%% ==========================================================================
+
+@article{alkaissi2023artificial,
+  title={Artificial hallucinations in ChatGPT: implications in scientific writing},
+  author={Alkaissi, Hussam and McFarlane, Samy I},
+  journal={Cureus},
+  volume={15},
+  number={2},
+  year={2023},
+  publisher={Cureus}
+}
+
+@article{thirunavukarasu2023large,
+  title={Large language models in medicine},
+  author={Thirunavukarasu, Arun James and Ting, Darren Shu Jeng and Elangovan, Kabilan and Gutierrez, Laura and Tan, Ting Fang and Ting, Daniel Shu Wei},
+  journal={Nature medicine},
+  volume={29},
+  number={8},
+  pages={1930--1940},
+  year={2023},
+  publisher={Nature Publishing Group US New York}
+}
+
+@article{dahl2024large,
+  title={Large legal fictions: Profiling legal hallucinations in large language models},
+  author={Dahl, Matthew and Magesh, Varun and Suzgun, Mirac and Ho, Daniel E},
+  journal={Journal of Legal Analysis},
+  volume={16},
+  number={1},
+  pages={64--93},
+  year={2024},
+  publisher={Oxford University Press UK}
+}
+
+@article{karvonen2025activation,
+  title={Activation Oracles: Training and Evaluating LLMs as General-Purpose Activation Explainers},
+  author={Karvonen, Adam and Chua, James and Dumas, Cl{\'e}ment and Fraser-Taliente, Kit and Kantamneni, Subhash and Minder, Julian and Ong, Euan and Sharma, Arnab Sen and Wen, Daniel and Evans, Owain and others},
+  journal={arXiv preprint arXiv:2512.15674},
+  year={2025}
+}
+
+%% ==========================================================================
+%% RLHF and Alignment Critiques
+%% ==========================================================================
+
+@inproceedings{perez2022discovering,
+  title={Discovering language model behaviors with model-written evaluations},
+  author={Perez, Ethan and Ringer, Sam and Lukosiute, Kamile and Nguyen, Karina and Chen, Edwin and Heiner, Scott and Pettit, Craig and Olsson, Catherine and Kundu, Sandipan and Kadavath, Saurav and others},
+  booktitle={Findings of the association for computational linguistics: ACL 2023},
+  pages={13387--13434},
+  year={2023}
+}
+
+@inproceedings{gao2023scaling,
+  title={Scaling laws for reward model overoptimization},
+  author={Gao, Leo and Schulman, John and Hilton, Jacob},
+  booktitle={International Conference on Machine Learning},
+  pages={10835--10866},
+  year={2023},
+  organization={PMLR}
+}
+@article{bai2022training,
+  title={Training a helpful and harmless assistant with reinforcement learning from human feedback},
+  author={Bai, Yuntao and Jones, Andy and Ndousse, Kamal and Askell, Amanda and Chen, Anna and DasSarma, Nova and Drain, Dawn and Fort, Stanislav and Ganguli, Deep and Henighan, Tom and others},
+  journal={arXiv preprint arXiv:2204.05862},
+  year={2022}
+}
+
+%% ==========================================================================
+%% Retrieval and Grounding
+%% ==========================================================================
+
+@article{lewis2020retrieval,
+  title={Retrieval-augmented generation for knowledge-intensive nlp tasks},
+  author={Lewis, Patrick and Perez, Ethan and Piktus, Aleksandra and Petroni, Fabio and Karpukhin, Vladimir and Goyal, Naman and K{\"u}ttler, Heinrich and Lewis, Mike and Yih, Wen-tau and Rockt{\"a}schel, Tim and others},
+  journal={Advances in neural information processing systems},
+  volume={33},
+  pages={9459--9474},
+  year={2020}
+}
+
+%% ==========================================================================
+%% Uncertainty and Calibration
+%% ==========================================================================
+
+@article{angelopoulos2021gentle,
+  title={A gentle introduction to conformal prediction and distribution-free uncertainty quantification},
+  author={Angelopoulos, Anastasios N and Bates, Stephen},
+  journal={arXiv preprint arXiv:2107.07511},
+  year={2021}
+}
+
+@article{kadavath2022language,
+  title={Language models (mostly) know what they know},
+  author={Kadavath, Saurav and Conerly, Tom and Askell, Amanda and Henighan, Tom and Drain, Dawn and Perez, Ethan and Schiefer, Nicholas and Hatfield-Dodds, Zac and DasSarma, Nova and Tran-Johnson, Eli and others},
+  journal={arXiv preprint arXiv:2207.05221},
+  year={2022}
+}
+
+%% ==========================================================================
+%% Impossibility Results in LLMs
+%% ==========================================================================
+
+@misc{xu2024hallucination,
+  title={Hallucination is Inevitable: An Innate Limitation of Large Language Models},
+  author={Ziwei Xu and Sanjay Jain and Mohan Kankanhalli},
+  year={2024},
+  eprint={2401.11817},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL}
+}
+
+
+%% ==========================================================================
+%% Benchmarks
+%% ==========================================================================
+
+@inproceedings{lin2022truthfulqa,
+  title={TruthfulQA: Measuring how models mimic human falsehoods},
+  author={Lin, Stephanie and Hilton, Jacob and Evans, Owain},
+  booktitle={Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages={3214--3252},
+  year={2022}
+}
+
+@misc{zhang2025recursivelanguagemodels,
+      title={Recursive Language Models},
+      author={Alex L. Zhang and Tim Kraska and Omar Khattab},
+      year={2025},
+      eprint={2512.24601},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2512.24601},
+}
+
+%% ==========================================================================
+%% LLM Interpretability / Mechanistic Interpretability
+%% ==========================================================================
+
+@article{elhage2021mathematical,
+  title={A Mathematical Framework for Transformer Circuits},
+  author={Elhage, Nelson and Nanda, Neel and Olsson, Catherine and Henighan, Tom and Joseph, Nicholas and Mann, Ben and Askell, Amanda and Bai, Yuntao and Chen, Anna and Conerly, Tom and others},
+  journal={Transformer Circuits Thread},
+  year={2022},
+  url={https://transformer-circuits.pub/2021/framework/index.html}
+}
+
+@article{bills2023language,
+  title={Language Models Can Explain Neurons in Language Models},
+  author={Bills, Steven and Cammarata, Nick and Mossing, Dan and Tillman, Henk and Gao, Leo and Goh, Gabriel and Sutskever, Ilya and Leike, Jan and Wu, Jeff and Saunders, William},
+  journal={OpenAI Blog},
+  year={2023},
+  url={https://openaipublic.blob.core.windows.net/neuron-explainer/paper/index.html}
+}
+
+@article{bricken2023monosemanticity,
+  title={Towards Monosemanticity: Decomposing Language Models with Dictionary Learning},
+  author={Bricken, Trenton and Templeton, Adly and Batson, Joshua and Chen, Brian and Jermyn, Adam and Conerly, Tom and Turner, Nick and Anil, Cem and Denison, Carson and Askell, Amanda and others},
+  journal={Transformer Circuits Thread},
+  year={2023},
+  url={https://transformer-circuits.pub/2023/monosemantic-features/index.html}
+}
+
+%% ==========================================================================
+%% Adversarial Attacks on Model Internals
+%% ==========================================================================
+
+@misc{winninger2025usingmechanisticinterpretabilitycraft,
+  title={Using Mechanistic Interpretability to Craft Adversarial Attacks against Large Language Models},
+  author={Thomas Winninger and Boussad Addad and Katarzyna Kapusta},
+  year={2025},
+  eprint={2503.06269},
+  archivePrefix={arXiv},
+  primaryClass={cs.LG},
+  url={https://arxiv.org/abs/2503.06269},
+}
+
+%% ==========================================================================
+%% Epistemic Frameworks and Architectures
+%% ==========================================================================
+
+
+@misc{clark2025epistemicalignmentmediatingframework,
+      title={Epistemic Alignment: A Mediating Framework for User-LLM Knowledge Delivery},
+      author={Nicholas Clark and Hua Shen and Bill Howe and Tanushree Mitra},
+      year={2025},
+      eprint={2504.01205},
+      archivePrefix={arXiv},
+      primaryClass={cs.HC},
+      url={https://arxiv.org/abs/2504.01205},
+}
+
+@misc{wright2025predictionstructuringepistemic,
+      title={Beyond Prediction -- Structuring Epistemic Integrity in Artificial Reasoning Systems},
+      author={Craig Steven Wright},
+      year={2025},
+      eprint={2506.17331},
+      archivePrefix={arXiv},
+      primaryClass={cs.LO},
+      url={https://arxiv.org/abs/2506.17331},
+}
+
+@misc{ouyang2022instructgpt,
+  title={Training language models to follow instructions with human feedback},
+  author={Long Ouyang and Jeff Wu and Xu Jiang and Diogo Almeida and Carroll L. Wainwright and Pamela Mishkin and Chong Zhang and Sandhini Agarwal and Katarina Slama and Alex Ray and John Schulman and Jacob Hilton and Fraser Kelton and Luke Miller and Maddie Simens and Amanda Askell and Peter Welinder and Paul Christiano and Jan Leike and Ryan Lowe},
+  year={2022},
+  eprint={2203.02155},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+}
+
+@misc{aiken_moss,
+  author  = {Alex Aiken},
+  title   = {Moss: A System for Detecting Software Plagiarism},
+  year    = {2000},
+  howpublished = {\url{https://theory.stanford.edu/~aiken/moss/}},
+  note    = {Accessed: 2026-02-14}
+}
+
+@inproceedings{schleimer2003winnowing,
+  title={Winnowing: Local Algorithms for Document Fingerprinting},
+  author={Schleimer, Saul and Wilkerson, Daniel S. and Aiken, Alex},
+  booktitle={Proceedings of the 2003 ACM SIGMOD International Conference on Management of Data},
+  pages={76--85},
+  year={2003},
+  publisher={ACM},
+  doi={10.1145/872757.872770},
+}
+
+@inproceedings{mason2019collaboration,
+  title={Collaboration versus cheating: Reducing code plagiarism in an online MS computer science program},
+  author={Mason, Tony and Gavrilovska, Ada and Joyner, David A},
+  booktitle={Proceedings of the 50th ACM Technical Symposium on Computer Science Education},
+  pages={1004--1010},
+  year={2019}
+}
+
+@misc{kuhn2023semanticuncertaintylinguisticinvariances,
+      title={Semantic Uncertainty: Linguistic Invariances for Uncertainty Estimation in Natural Language Generation},
+      author={Lorenz Kuhn and Yarin Gal and Sebastian Farquhar},
+      year={2023},
+      eprint={2302.09664},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2302.09664},
+}
+
+@misc{lu2026assistantaxissituatingstabilizing,
+      title={The Assistant Axis: Situating and Stabilizing the Default Persona of Language Models},
+      author={Christina Lu and Jack Gallagher and Jonathan Michala and Kyle Fish and Jack Lindsey},
+      year={2026},
+      eprint={2601.10387},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2601.10387},
+}
+
+%% ==========================================================================
+%% Added Feb 14 2026 (citation audit)
+%% ==========================================================================
+
+@misc{askell2021general,
+  title={A General Language Assistant as a Laboratory for Alignment},
+  author={Amanda Askell and Yuntao Bai and Anna Chen and Dawn Drain and Deep Ganguli and Tom Henighan and Andy Jones and Nicholas Joseph and Ben Mann and Nova DasSarma and Nelson Elhage and Zac Hatfield-Dodds and Danny Hernandez and Jackson Kernion and Kamal Ndousse and Catherine Olsson and Dario Amodei and Tom Brown and Jack Clark and Sam McCandlish and Chris Olah and Jared Kaplan},
+  year={2021},
+  eprint={2112.00861},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2112.00861},
+}
+
+@inproceedings{burns2023discovering,
+  title={Discovering Latent Knowledge in Language Models Without Supervision},
+  author={Collin Burns and Haotian Ye and Dan Klein and Jacob Steinhardt},
+  booktitle={International Conference on Learning Representations (ICLR)},
+  year={2023},
+  url={https://openreview.net/forum?id=ETKGuby0hcs},
+}
+
+@article{sampath1995diagnosability,
+  title={Diagnosability of Discrete-Event Systems},
+  author={Sampath, Meera and Sengupta, Raja and Lafortune, St{\'e}phane and Sinnamohideen, Kasturi and Teneketzis, Demosthenis},
+  journal={IEEE Transactions on Automatic Control},
+  volume={40},
+  number={9},
+  pages={1555--1575},
+  year={1995},
+  doi={10.1109/9.412626},
+}
+
+@misc{kaplan2020scaling,
+  title={Scaling Laws for Neural Language Models},
+  author={Jared Kaplan and Sam McCandlish and Tom Henighan and Tom B. Brown and Benjamin Chess and Rewon Child and Scott Gray and Alec Radford and Jeffrey Wu and Dario Amodei},
+  year={2020},
+  eprint={2001.08361},
+  archivePrefix={arXiv},
+  primaryClass={cs.LG},
+  url={https://arxiv.org/abs/2001.08361},
+}
+
+@misc{wei2022emergent,
+  title={Emergent Abilities of Large Language Models},
+  author={Jason Wei and Yi Tay and Rishi Bommasani and Colin Raffel and Barret Zoph and Sebastian Borgeaud and Dani Yogatama and Maarten Bosma and Denny Zhou and Donald Metzler and Ed H. Chi and Tatsunori Hashimoto and Oriol Vinyals and Percy Liang and Jeff Dean and William Fedus},
+  year={2022},
+  eprint={2206.07682},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2206.07682},
+}
+
+@misc{llama31,
+  title={The {Llama} 3 Herd of Models},
+  author={{Meta AI}},
+  year={2024},
+  eprint={2407.21783},
+  archivePrefix={arXiv},
+  primaryClass={cs.AI},
+  url={https://arxiv.org/abs/2407.21783},
+}
+
+@misc{qwen3,
+  title={Qwen3 Technical Report},
+  author={{Qwen Team}},
+  year={2025},
+  url={https://qwenlm.github.io/blog/qwen3/},
+  note={Alibaba Cloud technical report},
+}
+
+@misc{mistral7b,
+  title={Mistral 7B},
+  author={Albert Q. Jiang and Alexandre Sablayrolles and Arthur Mensch and Chris Bamford and Devendra Singh Chaplot and Diego de las Casas and Florian Bressand and Gianna Lengyel and Guillaume Lample and Lucile Saulnier and L{\'e}lio Renard Lavaud and Marie-Anne Lachaux and Pierre Stock and Teven Le Scao and Thibaut Lavril and Thomas Wang and Timoth{\'e}e Lacroix and William El Sayed},
+  year={2023},
+  eprint={2310.06825},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2310.06825},
+}
