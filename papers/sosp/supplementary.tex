@@ -64,7 +64,9 @@ This supplementary material provides formal specifications, mechanized proofs, a
 
 \section{Formal Specifications (TLA+)}
 
-The core theoretical contributions are formalized in TLA+ (Temporal Logic of Actions), a language for specifying concurrent and distributed systems. Two complementary specifications demonstrate the impossibility under text-only observation and the escape under tensor interfaces.
+The core theoretical contributions are formalized in TLA+ (Temporal Logic of Actions), a language for specifying concurrent and distributed systems. Two complementary specifications model the impossibility under text-only observation and the escape under tensor interfaces.
+
+\textbf{Epistemic status:} These are \emph{conditional formal results}. TLC verifies properties \emph{within our formal model}, where the axioms that (a) fabrications have distinguishable provenance and (b) text-only judges cannot access provenance are encoded by construction. The specifications demonstrate that our definitions are internally consistent and that the impossibility/escape follow from the stated axioms. The empirical question---whether real tensor signals satisfy these axioms---is addressed in the main paper's evaluation section.
 
 \textbf{Note:} The excerpts below illustrate the modeling approach. Complete, runnable specifications are available in the artifact repository at \texttt{tla/EpistemicImpossibility.tla} and \texttt{tla/epistemic\_tensor.tla}. Both specifications have been validated with TLC model checker and verified to be correct.
 
@@ -157,7 +159,9 @@ Both specifications have been validated using TLC model checker:
 
 \section{Machine-Checked Proofs (Lean 4)}
 
-The core theorems are formalized and proven in Lean 4 with zero unsolved goals (no \texttt{sorry} statements). File: \texttt{EpistemicProofs/Basic.lean} (208 lines).
+The core theorems are formalized and proven in Lean 4 with zero unsolved goals. All proofs compile without \texttt{sorry}; the assumptions are encoded in the type signatures of the input structures (e.g., \texttt{BoundedSupervisor.indistinguishable}, \texttt{LearningAlgorithm.update\_depends\_on\_obs}). File: \texttt{EpistemicProofs/Basic.lean} (208 lines).
+
+\textbf{Epistemic status:} These are \emph{conditional formal results}. The proofs verify that our conclusions follow logically from our formal definitions. The substantive claim---that those definitions faithfully model real LLM behavior---is an informal argument supported by the main paper's empirical evaluation.
 
 \subsection{Theorem 1: Representational Impossibility}
 
@@ -267,19 +271,30 @@ Experiment 27 evaluates bounded verification strategies across four language mod
 
 \subsubsection{Query Categories}
 
+The test queries span five distinct categories, chosen to exercise the impossibility across different epistemic regimes:
+
+\begin{itemize}
+    \item \textbf{Control (Truth)}: Common factual knowledge (capital of France, boiling point of water). Baseline: the model should know these.
+    \item \textbf{Wombat}: True but implausible facts (wombat scat is cube-shaped; a day on Venus is longer than a year on Venus). Tests whether the model can express uncertainty about facts that sound wrong.
+    \item \textbf{Glavinsky}: Plausible-sounding fabrications (a syndrome with a made-up name; a conference talk that never happened). Tests the core problem: the model generates fluent, confident output even when fabricating.
+    \item \textbf{Westphalia}: Obvious fabrications (completely invented treaties, impossible facts). Tests whether the model can recognize obvious errors.
+    \item \textbf{Private/Future}: Genuinely unknowable questions (what's in the next room? When will it rain next Thursday?). Tests whether the model distinguishes unknowable from unanswerable.
+\end{itemize}
+
 \begin{table}[H]
 \centering
 \begin{tabular}{llcl}
 \toprule
 \textbf{Category} & \textbf{Type} & \textbf{Count} & \textbf{Ground Truth} \\
 \midrule
-Control (Truth) & Factual & 50 & Known, common \\
-Wombat & Weird Truth & 50 & True, implausible \\
-Glavinsky & Self-Deceived Lie & 50 & Fabricated, plausible \\
-Westphalia & Shattered Lie & 50 & Fabricated, obvious \\
-Private/Future & Unknowable & 50 & No valid answer \\
+Geography, Science, History, Math & Factual & 80 & Known, common \\
+Wombat (Weird Truth) & Factual & 20 & True, implausible \\
+Fictional People/Papers & Fabrication & 25 & Fabricated, plausible \\
+Fictional Historical Events & Fabrication & 25 & Fabricated, obvious \\
+Future/Private/Impossible & Unknowable & 25 & No valid answer \\
+Fabricated Citations & Fabrication & 25 & Fabricated references \\
 \midrule
-\multicolumn{4}{l}{\textit{×4 models = 1000 queries; deduplicates to 800 pairs}} \\
+\multicolumn{4}{l}{\textit{200 unique queries $\times$ 4 models = 800 query-response pairs}} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -376,7 +391,7 @@ Normalize both text and expected answer (unicode, case, whitespace)\;
 
 \subsubsection{Tier 2: LLM Classification}
 
-For ambiguous or unknowable queries, use Gemini 2.0 Flash (not in test set) as classifier:
+For ambiguous or unknowable queries, use Qwen3-4B-Instruct (\texttt{Qwen/Qwen3-4B-Instruct-2507}, greedy decoding, \texttt{max\_new\_tokens=200}) as classifier. Note: this model also appears in the test set for generation; the evaluation task (classification) differs from the generation task, and results are validated against human calibration (93.8\% agreement):
 
 \begin{table}[H]
 \centering
@@ -413,7 +428,7 @@ Agreement & 75 & 93.75\% & Validates evaluator \\
 \end{tabular}
 \end{table}
 
-\textbf{Result}: 93.8\% agreement validates the stratified evaluator for paper use.
+\textbf{Result}: 93.8\% agreement validates the stratified evaluator for paper use. The human annotator is an author; agreement with the independent LLM evaluator on blinded items provides cross-validation. Disagreement patterns (2 auto-too-generous, 3 auto-too-strict) suggest no systematic bias in either direction.
 
 \subsection{Analysis Pipeline}
 
@@ -459,7 +474,7 @@ Composed & 81.1\% & 87.7\% & 91.8\% \\
 \end{tabular}
 \end{table}
 
-\textbf{Key finding}: Tensor@10\% (82.1\%) outperforms Text@30\% (80.4\%), demonstrating that internal signals provide more discrimination per unit of verification budget.
+\textbf{Key finding}: Tensor-guided verification outperforms the text baseline at every budget level by +2.5--3.9 percentage points, demonstrating that internal signals provide more discrimination per unit of verification budget.
 
 % ===========================================================================
 % Section 4: Topological Data Analysis (TDA)
@@ -600,7 +615,14 @@ Mean correlation: 0.762 (all pairs $p < 0.001$). Signal is architectural.
 
 \subsection{Code and Data}
 
-All experiments are reproducible from source:
+All experiments are reproducible from source. The complete artifact repository is available at:
+
+\begin{center}
+\texttt{https://github.com/fsgeek/ai-honesty}\\
+\textit{Commit hash will be pinned at submission time.}
+\end{center}
+
+\noindent Artifact contents:
 
 \begin{table}[H]
 \centering

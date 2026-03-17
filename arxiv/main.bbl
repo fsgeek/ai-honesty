@@ -1,4 +1,4 @@
-\begin{thebibliography}{29}
+\begin{thebibliography}{27}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -88,13 +88,6 @@ Saurav Kadavath, Tom Conerly, Amanda Askell, Tom Henighan, Dawn Drain, Ethan
   Tran-Johnson, et~al.
 \newblock Language models (mostly) know what they know.
 \newblock \emph{arXiv preprint arXiv:2207.05221}, 2022.
-
-\bibitem[Kaplan et~al.(2020)Kaplan, McCandlish, Henighan, Brown, Chess, Child,
-  Gray, Radford, Wu, and Amodei]{kaplan2020scaling}
-Jared Kaplan, Sam McCandlish, Tom Henighan, Tom~B. Brown, Benjamin Chess, Rewon
-  Child, Scott Gray, Alec Radford, Jeffrey Wu, and Dario Amodei.
-\newblock Scaling laws for neural language models, 2020.
-\newblock URL \url{https://arxiv.org/abs/2001.08361}.
 
 \bibitem[Karvonen et~al.(2025)Karvonen, Chua, Dumas, Fraser-Taliente,
   Kantamneni, Minder, Ong, Sharma, Wen, Evans, et~al.]{karvonen2025activation}
@@ -212,16 +205,6 @@ Arun~James Thirunavukarasu, Darren Shu~Jeng Ting, Kabilan Elangovan, Laura
   Gutierrez, Ting~Fang Tan, and Daniel Shu~Wei Ting.
 \newblock Large language models in medicine.
 \newblock \emph{Nature medicine}, 29\penalty0 (8):\penalty0 1930--1940, 2023.
-
-\bibitem[Wei et~al.(2022)Wei, Tay, Bommasani, Raffel, Zoph, Borgeaud, Yogatama,
-  Bosma, Zhou, Metzler, Chi, Hashimoto, Vinyals, Liang, Dean, and
-  Fedus]{wei2022emergent}
-Jason Wei, Yi~Tay, Rishi Bommasani, Colin Raffel, Barret Zoph, Sebastian
-  Borgeaud, Dani Yogatama, Maarten Bosma, Denny Zhou, Donald Metzler, Ed~H.
-  Chi, Tatsunori Hashimoto, Oriol Vinyals, Percy Liang, Jeff Dean, and William
-  Fedus.
-\newblock Emergent abilities of large language models, 2022.
-\newblock URL \url{https://arxiv.org/abs/2206.07682}.
 
 \bibitem[Winninger et~al.(2025)Winninger, Addad, and
   Kapusta]{winninger2025usingmechanisticinterpretabilitycraft}

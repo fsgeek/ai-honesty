@@ -220,16 +220,23 @@ def plot_traces(all_traces, output_path):
         positions = [t["position"] for t in tokens]
         entropies = [t["entropy"] for t in tokens]
 
+        # Colorblind-friendly: blue (low) → orange (med) → brown (high)
         colors = []
+        hatches = []
         for e in entropies:
             if e < 0.5:
-                colors.append("#2166ac")
+                colors.append("#2166ac")  # Blue for confident
+                hatches.append(None)
             elif e < 1.5:
-                colors.append("#fdae61")
+                colors.append("#fdae61")  # Orange for medium
+                hatches.append('/')
             else:
-                colors.append("#d73027")
+                colors.append("#8B6F47")  # Brown for uncertain
+                hatches.append('///')
 
-        ax.bar(positions, entropies, color=colors, width=1.0, alpha=0.8)
+        for pos, ent, color, hatch in zip(positions, entropies, colors, hatches):
+            ax.bar(pos, ent, width=1.0, color=color, alpha=0.8,
+                   edgecolor='black', linewidth=0.5, hatch=hatch)
 
         response_preview = trace["response"][:80]
         if len(trace["response"]) > 80:
@@ -299,10 +306,11 @@ def plot_detailed_trace(query_info, trace, output_path):
     ax_logprob = fig.add_subplot(gs[2], sharex=ax_text)
     ax_top5 = fig.add_subplot(gs[3], sharex=ax_text)
 
-    # --- Entropy colormap: blue (confident) → yellow → red (uncertain) ---
+    # --- Colorblind-friendly palette: blue (low) → orange (med) → brown (high) ---
+    # Avoids red-green, uses blue-orange-brown with hatching for accessibility
     from matplotlib.colors import LinearSegmentedColormap
     entropy_cmap = LinearSegmentedColormap.from_list(
-        "epistemic", ["#2166ac", "#67a9cf", "#f7f7f7", "#fdae61", "#d73027"]
+        "epistemic", ["#2166ac", "#67a9cf", "#f7f7f7", "#fdae61", "#8B6F47"]
     )
     max_entropy_for_color = max(max(entropies) * 0.8, 2.0)
 
@@ -343,9 +351,20 @@ def plot_detailed_trace(query_info, trace, output_path):
     )
 
     # --- Row 1: Entropy trace (primary) ---
+    # Use hatching for accessibility: bars have both color and pattern
     colors = [entropy_cmap(min(e / max_entropy_for_color, 1.0)) for e in entropies]
-    ax_entropy.bar(positions, entropies, color=colors, width=1.0, alpha=0.85,
-                   edgecolor="none")
+    hatches = []
+    for e in entropies:
+        if e < 0.5:
+            hatches.append(None)  # Confident: solid blue, no hatching
+        elif e < 1.5:
+            hatches.append('/')   # Medium: light hatching
+        else:
+            hatches.append('///')  # Uncertain: heavy hatching
+
+    for i, (pos, h, color, hatch) in enumerate(zip(positions, entropies, colors, hatches)):
+        ax_entropy.bar(pos, h, width=1.0, color=color, alpha=0.85,
+                      edgecolor='black', linewidth=0.5, hatch=hatch)
 
     # Smoothed trend line
     if n > 5:
@@ -358,7 +377,7 @@ def plot_detailed_trace(query_info, trace, output_path):
             ax_entropy.plot(positions, smoothed, color="black", linewidth=1.5,
                           alpha=0.6, label="smoothed trend")
 
-    # Mark entropy spikes (> mean + 1.5*std)
+    # Mark entropy spikes (> mean + 1.5*std) using colorblind-friendly brown
     mean_e = np.mean(entropies)
     std_e = np.std(entropies)
     threshold = mean_e + 1.5 * std_e
@@ -367,8 +386,8 @@ def plot_detailed_trace(query_info, trace, output_path):
             ax_entropy.annotate(
                 tokens[i]["token_text"].strip()[:8],
                 xy=(i, e), xytext=(i, e + max_entropy_for_color * 0.08),
-                fontsize=5, ha="center", color="#d73027",
-                arrowprops=dict(arrowstyle="-", color="#d73027", lw=0.5),
+                fontsize=5, ha="center", color="#8B6F47",
+                arrowprops=dict(arrowstyle="-", color="#8B6F47", lw=0.5),
             )
 
     ax_entropy.axhline(mean_e, color="gray", linestyle="--", linewidth=0.8,
@@ -377,19 +396,22 @@ def plot_detailed_trace(query_info, trace, output_path):
     ax_entropy.legend(fontsize=7, loc="upper right")
     ax_entropy.tick_params(labelbottom=False)
 
-    # --- Row 2: Log-probability trace ---
-    lp_colors = ["#2166ac" if lp > -1 else "#fdae61" if lp > -3 else "#d73027"
+    # --- Row 2: Log-probability trace (colorblind-friendly) ---
+    lp_colors = ["#2166ac" if lp > -1 else "#fdae61" if lp > -3 else "#8B6F47"
                  for lp in logprobs]
-    ax_logprob.bar(positions, logprobs, color=lp_colors, width=1.0, alpha=0.7)
+    ax_logprob.bar(positions, logprobs, color=lp_colors, width=1.0, alpha=0.7,
+                   edgecolor='black', linewidth=0.3)
     ax_logprob.set_ylabel("Log P(token)", fontsize=9)
     ax_logprob.axhline(np.mean(logprobs), color="gray", linestyle="--",
                        linewidth=0.8, alpha=0.5)
     ax_logprob.tick_params(labelbottom=False)
 
     # --- Row 3: Top-5 mass trace ---
-    t5_colors = ["#2166ac" if m > 0.9 else "#fdae61" if m > 0.7 else "#d73027"
+    # --- Row 3: Top-5 mass trace (colorblind-friendly) ---
+    t5_colors = ["#2166ac" if m > 0.9 else "#fdae61" if m > 0.7 else "#8B6F47"
                  for m in top5_masses]
-    ax_top5.bar(positions, top5_masses, color=t5_colors, width=1.0, alpha=0.7)
+    ax_top5.bar(positions, top5_masses, color=t5_colors, width=1.0, alpha=0.7,
+                edgecolor='black', linewidth=0.3)
     ax_top5.set_ylabel("Top-5 mass", fontsize=9)
     ax_top5.set_ylim(0, 1.05)
     ax_top5.axhline(0.9, color="gray", linestyle=":", linewidth=0.8, alpha=0.4)
