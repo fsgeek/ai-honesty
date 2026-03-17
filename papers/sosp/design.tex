@@ -159,7 +159,12 @@ the computation that produced the output).
 \etok{5}{ transported}\etok{4}{ by}\etok{2}{ wind}\etok{3}{ or}\etok{6}{ through}\etok{2}{ the}\etok{6}{ soil}\etok{3}{,}\etok{4}{ aiding}\etok{0}{ in}%
 \etok{3}{ dispers}\etok{0}{al}\etok{2}{ and}\etok{5}{ preventing}\etok{5}{ it}\etok{0}{ from}\etok{4}{ being}\etok{6}{ easily}\etok{6}{ eaten}\etok{0}{ by}%
 \etok{1}{ predators}\etok{2}{.}%
-\caption{Generated output consisting of 43 tokens along with its entropy trace for the query \textit{What shape is wombat scat?} with mean entropy $H=1.147$, max entropy $H=4.315$}
+
+\vspace{4pt}
+\noindent\small%
+\etok{0}{\ low\ }\etok{2}{\ mid\ }\etok{4}{\ high\ }\etok{6}{\ very high\ }%
+\quad{\normalfont Entropy: blue = confident, brown = uncertain}
+\caption{Generated output consisting of 43 tokens along with its entropy trace for the query \textit{What shape is wombat scat?} with mean entropy $H=1.147$, max entropy $H=4.315$. Token background color indicates per-token entropy: blue (confident/low entropy) through orange to brown (uncertain/high entropy).}
 \label{fig:entropy_trace}
 \end{figure}
 
@@ -190,7 +195,7 @@ knows or does not know.
 % proceeded with high confidence (low entropy, suggesting retrieval of stored
 % pattern) or uncertainty (high entropy, suggesting fabrication).
 \autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
-along with its entropy trace. We color code per-token entropy, high entropy tokens are color coded as red.
+along with its entropy trace. We color code per-token entropy: blue indicates low entropy (confident generation), orange indicates moderate entropy, and brown indicates high entropy (uncertain generation).
 The entropy enhanced output shows where in the output generation did the generation
 proceed with high confidence (low entropy, suggesting retrieval of stored pattern)
 and where did it proceed with high uncertainty (high entropy, suggesting fabrication).

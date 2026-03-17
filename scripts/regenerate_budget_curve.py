@@ -27,11 +27,13 @@ budgets = [10, 20, 30]
 
 fig, ax = plt.subplots(1, 1, figsize=(6, 4))
 
+# Colorblind-friendly: blue, orange, brown, gray — no red-green
+# Distinct markers + linestyles ensure greyscale readability
 styles = {
     "No judge":              {"color": "#888888", "marker": "s", "linestyle": "--", "linewidth": 1.5},
-    "Text-guided (length)":  {"color": "#d62728", "marker": "o", "linestyle": "-", "linewidth": 2},
-    "Tensor-guided":         {"color": "#1f77b4", "marker": "^", "linestyle": "-", "linewidth": 2},
-    "Composed":              {"color": "#2ca02c", "marker": "D", "linestyle": "-", "linewidth": 2},
+    "Text-guided (length)":  {"color": "#e66101", "marker": "o", "linestyle": "-", "linewidth": 2},
+    "Tensor-guided":         {"color": "#2166ac", "marker": "^", "linestyle": "-", "linewidth": 2},
+    "Composed":              {"color": "#5e3c99", "marker": "D", "linestyle": "-.", "linewidth": 2},
 }
 
 for label, values in data.items():
@@ -61,12 +63,12 @@ ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
 
-# Save to paper figures directory
-outpath = "papers/sosp/figures/exp27_aggregate_budget_curve.pdf"
-fig.savefig(outpath, bbox_inches="tight")
-print(f"Saved: {outpath}")
-
-# Also save PNG for quick preview
-outpath_png = "papers/sosp/figures/exp27_aggregate_budget_curve.png"
-fig.savefig(outpath_png, bbox_inches="tight", dpi=150)
-print(f"Saved: {outpath_png}")
+# Save to all figure locations
+for ext in ["pdf", "png"]:
+    for dest in [
+        f"papers/sosp/figures/exp27_aggregate_budget_curve.{ext}",
+        f"arxiv/exp27_aggregate_budget_curve.{ext}",
+        f"exp27_aggregate_budget_curve.{ext}",
+    ]:
+        fig.savefig(dest, bbox_inches="tight", dpi=150)
+        print(f"Saved: {dest}")

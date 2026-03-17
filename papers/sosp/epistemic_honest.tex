@@ -30,19 +30,21 @@
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
 
-\definecolor{ent0bg}{rgb}{0.13,0.40,0.67}
+% Colorblind-friendly entropy palette: blue (confident) → orange → brown (uncertain)
+% Avoids red-green; degrades gracefully to greyscale
+\definecolor{ent0bg}{rgb}{0.13,0.40,0.67}   % dark blue — very confident
 \definecolor{ent0fg}{rgb}{1,1,1}
-\definecolor{ent1bg}{rgb}{0.40,0.66,0.81}
+\definecolor{ent1bg}{rgb}{0.40,0.66,0.81}   % light blue
 \definecolor{ent1fg}{rgb}{0,0,0}
-\definecolor{ent2bg}{rgb}{0.97,0.97,0.97}
+\definecolor{ent2bg}{rgb}{0.97,0.97,0.97}   % near-white — neutral
 \definecolor{ent2fg}{rgb}{0,0,0}
-\definecolor{ent3bg}{rgb}{0.99,0.75,0.44}
+\definecolor{ent3bg}{rgb}{0.99,0.75,0.44}   % light orange
 \definecolor{ent3fg}{rgb}{0,0,0}
-\definecolor{ent4bg}{rgb}{0.99,0.55,0.24}
+\definecolor{ent4bg}{rgb}{0.93,0.60,0.28}   % medium orange
 \definecolor{ent4fg}{rgb}{0,0,0}
-\definecolor{ent5bg}{rgb}{0.90,0.30,0.24}
+\definecolor{ent5bg}{rgb}{0.70,0.50,0.30}   % medium brown
 \definecolor{ent5fg}{rgb}{1,1,1}
-\definecolor{ent6bg}{rgb}{0.84,0.19,0.15}
+\definecolor{ent6bg}{rgb}{0.55,0.35,0.17}   % dark brown — very uncertain
 \definecolor{ent6fg}{rgb}{1,1,1}
 
 \newcommand{\etok}[2]{\colorbox{ent#1bg}{\strut\textcolor{ent#1fg}{\small\texttt{#2}}}\hspace{-0.5pt}}
