@@ -61,14 +61,18 @@ objective is an open question (\autoref{sec:discussion}).
 
 Existing models today optimize for generating coherent output instead of factual output~\cite{krestnikov2026truthcompressionartifactlanguage}.
 Under these conditions, the optimization pressure favors fluent completion over
-honest refusal. This can be formalized as a reward inequality:
+honest refusal. This can be formalized as a reward inequality, as shown in \autoref{fig:reward_inequal}.
 
+\begin{figure}[h]
 \begin{multline*}
 w_{\text{coherence}} R_{\text{coherence}} + w_{\text{engagement}} R_{\text{engagement}} \\
 \gg w_{\text{factuality}} R_{\text{factuality}} + w_{\text{refusal}} R_{\text{refusal}}
 \end{multline*}
+\caption{Reward inequality for favoring fluent completion over honest refusal}
+\label{fig:reward_inequal}
+\end{figure}
 
-No direct measurement of these weights in commercial reward models
+No direct measurement of the weights from \autoref{fig:reward_inequal} in commercial reward models
 (separate models trained on human preferences that score language model outputs)
 exists. But
 current evaluation and feedback practices incentivize behavior consistent with

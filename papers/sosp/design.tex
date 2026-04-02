@@ -207,13 +207,18 @@ and where did it proceed with high uncertainty (high entropy, suggesting fabrica
 
 The tensor interface requires no architectural changes to current transformers.
 Generation APIs already support returning logits; the entropy trace is a simple
-transformation. Attention patterns are available with \texttt{output\_attentions=True}
-in standard frameworks. The interface is:
+transformation. Attention patterns are available with \texttt{\small{output\_attentions=True}}
+in standard frameworks. \autoref{fig:tensor_iface} shows the tensor interface.
 
-\begin{verbatim}
-  generate_with_tensor(prompt) ->
-    (text, entropy_trace, attention_summary)
-\end{verbatim}
+\begin{figure}
+\centering
+\lstset{style=python}
+\begin{framedlisting}[language=Python]
+def generate_with_tensor(prompt) -> (text, entropy_trace, attention_summary)
+\end{framedlisting}
+\caption{Epistemic Observability Tensor Interface}
+\label{fig:tensor_iface}
+\end{figure}
 
 We provide a reference implementation supporting OLMo models that demonstrates
 the interface is practical. The overhead is modest: storing per-token entropy
