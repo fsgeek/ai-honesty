@@ -4,21 +4,23 @@
 \begin{abstract}
     Systems incorporating language model components face a verification problem:
     these components fabricate, and verification has cost. How should a system
-    allocate its verification budget? We prove that text-only observation with
+    allocate its verification budget? 
+    Systems engineers building with language model
+    components need to know what each level of verification investment buys.
+    This paper provides the formal framework and empirical cost surface for making that decision.
+    
+    We prove that text-only observation with
     bounded supervision is structurally insufficient to verify epistemic honesty,
     regardless of model scale or training procedure (the impossibility is
     architectural, not a capability gap). 
     To overcome this, we introduce epistemic observability and construct a tensor interface that
-    escapes this class by exporting internal computational signals, which are entropy traces and
+    escapes this impossibility by exporting internal computational signals, such as entropy traces and
     attention summaries, that the model cannot independently control under current training objectives.
     Under a length-controlled evaluation where text-channel features collapse
-    (no text feature exceeds pooled AUC 0.70), per-token entropy remains
-    discriminative (pooled AUC 0.757), and tensor-guided judges outperform
-    text baselines at every verification budget level (+2.5--3.9pp, averaged
-    across four architectures).
-    Systems engineers building with language model
-    components need to know what each level of verification investment buys.
-    This paper provides the cost surface for that decision.
+    , per-token entropy remains discriminative , and tensor-guided judges outperform
+    text baselines at every verification budget level (+2.5--3.9 percentage points, averaged
+    across four architectures). Moreover, we show that tensor-guided judges
+    outperform text baselines with lower verification budgets.
     % The text channel is
     % stronger than expected: response length alone achieves AUC
     % (Area Under the ROC Curve; 1.0 = perfect, 0.5 = random)
