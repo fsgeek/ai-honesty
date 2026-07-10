@@ -54,32 +54,25 @@ telemetry is harder to fake.
 
 We introduce \emph{epistemic observability}: an interface that exposes this
 telemetry alongside the standard text output.
-Epistemic observability is distinct from model interpretability (understanding
-\emph{why} a model activates a particular circuit) and from explainability
-(generating post-hoc rationales for outputs). It asks a narrower question:
-\emph{is this generation grounded or fabricated?} The answer comes from
-signals that are byproducts of inference, not from understanding the
-model's learned representations.
+Unlike interpretability, which seeks to explain why a model activates particular neurons or circuits, 
+or explainability, which generates post-hoc rationales for its outputs, 
+epistemic observability addresses a different question: how trustworthy is this generation? Rather than explaining the model's internal reasoning, it surfaces signals produced as a byproduct of inference that help estimate whether the generated content is grounded in the model's knowledge or is likely to be fabricated.
 
-This paper contributes:
+To support a range of application requirements, we propose a multi-tier epistemic observability interface, 
+where each successive tier exposes richer and more informative telemetry about the generation process. 
+These tiers provide a principled trade-off between observability and computational cost, 
+enabling developers to select the level of epistemic insight that best matches their system's reliability requirements and resource budget. 
+For instance, a creative brainstorming assistant may require only Tier~0 observability, 
+whereas a medical decision-support system may justify the additional cost of higher observability tiers 
+to better identify and validate potentially hallucinated content. In this way, the observability hierarchy 
+makes explicit what additional epistemic information each level of investment provides.
 
-\fakepara{An impossibility result for text-only verification with finite budget.}
-Epistemic honesty is unverifiable for systems operating under text-only
-observation with bounded supervision (\autoref{sec:formal}). The impossibility
-is structural, not a matter of scale: a system that can only observe
-text cannot distinguish confident fabrication from grounded truth, and
-stacking additional text-channel supervisors cannot escape the
-constraint.
+As a proof of concept, we build a new tensor interface at Tier 1 epistemic observability,
+which includes the entropy at the token granularity. \todo{1 liner about the eval}
 
-\fakepara{A tensor interface that escapes the impossibility.}
-We construct an epistemic observability interface that augments text output with
-epistemic signals (entropy traces, attention summaries) in a composable
-tensor format, without architectural changes to current transformers
-(\autoref{sec:escape}).
-
-\fakepara{Empirical cost surface of verification.} We map the cost
-surface across text-only and tensor-augmented verification strategies.
-Under length-controlled evaluation, no text-channel feature exceeds pooled
-AUC 0.70; per-token entropy is the only signal that generalizes across
-architectures. Tensor-guided triage outperforms text baselines at every
-budget level (\autoref{sec:eval}).
+% \fakepara{Empirical cost surface of verification.} We map the cost
+% surface across text-only and tensor-augmented verification strategies.
+% Under length-controlled evaluation, no text-channel feature exceeds pooled
+% AUC 0.70; per-token entropy is the only signal that generalizes across
+% architectures. Tensor-guided triage outperforms text baselines at every
+% budget level (\autoref{sec:eval}).
