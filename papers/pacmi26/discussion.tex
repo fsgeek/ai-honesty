@@ -1,0 +1,96 @@
+\section{Limitations and Future Work}\label{sec:discussion}
+
+We are explicit about what this paper does not claim. The cost surface
+is characterized; the investment tiers are mapped; but several important
+questions remain open.
+
+\fakepara{What we do NOT claim.}
+\begin{itemize}
+\item The tensor interface is unfakeable under adversarial training: models
+  might learn to present confident distributions when fabricating.
+\item Composition preserves epistemic properties: tensor signals may not
+  propagate in recursive LLM pipelines.
+\item The tensor interface is the optimal design. We demonstrate existence, not
+  optimality.
+\item These findings generalize to all architectures. Our empirical work spans
+  nine model families up to 235B parameters; closed-weight models whose providers
+  do not expose log-probabilities remain untested.
+\end{itemize}
+
+\fakepara{Future work: Adversarial robustness.}
+Can training find weights that produce confident tensors for fabricated content?
+Winninger et al.~\cite{winninger2025usingmechanisticinterpretabilitycraft}
+show that mechanistic interpretability tools can identify internal subspaces
+and craft targeted attacks, confirming that internal signals are rich enough to
+be both attacked and defended, which is precisely why exporting them matters.
+The intuition that ``you cannot fake the computation you actually performed''
+may break down under end-to-end adversarial training. Preliminary analysis
+suggests linguistic and tensor confidence are decoupled in natural outputs, but
+whether adversarial training can force this coupling remains open.
+Information-theoretic bounds on signal manipulation are needed.
+
+\fakepara{Future work: Compositional integrity.}
+When LLM outputs feed into subsequent LLM inputs, the epistemic trace must
+be preserved, regenerated, or discarded. Whether tensor composition preserves
+epistemic properties in recursive settings is an open architectural problem.
+
+\fakepara{Cross-architecture generalization.}
+Our bounded verification experiment tests four model families (OLMo-3, Llama-3.1,
+Qwen3, Mistral) and finds consistent tensor advantage across all of them
+(\autoref{sec:eval_bounded}).
+%
+We validated this finding via API using Together.ai's serverless endpoints
+across five additional architectures spanning 4B to 235B parameters, including
+mixture-of-experts models (Llama-4 Maverick 128E, Qwen3-235B) and a
+Google-family architecture (Gemma 3n). Using only top-5 log-probabilities
+(renormalized as a lower bound on full-vocabulary entropy), all five models
+discriminate knowable from unknowable queries using mean entropy, with AUC
+ranging from 0.65 to 0.88. Post-hoc analysis suggests that alternative
+aggregations (peak entropy, entropy variance) may better suit specific
+architecture classes, for example, peak entropy improves AUC for
+mixture-of-experts models, but these observations are exploratory and have
+not been validated on held-out data.
+Cross-model $\rho = 0.36$ in the API set is lower than the local $0.762$,
+likely reflecting the greater architectural diversity (five families, 4B--235B)
+and the top-5 approximation, rather than signal absence.
+
+\fakepara{Signal access as provider choice.}
+The tensor signals we measure are byproducts of inference that providers can
+expose or withhold. In practice, access has eroded as models have grown more
+capable: log-probabilities were available on early completion endpoints but
+remain unsupported for the newest reasoning models, which is precisely the systems
+whose outputs are hardest to verify. Responsibility Concentration
+(\autoref{cor:responsibility}) formalizes the consequence: when the provider
+retains exclusive access to epistemic telemetry, only the provider can verify
+epistemic honesty. Whether to export the tensor interface is a policy
+decision with direct implications for who bears verification cost.
+
+\fakepara{Domain-specific calibration.} The citation entropy inversion
+(\autoref{sec:eval_bounded}) supports the interpretation that the tensor
+measures generation confidence, not truthfulness directly. This blind spot is
+precisely where bounded verification is cheapest: citation verification has
+low compositional complexity (check the DOI, query the database), placing it
+well within a bounded supervisor's budget.
+A related confound appears with epistemic refusals: models trained to decline
+unknowable queries produce low-entropy refusals that are entropically
+indistinguishable from confident factual answers. As models become more
+epistemically honest, the entropy signal's ability to detect dishonesty
+\emph{degrades} because honest refusals and honest facts occupy the same
+region of entropy space.
+
+\fakepara{Sufficiency gap.} The three architectural principles (State
+Exteriority, Verification Independence, Provenance Binding) are \emph{necessary}
+conditions for escaping the impossibility. We do not prove they are
+\emph{sufficient}. A system satisfying all three might still fail epistemic
+honesty through implementation bugs, adversarial inputs, or unforeseen failure
+modes. Sufficiency requires additional formal treatment.
+
+\fakepara{The engineering decision.}
+How much epistemic assurance a system needs is an engineering decision, not a
+research question. A brainstorming tool needs none. A medical summary system
+needs substantial assurance. A legal research system needs the highest
+tier available. This paper provides the cost surface for making that decision:
+what each level of verification investment buys, where the text-channel ceiling
+lies, what the tensor interface adds, and how content format modulates the
+tradeoff. The contribution is the map. The territory is the system you are
+building.

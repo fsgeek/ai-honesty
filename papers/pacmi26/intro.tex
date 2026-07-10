@@ -1,0 +1,85 @@
+%% ==========================================================================
+%% SECTION 1: INTRODUCTION
+%% ==========================================================================
+\balance
+\section{Introduction}\label{sec:intro}
+
+Systems incorporating language model components face a verification problem.
+The components generate text by sampling from learned probability distributions,
+and some fraction of that text is fabricated: fluent, confident, and wrong.
+LLM-based systems today are rife with ``hallucinations''.
+
+% This paper provides the formal framework and empirical cost surface for making that decision.
+
+We use the term \emph{fabrication} throughout this paper to emphasize that
+the system's default behavior under coherence optimization is reasonable and
+not a malfunction to be patched. Language models optimized for
+coherence produce coherent output. The output reflects the training data: grounded
+training data tends to track truth, while ungrounded training data tends to produce untruth.
+\citeauthor{xu2024hallucination}~\cite{xu2024hallucination} proves that hallucination is
+inevitable for LLMs over the class of computable functions.
+% Our result is orthogonal. They prove a computational limit on what the model can produce;
+% we prove an observational limit on what a supervisor can verify.
+% [moved to telemetry paragraph below]
+
+%Verification has a cost. 
+Consequently, every system that
+deploys a language model component must allocate a budget: how much of the output to verify,
+which outputs to prioritize, and what signals to use for triage.
+For example, checking a citation against a database costs API
+calls and latency; having a domain expert review a summary costs time
+and salary; running a second model as a judge costs compute.
+Verification cost varies by content type: checking a citation is cheap;
+assessing whether a summary faithfully represents its source is expensive.
+
+The key issue is that the current text-only interface to language models does not expose the model's
+internal computation, which produces signals that distinguish grounded generation from fabrication.
+The model may know it is fabricating but currently the supervisor cannot tell if the model
+is fabricating just from the text output. 
+
+This observability gap has direct consequences for verification cost. 
+A supervisor receiving only text must spend its
+verification budget reconstructing, from the output alone,
+what the model's own computation already knew. The budget is
+consumed by reconstruction rather than concentrated on the cases
+where verification is most needed.
+
+Our key insight is that language models carry internal
+signals, which are the entropy traces, attention geometry, token-level
+log-probabilities, that distinguish grounded generation from
+fabrication. These signals are byproducts of the computation itself:
+\emph{telemetry} that the model cannot separately control under standard training.
+Unlike the model's \emph{testimony} (the text it chooses to output),
+telemetry is harder to fake.
+
+We introduce \emph{epistemic observability}: an interface that exposes this
+telemetry alongside the standard text output.
+Epistemic observability is distinct from model interpretability (understanding
+\emph{why} a model activates a particular circuit) and from explainability
+(generating post-hoc rationales for outputs). It asks a narrower question:
+\emph{is this generation grounded or fabricated?} The answer comes from
+signals that are byproducts of inference, not from understanding the
+model's learned representations.
+
+This paper contributes:
+
+\fakepara{An impossibility result for text-only verification with finite budget.}
+Epistemic honesty is unverifiable for systems operating under text-only
+observation with bounded supervision (\autoref{sec:formal}). The impossibility
+is structural, not a matter of scale: a system that can only observe
+text cannot distinguish confident fabrication from grounded truth, and
+stacking additional text-channel supervisors cannot escape the
+constraint.
+
+\fakepara{A tensor interface that escapes the impossibility.}
+We construct an epistemic observability interface that augments text output with
+epistemic signals (entropy traces, attention summaries) in a composable
+tensor format, without architectural changes to current transformers
+(\autoref{sec:escape}).
+
+\fakepara{Empirical cost surface of verification.} We map the cost
+surface across text-only and tensor-augmented verification strategies.
+Under length-controlled evaluation, no text-channel feature exceeds pooled
+AUC 0.70; per-token entropy is the only signal that generalizes across
+architectures. Tensor-guided triage outperforms text baselines at every
+budget level (\autoref{sec:eval}).

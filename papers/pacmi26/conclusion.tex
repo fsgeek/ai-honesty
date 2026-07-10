@@ -1,0 +1,21 @@
+%% ==========================================================================
+%% Conclusion
+%% ==========================================================================
+\section{Conclusion}\label{sec:conclusion}
+
+Systems incorporating language model components must decide how much to spend
+on verification and where to spend it. This paper provides the cost surface
+for that decision.
+Epistemic honesty is unverifiable under text-only observation with bounded
+supervision, which is a structural property of the interface, not a capability gap.
+Systems that export structured epistemic state escape this class. Under
+length-controlled evaluation, no text-channel feature generalizes across
+architectures; per-token entropy is the only signal that does.
+Tensor-guided judges outperform text baselines at every budget level
+(+2.5--3.9pp). The engineering question is not whether to verify, but how
+much verification to buy and at which tier.
+% A brainstorming tool needs Tier~0. A medical system
+% needs Tier~2. The cost surface tells you what each investment buys, and
+% preliminary observations indicate that content format modulates the tradeoff.
+
+% The interface is the problem. The interface is where the solution lives.

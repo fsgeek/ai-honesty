@@ -1,0 +1,82 @@
+%% ==========================================================================
+%% SECTION 6: RELATED WORK
+%% ==========================================================================
+\section{Related Work}\label{sec:related}
+
+Our contribution is a formal impossibility result. Prior work documents
+symptoms; we formalize one structural cause. Prior work proposes treatments; we
+explain why they cannot fully resolve the verification problem under text-only
+observation.
+
+\fakepara{Hallucination taxonomies.} Extensive empirical work catalogs LLM
+fabrication patterns: citation hallucination in academic
+contexts~\cite{alkaissi2023artificial}, medical
+misinformation~\cite{thirunavukarasu2023large}, and legal
+fabrication~\cite{dahl2024large}. These findings instantiate our
+\autoref{cond:hallucination}: in each domain, plausible fabrications are
+cheap to generate and expensive to verify, placing supervisors in the hallucination
+regime where gradient signal cannot distinguish truth from fabrication. The
+taxonomies document the symptom; our theorems identify the structural cause.
+
+\fakepara{Model internals.} A substantial body of work examines model internal
+states: transformer circuits~\cite{elhage2021mathematical}, sparse
+features~\cite{bricken2023monosemanticity}, Activation
+Oracles~\cite{karvonen2025activation} that train LLMs to interpret other
+models' internals, and the ``Assistant Axis''~\cite{lu2026assistantaxissituatingstabilizing} showing
+that internal persona state diverges from text behavior. Our work is
+complementary but narrower: we do not require understanding a model's learned
+circuits, only that inference-time signals differ measurably between grounded
+and fabricated generation. Interpretability asks why; observability asks
+whether.
+
+\fakepara{RLHF critiques.} Work on sycophancy~\cite{perez2022discovering},
+reward hacking~\cite{gao2023scaling}, and the tension between helpfulness and
+honesty~\cite{bai2022training} demonstrates that preference optimization can
+degrade factual accuracy. Our \autoref{thm:learnability} formalizes why:
+bounded supervisors cannot distinguish plausible fabrications from truthful
+responses, so the learning signal is systematically corrupted.
+
+\fakepara{Uncertainty quantification.} Calibration methods, conformal
+prediction~\cite{angelopoulos2021gentle}, and verbalized
+uncertainty~\cite{kadavath2022language} attempt to surface model confidence
+through the text channel. Kuhn et
+al.~\cite{kuhn2023semanticuncertaintylinguisticinvariances} advance this with
+semantic entropy: sampling multiple responses and clustering by meaning. This
+is the most sophisticated text-channel approach to date, partially addressing
+gaming by measuring agreement \emph{between} outputs. But it remains
+text-channel: the clustering operates on generated text, and a bounded
+supervisor evaluating semantic equivalence remains subject to gaming in the
+limit. Our tensor interface extracts signals from the computation that produced
+a single output, which are the signals the model cannot independently control. Semantic
+entropy and tensor observability are complementary: one measures output-level
+consistency, the other computation-level confidence.
+
+\fakepara{Impossibility results in LLMs.} Xu et
+al.~\cite{xu2024hallucination} prove that hallucination is inevitable for LLMs
+over the class of computable functions, which is a computational limit. Our result is
+orthogonal: we prove that even if a system could be honest, a bounded
+supervisor observing only text cannot verify that honesty, which is an observational
+limit. Their impossibility concerns what LLMs can compute; ours concerns what
+supervisors can verify. Both are structural, but they constrain different
+dimensions of system design.
+
+\fakepara{Impossibility results in distributed systems.} The
+Fischer-Lynch-Paterson theorem~\cite{flp} proved that consensus is impossible
+under asynchrony with one faulty process. This did not end distributed systems
+research; it clarified the design space. Paxos~\cite{paxos}, Raft~\cite{raft}, and modern
+consensus protocols work \emph{around} FLP by relaxing assumptions or
+strengthening guarantees. Our result plays an analogous role: text-only
+observation models with bounded supervision cannot guarantee epistemic honesty,
+but systems that export structured epistemic state can escape the impossibility
+class.
+
+\fakepara{Epistemic evaluation and agent architectures.} \citeauthor{clark2025epistemicalignmentmediatingframework}
+~\cite{clark2025epistemicalignmentmediatingframework} note that current interfaces lack structured ways
+to specify uncertainty or sourcing; we provide the formal impossibility
+explaining \emph{why} text-only evaluation cannot suffice. \citeauthor{wright2025predictionstructuringepistemic}~\cite{wright2025predictionstructuringepistemic} propose architectures with explicit propositions
+and justification graphs, which are closest in spirit to our escape conditions, but
+frame these as \emph{replacements} for stochastic generation. We derive the
+tensor interface as a minimal \emph{addition} to current architectures.
+
+The gap we fill is formalization: we prove \emph{why} the problem is structural
+and identify architectural properties that enable escaping it.

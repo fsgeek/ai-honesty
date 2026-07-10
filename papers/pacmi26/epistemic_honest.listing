@@ -1,0 +1,1 @@
+def generate_with_tensor(prompt) -> (text, entropy_trace, attention_summary)

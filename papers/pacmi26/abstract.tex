@@ -1,0 +1,38 @@
+%%
+%% Abstract
+%%
+\begin{abstract}
+    Systems incorporating language model components face a verification problem:
+    these components fabricate, and verification has cost. How should a system
+    allocate its verification budget? 
+    Systems engineers building with language model
+    components need to know what each level of verification investment buys.
+    This paper provides the formal framework and empirical cost surface for making that decision.
+    
+    We prove that text-only observation with
+    bounded supervision is structurally insufficient to verify epistemic honesty,
+    regardless of model scale or training procedure (the impossibility is
+    architectural, not a capability gap). 
+    To overcome this, we introduce epistemic observability and construct a tensor interface that
+    escapes this impossibility by exporting internal computational signals, such as entropy traces and
+    attention summaries, that the model cannot independently control under current training objectives.
+    Under a length-controlled evaluation where text-channel features collapse
+    , per-token entropy remains discriminative , and tensor-guided judges outperform
+    text baselines at every verification budget level (+2.5--3.9 percentage points, averaged
+    across four architectures). Moreover, we show that tensor-guided judges
+    outperform text baselines with lower verification budgets.
+    % The text channel is
+    % stronger than expected: response length alone achieves AUC
+    % (Area Under the ROC Curve; 1.0 = perfect, 0.5 = random)
+    % 0.88--0.96, but is trivially gameable.
+    % After controlling for length, the tensor residual adds AUC 0.60--0.70:
+    % modest, but occupying a fundamentally different position in the adversarial
+    % landscape. Behavioral signals can be adapted by training without altering the
+    % computation; computational signals cannot be independently controlled
+    % under current training objectives, the same structural pattern that makes
+    % code plagiarism detection (MOSS) robust. Preliminary observations
+    % identify a format-dependent cost surface: scaffolding ratio and rigidity
+    % vary across content formats (natural text, code, mathematical proofs) and
+    % predict which judge strategy is cost-effective per domain. The
+    % contribution is the map: 
+    \end{abstract}
