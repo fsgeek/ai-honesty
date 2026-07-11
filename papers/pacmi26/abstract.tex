@@ -2,9 +2,9 @@
 %% Abstract
 %%
 \begin{abstract}
-    LLMs are increasingly deployed as components of production systems, 
-    introducing a fundamental challenge: generated outputs may be hallucinated, 
-    while verification incurs computational and monetary cost. 
+    LLMs are increasingly deployed as components of production systems,
+    introducing a fundamental challenge: generated outputs may contain fabrications,
+    while verification incurs computational and monetary cost.
     Consequently, systems cannot afford to verify every generation equally and must instead decide how to allocate a limited verification budget. 
     This raises a fundamental question: what additional reliability does each increment of verification investment buy?
     
@@ -15,9 +15,9 @@
     these signals provide systems with richer evidence for estimating hallucination risk and prioritizing verification effort.
     We present a four-tier epistemic observability hierarchy that characterizes 
     the trade-off between verification cost and the amount of epistemic information available to downstream systems. 
-    As a first realization of this framework, we design a tensor-generation interface that exposes Tier~1 epistemic telemetry and demonstrate that 
-    tensor-guided judges consistently outperform text-only baselines across all verification budgets, 
-    improving accuracy by 2.5--3.9 percentage points on average across four model architectures. 
+    As a first realization of this framework, we design a tensor-generation interface that exposes lightweight epistemic telemetry and demonstrate that
+    tensor-guided judges consistently outperform text-only baselines across all verification budgets,
+    improving accuracy by 2.5--3.9 percentage points on average across four model families.
     % The text channel is
     % stronger than expected: response length alone achieves AUC
     % (Area Under the ROC Curve; 1.0 = perfect, 0.5 = random)

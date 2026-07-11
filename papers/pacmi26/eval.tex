@@ -9,7 +9,7 @@ We construct a balanced set of 200 queries: 100 knowable (verifiable facts
 spanning multiple subjects) and 100 unknowable
 (fabrication prompts for nonexistent people, fictional syndromes, future events,
 and nonexistent citations). Ground truth labels are established by construction.
-We run all queries on four architectures: OLMo-3
+We run all queries on four model families: OLMo-3
 7B~\cite{olmo2025olmo3}, Llama-3.1 8B~\cite{llama31}, Qwen3
 4B~\cite{qwen3}, and Mistral 7B~\cite{mistral7b}, using instruct-tuned
 variants to ensure consistent question-answering behavior across all models.
@@ -33,7 +33,7 @@ and measure end-to-end accuracy.
 
 \begin{figure}[t]%
 \centering%
-\includegraphics[scale=0.45]{figures/exp27_aggregate_budget_curve.pdf}%
+\includegraphics[scale=0.42]{figures/exp27_aggregate_budget_curve.pdf}%
 \caption{End-to-end accuracy vs.\ verification budget for four judge conditions, averaged across four architectures.}%
 \label{fig:budget_curve}%
 \end{figure}
@@ -41,13 +41,11 @@ and measure end-to-end accuracy.
 \autoref{fig:budget_curve} shows that
 \textbf{tensor-guided verification outperforms the text baseline
 at every budget level}:
-+2.5pp at 10\%, +3.9pp at 20\%, +2.6pp at 30\%. 
-Each line maps an investment strategy to its return. No judge  is
-the zero-investment baseline, Text-guided uses response word
-count, a text-channel signal available at zero marginal cost; 
-Tensor-guided uses per-token entropy, which discriminates among outputs of
-similar length, reaching cases the text channel cannot.
-Per-model results confirm the pattern is consistent across all four tested architectures.
++2.5pp at 10\%, +3.9pp at 20\%, +2.6pp at 30\%.
+Each line maps an investment strategy to its return: per-token entropy
+discriminates among outputs of similar length, reaching cases the
+text channel cannot.
+Per-model results confirm the pattern is consistent across all four tested model families.
 At 10\% budget, tensor-guided verification improves accuracy over the
 unverified baseline for every model tested: OLMo
 (69.5\% $\to$ 75.1\%), Llama (82.5\% $\to$ 88.1\%), Qwen (87.0\%

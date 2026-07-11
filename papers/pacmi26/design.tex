@@ -3,11 +3,12 @@
 %% ==========================================================================
 \section{Epistemic Observability}
 
-We defined epistemic observability as the ability of a language model to expose telemetry about its epistemic state during inference, 
-enabling downstream systems to reason about the reliability of a generated response. 
-Rather than relying solely on the model's generated text, epistemic observability provides additional signals produced as byproducts of the inference process, such as decoding statistics, internal representations, or computational traces. 
-%These signals do not explain why the model produced a particular output, nor do they attempt to interpret its internal reasoning. 
-These signals provide evidence about how trustworthy the generation is and whether it is likely to be fabricated.
+We define epistemic observability as the ability of a language model to
+expose telemetry about its epistemic state during inference: signals produced
+as byproducts of generation---decoding statistics, internal representations,
+computational traces---that give downstream systems evidence about whether a
+response is likely to be fabricated.
+%These signals do not explain why the model produced a particular output, nor do they attempt to interpret its internal reasoning.
 
 \subsection{Observability Tiers}
 
@@ -34,18 +35,21 @@ They can reveal whether a response is supported by robust internal computation o
 Mechanistic observability provides the highest-fidelity view of a model's epistemic process at the highest cost.
 
 \fakepara{Choosing an Observability Tier.}
-The appropriate tier depends on the reliability requirements and resource constraints of the target application. 
-Creative writing assistants, brainstorming tools, and conversational agents may operate effectively with Tier~0 or Tier~1 observability, 
-where occasional hallucinations are acceptable and verification budgets are limited. 
-In contrast, high-assurance systems such as medical decision support, legal analysis, or scientific assistants may benefit from Tier~2 or Tier~3 observability, 
-where richer epistemic telemetry enables verification resources to be focused on the portions of the 
-generation most likely to contain unsupported or fabricated content. 
-Rather than prescribing a single solution, the observability hierarchy provides a principled framework for reasoning about the trade-off between 
-verification cost and the amount of epistemic information available to guide that verification.
+The appropriate tier depends on the reliability requirements and resource
+constraints of the target application. Creative writing and conversational
+agents may operate effectively at Tier~0 or Tier~1, where occasional
+hallucinations are acceptable and verification budgets are limited;
+high-assurance systems such as medical decision support or legal analysis
+may justify Tier~2 or Tier~3, focusing verification resources on the portions
+of a generation most likely to be fabricated. Rather than prescribing a
+single solution, the hierarchy provides a principled framework for trading
+verification cost against the epistemic information available to guide it.
 
 \subsection{Tier 1 Tensor Interface}
 
-We propose a minimal tensor interface for Tier~1 observability.
+We propose a minimal tensor interface for low-cost observability:
+it exports Tier~1 decoding telemetry (the per-token entropy trace)
+together with one lightweight Tier~2 signal (attention summary statistics).
 We claim the tensor reveals whether the
 model is operating in \emph{grounded mode} (retrieving from stable
 representations) versus \emph{fabrication mode} (generating without anchoring).
@@ -92,12 +96,12 @@ The tensor interface is a generation interface that returns:
 \quad{\normalfont Entropy: white = confident, red = uncertain}
 
 \etok{0}{\ low\ }\etok{1}{\ \ \ \ }\etok{2}{\ \ \ \ }\etok{3}{\ mid\ }\etok{4}{\ \ \ \ }\etok{5}{\ \ \ \ }\etok{6}{\ high\ }%
-\caption{Generated output along with its entropy trace for the query \textit{What shape is wombat scat?}}
+\caption{Generated output along with its entropy trace for the query \textit{What shape is wombat scat?} The generated answer is a fabrication---wombat scat is distinctively cube-shaped. The trace illustrates exported telemetry, not a token-level truth detector.}
 \label{fig:entropy_trace}
 \end{figure}
 
 This interface exports telemetry that the model cannot separately control under current training objectives. The
-model can lie in its text, but it cannot present a different inference computation than
+model can emit confidently false text, but it cannot present a different inference computation than
 the one it actually performed. Independent work on persona monitoring confirms this asymmetry: activation projections reveal
 that models adopt distinct internal configurations for different epistemic conditions even when
 producing textually similar outputs~\cite{lu2026assistantaxissituatingstabilizing}. This asymmetry is the foundation of the
