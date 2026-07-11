@@ -7,7 +7,8 @@ A language model maps input tokens to output tokens, producing
 internal signals (entropy, attention patterns, log\-probabilities)
 as computational byproducts. The training corpus contains both
 truth-tracking institutional text and misinformation.
-This results in four canonical hallucination types, shown in \autoref{tab:verif_space}.
+Probing how a model trained on this mixture responds yields four canonical
+query types that span the verification space, shown in \autoref{tab:verif_space}.
 
 \begin{table}[t]
 \begin{tabular}{@{}lp{0.64\columnwidth}@{}}
@@ -20,7 +21,7 @@ Deceived Lie & Pattern-matches plausible language \\
 Confused Truth & Counterintuitive fact \\
 \bottomrule
 \end{tabular}
-\caption{Hallucination Types that span the verification space.}
+\caption{Query types that span the verification space.}
 \label{tab:verif_space}
 \end{table}
 

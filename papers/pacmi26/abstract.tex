@@ -10,9 +10,9 @@
     
     We argue that text-only observation, even with bounded supervision, 
     is structurally insufficient for reliably assessing the epistemic validity of model outputs, regardless of model scale or training procedure. 
-    To address this limitation, we introduce epistemic observability, 
-    an interface that exposes internal computational telemetry alongside generated text as these signals 
-    they provide systems with richer evidence for estimating hallucination risk and prioritizing verification effort.
+    To address this limitation, we introduce epistemic observability,
+    an interface that exposes internal computational telemetry alongside generated text;
+    these signals provide systems with richer evidence for estimating hallucination risk and prioritizing verification effort.
     We present a four-tier epistemic observability hierarchy that characterizes 
     the trade-off between verification cost and the amount of epistemic information available to downstream systems. 
     As a first realization of this framework, we design a tensor-generation interface that exposes Tier~1 epistemic telemetry and demonstrate that 

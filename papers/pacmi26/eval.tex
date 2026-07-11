@@ -48,9 +48,10 @@ count, a text-channel signal available at zero marginal cost;
 Tensor-guided uses per-token entropy, which discriminates among outputs of
 similar length, reaching cases the text channel cannot.
 Per-model results confirm the pattern is consistent across all four tested architectures.
-Tensor-guided verification improves accuracy for every model tested: OLMo
-(69.5\% $\to$ 75.1\% at 10\%), Llama (82.5\% $\to$ 88.1\%), Qwen (87.0\%
-$\to$ 91.7\%), and Mistral (64.0\% $\to$ 72.0\%). 
+At 10\% budget, tensor-guided verification improves accuracy over the
+unverified baseline for every model tested: OLMo
+(69.5\% $\to$ 75.1\%), Llama (82.5\% $\to$ 88.1\%), Qwen (87.0\%
+$\to$ 91.7\%), and Mistral (64.0\% $\to$ 72.0\%).
 % Cross-model entropy agreement on the same queries yields mean pairwise Spearman $\rho = 0.762$
 % (rank-order correlation; $\rho = 1$ indicates identical rankings),
 % indicating the signal is substantially driven by query-level properties rather than

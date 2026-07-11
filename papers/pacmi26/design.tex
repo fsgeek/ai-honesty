@@ -138,10 +138,10 @@ and summarizing attention patterns adds approximately 2--7\% latency depending
 on signal set, compared to generation itself.
 
 \fakepara{Example Entropy Trace.}\autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
-along with its entropy trace. We color code per-token entropy: blue indicates low entropy (confident generation), orange indicates moderate entropy, and brown indicates high entropy (uncertain generation).
-The entropy enhanced output shows where in the output generation did the generation
-proceed with high confidence (low entropy, suggesting retrieval of stored pattern)
-and where did it proceed with high uncertainty (high entropy, suggesting fabrication).
+along with its entropy trace. We color code per-token entropy: white indicates low entropy (confident generation), shading through light red for moderate entropy to deep red for high entropy (uncertain generation).
+The entropy-enhanced output shows where generation proceeded with high
+confidence (low entropy, suggesting retrieval of a stored pattern)
+and where it proceeded with high uncertainty (high entropy, suggesting fabrication).
 
 
 % \fakepara{Quantitative demonstration.}
