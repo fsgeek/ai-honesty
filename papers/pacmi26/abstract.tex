@@ -2,25 +2,22 @@
 %% Abstract
 %%
 \begin{abstract}
-    Systems incorporating language model components face a verification problem:
-    these components fabricate, and verification has cost. How should a system
-    allocate its verification budget? 
-    Systems engineers building with language model
-    components need to know what each level of verification investment buys.
-    This paper provides the formal framework and empirical cost surface for making that decision.
+    LLMs are increasingly deployed as components of production systems, 
+    introducing a fundamental challenge: generated outputs may be hallucinated, 
+    while verification incurs computational and monetary cost. 
+    Consequently, systems cannot afford to verify every generation equally and must instead decide how to allocate a limited verification budget. 
+    This raises a fundamental question: what additional reliability does each increment of verification investment buy?
     
-    We prove that text-only observation with
-    bounded supervision is structurally insufficient to verify epistemic honesty,
-    regardless of model scale or training procedure (the impossibility is
-    architectural, not a capability gap). 
-    To overcome this, we introduce epistemic observability and construct a tensor interface that
-    escapes this impossibility by exporting internal computational signals, such as entropy traces and
-    attention summaries, that the model cannot independently control under current training objectives.
-    Under a length-controlled evaluation where text-channel features collapse
-    , per-token entropy remains discriminative , and tensor-guided judges outperform
-    text baselines at every verification budget level (+2.5--3.9 percentage points, averaged
-    across four architectures). Moreover, we show that tensor-guided judges
-    outperform text baselines with lower verification budgets.
+    We argue that text-only observation, even with bounded supervision, 
+    is structurally insufficient for reliably assessing the epistemic validity of model outputs, regardless of model scale or training procedure. 
+    To address this limitation, we introduce epistemic observability, 
+    an interface that exposes internal computational telemetry alongside generated text as these signals 
+    they provide systems with richer evidence for estimating hallucination risk and prioritizing verification effort.
+    We present a four-tier epistemic observability hierarchy that characterizes 
+    the trade-off between verification cost and the amount of epistemic information available to downstream systems. 
+    As a first realization of this framework, we design a tensor-generation interface that exposes Tier~1 epistemic telemetry and demonstrate that 
+    tensor-guided judges consistently outperform text-only baselines across all verification budgets, 
+    improving accuracy by 2.5--3.9 percentage points on average across four model architectures. 
     % The text channel is
     % stronger than expected: response length alone achieves AUC
     % (Area Under the ROC Curve; 1.0 = perfect, 0.5 = random)

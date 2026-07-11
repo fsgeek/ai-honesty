@@ -8,16 +8,19 @@ Systems incorporating language model components face a verification problem.
 The components generate text by sampling from learned probability distributions,
 and some fraction of that text is fabricated: fluent, confident, and wrong.
 LLM-based systems today are rife with ``hallucinations''.
+We use the term \emph{fabrication} throughout this paper to emphasize that
+the system's default behavior under coherence optimization is reasonable and
+not a malfunction to be patched.
+\citeauthor{xu2024hallucination}~\cite{xu2024hallucination} proves that fabrication is
+inevitable for LLMs over the class of computable functions.
 
 % This paper provides the formal framework and empirical cost surface for making that decision.
 
-We use the term \emph{fabrication} throughout this paper to emphasize that
-the system's default behavior under coherence optimization is reasonable and
-not a malfunction to be patched. Language models optimized for
-coherence produce coherent output. The output reflects the training data: grounded
-training data tends to track truth, while ungrounded training data tends to produce untruth.
-\citeauthor{xu2024hallucination}~\cite{xu2024hallucination} proves that hallucination is
-inevitable for LLMs over the class of computable functions.
+% We use the term \emph{fabrication} throughout this paper to emphasize that
+% the system's default behavior under coherence optimization is reasonable and
+% not a malfunction to be patched. Language models optimized for
+% coherence produce coherent output. The output reflects the training data: grounded
+% training data tends to track truth, while ungrounded training data tends to produce untruth.
 % Our result is orthogonal. They prove a computational limit on what the model can produce;
 % we prove an observational limit on what a supervisor can verify.
 % [moved to telemetry paragraph below]
@@ -26,9 +29,7 @@ inevitable for LLMs over the class of computable functions.
 Consequently, every system that
 deploys a language model component must allocate a budget: how much of the output to verify,
 which outputs to prioritize, and what signals to use for triage.
-For example, checking a citation against a database costs API
-calls and latency; having a domain expert review a summary costs time
-and salary; running a second model as a judge costs compute.
+For example, checking a citation against a database costs latency; running a second model as a judge costs compute.
 Verification cost varies by content type: checking a citation is cheap;
 assessing whether a summary faithfully represents its source is expensive.
 
@@ -45,8 +46,7 @@ consumed by reconstruction rather than concentrated on the cases
 where verification is most needed.
 
 Our key insight is that language models carry internal
-signals, which are the entropy traces, attention geometry, token-level
-log-probabilities, that distinguish grounded generation from
+signals that distinguish grounded generation from
 fabrication. These signals are byproducts of the computation itself:
 \emph{telemetry} that the model cannot separately control under standard training.
 Unlike the model's \emph{testimony} (the text it chooses to output),
@@ -54,9 +54,10 @@ telemetry is harder to fake.
 
 We introduce \emph{epistemic observability}: an interface that exposes this
 telemetry alongside the standard text output.
-Unlike interpretability, which seeks to explain why a model activates particular neurons or circuits, 
+Unlike interpretability, which seeks to explain why a model activates particular neurons, 
 or explainability, which generates post-hoc rationales for its outputs, 
-epistemic observability addresses a different question: how trustworthy is this generation? Rather than explaining the model's internal reasoning, it surfaces signals produced as a byproduct of inference that help estimate whether the generated content is grounded in the model's knowledge or is likely to be fabricated.
+epistemic observability surfaces signals produced as a byproduct of inference that help 
+estimate whether the generated content is grounded in the model's knowledge or is likely to be fabricated.
 
 To support a range of application requirements, we propose a multi-tier epistemic observability interface, 
 where each successive tier exposes richer and more informative telemetry about the generation process. 
@@ -67,8 +68,9 @@ whereas a medical decision-support system may justify the additional cost of hig
 to better identify and validate potentially hallucinated content. In this way, the observability hierarchy 
 makes explicit what additional epistemic information each level of investment provides.
 
-As a proof of concept, we build a new tensor interface at Tier 1 epistemic observability,
-which includes the entropy at the token granularity. \todo{1 liner about the eval}
+As a proof of concept, we design a tensor-generation interface that exposes Tier~1 epistemic telemetry, which includes the per-token entropy,
+and demonstrate that tensor-guided judges consistently outperform text-only baselines across all verification budgets, 
+improving accuracy by 2.5--3.9 percentage points on average across four model architectures. 
 
 % \fakepara{Empirical cost surface of verification.} We map the cost
 % surface across text-only and tensor-augmented verification strategies.

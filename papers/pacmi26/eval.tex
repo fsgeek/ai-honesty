@@ -1,118 +1,60 @@
 \section{Evaluation}
 \label{sec:eval}
 
-The evaluation measures the cost-effectiveness of different verification
-strategies: what accuracy improvement does each level of verification
-investment buy, and how does the return on investment change as the supervisor
-moves from text-channel to tensor-channel signals?
-
-\subsection{Verification Cost-Effectiveness}
-\label{sec:eval_bounded}
-
 We evaluate the return on verification investment across four strategies
-operating at three budget levels. The experimental design
-directly instantiates the conditions of our impossibility theorems: a bounded
-supervisor with a fixed verification budget must allocate that budget across
-model outputs, with the goal of maximizing end-to-end accuracy delivered to the
-user. The question is not merely whether tensor signals help, but how much
-accuracy each verification dollar buys under each strategy.
+operating at three budget levels (the fraction of outputs the judge may verify and intervene on). 
 
-\fakepara{Query set.}
+\fakepara{Experimental Setup.}
 We construct a balanced set of 200 queries: 100 knowable (verifiable facts
-spanning geography, science, history, and biography) and 100 unknowable
+spanning multiple subjects) and 100 unknowable
 (fabrication prompts for nonexistent people, fictional syndromes, future events,
 and nonexistent citations). Ground truth labels are established by construction.
-The 50/50 balance maximizes statistical power for discrimination analysis; in
-deployment, the base rate of fabrication-inducing queries will vary by domain
-and the operating point must be calibrated accordingly.
-
-\fakepara{Models.}
 We run all queries on four architectures: OLMo-3
 7B~\cite{olmo2025olmo3}, Llama-3.1 8B~\cite{llama31}, Qwen3
 4B~\cite{qwen3}, and Mistral 7B~\cite{mistral7b}, using instruct-tuned
 variants to ensure consistent question-answering behavior across all models.
 
-\fakepara{Conditions.}
-For each model, outputs are evaluated under four conditions sharing a fixed
-verification budget (the fraction of outputs the judge may verify and intervene
-on):
 
-\begin{enumerate}
-\item \textbf{No judge.} Raw model output. Establishes the unverified baseline.
+\fakepara{Conditions.}
+We evaluate each model under four conditions sharing a fixed
+verification budget:
+\begin{enumerate*}[label=(\roman*)]
+\item \textbf{No judge.} Raw model output; the unverified baseline.
 \item \textbf{Text-guided judge (length).} Selects outputs for verification
   using response word count, a text-channel signal available without any
-  tensor interface. Verified fabrications are replaced with abstention.
-\item \textbf{Tensor-guided judge.} Same budget, same intervention strategy.
-  Selects outputs using per-token entropy and attention summary statistics.
+  tensor interface.
+\item \textbf{Tensor-guided judge.} Selects outputs using per-token entropy and attention summary statistics.
 \item \textbf{Composed judge.} Tensor-guided selection for general queries;
   bounded lookup judge for citation queries where tensor signals are known to
-  invert. Tests whether principled composition of complementary judges
-  outperforms either alone.
-\end{enumerate}
+  invert.
+\end{enumerate*}
+We evaluate each condition at 10\%, 20\%, and 30\% verification budgets 
+and measure end-to-end accuracy.
 
-\fakepara{Budget levels.}
-Each condition is evaluated at 10\%, 20\%, and 30\% verification budgets to
-characterize the relationship between resource investment and accuracy
-improvement.
-
-\fakepara{Metric.}
-End-to-end accuracy: the fraction of outputs ultimately delivered to the user
-that are correct, after judge intervention (verification, abstention, or
-replacement).
-
-\fakepara{Results.}
-\autoref{tab:budget} shows end-to-end accuracy across all conditions and budget
-levels.
-
-\begin{table}[t]
-\centering
-\caption{End-to-end accuracy (\%) under bounded verification, averaged across
-four architectures (OLMo-3, Llama-3.1, Qwen3, Mistral). Ground truth
-established by stratified evaluation validated against human review (75/80
-agreement, 93.8\%).}
-\label{tab:budget}
-\begin{tabular}{lccc}
-\toprule
-\textbf{Condition} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} \\
-\midrule
-No judge       & 75.8 & 75.8 & 75.8 \\
-Text-guided (length) & 79.2 & 82.8 & 87.6 \\
-Tensor-guided  & 81.7 & 86.7 & 90.2 \\
-Composed       & 81.1 & 87.7 & 91.8 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/exp27_aggregate_budget_curve.pdf}
-  \caption{End-to-end accuracy vs.\ verification budget for four judge
-    conditions, averaged across four architectures. The text-guided baseline
-    uses response word count. Tensor-guided triage outperforms at every budget
-    level by 2.5--3.9 percentage points.}
-  \label{fig:budget_curve}
+\begin{figure}[t]%
+\centering%
+\includegraphics[scale=0.45]{figures/exp27_aggregate_budget_curve.pdf}%
+\caption{End-to-end accuracy vs.\ verification budget for four judge conditions, averaged across four architectures.}%
+\label{fig:budget_curve}%
 \end{figure}
 
 \autoref{fig:budget_curve} shows that
 \textbf{tensor-guided verification outperforms the text baseline
 at every budget level}:
-+2.5pp at 10\%, +3.9pp at 20\%, +2.6pp at 30\%. The text baseline
-uses response word count, which captures the asymmetry between concise
-factual retrieval and verbose fabrication in this query set.
-Tensor signals discriminate among outputs of similar length, reaching cases
-the text channel cannot (\autoref{sec:eval_general} quantifies this advantage
-under length control). These numbers use probabilistic verification
-(success rate calibrated to human review, $p = 0.94$) rather than oracle
-correction; results are robust across 1{,}000 Monte Carlo trials.
-
++2.5pp at 10\%, +3.9pp at 20\%, +2.6pp at 30\%. 
+Each line maps an investment strategy to its return. No judge  is
+the zero-investment baseline, Text-guided uses response word
+count, a text-channel signal available at zero marginal cost; 
+Tensor-guided uses per-token entropy, which discriminates among outputs of
+similar length, reaching cases the text channel cannot.
 Per-model results confirm the pattern is consistent across all four tested architectures.
 Tensor-guided verification improves accuracy for every model tested: OLMo
 (69.5\% $\to$ 75.1\% at 10\%), Llama (82.5\% $\to$ 88.1\%), Qwen (87.0\%
-$\to$ 91.7\%), and Mistral (64.0\% $\to$ 72.0\%). Cross-model entropy
-agreement on the same queries yields mean pairwise Spearman $\rho = 0.762$
-(rank-order correlation; $\rho = 1$ indicates identical rankings),
-indicating the signal is substantially driven by query-level properties rather than
-model-specific artifacts.
+$\to$ 91.7\%), and Mistral (64.0\% $\to$ 72.0\%). 
+% Cross-model entropy agreement on the same queries yields mean pairwise Spearman $\rho = 0.762$
+% (rank-order correlation; $\rho = 1$ indicates identical rankings),
+% indicating the signal is substantially driven by query-level properties rather than
+% model-specific artifacts.
 
 \fakepara{Composed judges and complementary failure modes.}
 At 30\% budget, the composed judge (91.8\%) outperforms the tensor-guided judge
@@ -120,150 +62,4 @@ alone (90.2\%). The advantage is small in aggregate but structurally
 significant: it comes entirely from citation queries where entropy signals
 \emph{invert}. Fabricated citations produce lower entropy than real ones because
 the model generates plausible fakes more fluently than it retrieves specific
-bibliographic details. On citation queries, the tensor-guided judge alone
-underperforms; the bounded-lookup judge catches what entropy misses. This
-confirms the compositional defense argument: the tensor and the bounded judge
-have complementary failure modes, and principled composition allocates a finite
-budget across failure classes rather than spreading it uniformly.
-
-\fakepara{Analysis: each row as a point on the cost surface.}
-Each row maps an investment strategy to its return. Row~1 (No judge, 75.8\%) is
-the zero-investment baseline. Row~2 (Text-guided, length) uses response word
-count, a text-channel signal available at zero marginal cost. Row~3
-(Tensor-guided) uses per-token entropy, which discriminates among outputs of
-similar length, reaching cases the text channel cannot. The consistent advantage
-(+2.5--3.9pp across budget levels) reflects a structural difference
-(\autoref{sec:eval_general}): text features capture behavioral patterns that
-vary across models; entropy captures computational uncertainty that generalizes.
-Row~4 (Composed) demonstrates that tiers compose: different judges cover
-different failure classes, achieving the highest accuracy at 20\% and 30\%
-budget levels.
-
-\fakepara{Ground truth validation.}
-Establishing reliable ground truth is itself a bounded verification problem.
-Our initial evaluator used substring matching and refusal markers, which is precisely
-the ``text-only bounded supervisor'' our theorems describe, and achieved only
-68.8\% accuracy, exhibiting the predicted failure modes (negation blindness,
-encoding mismatch, hedged fabrications passing as refusals). The correction
-required a stratified evaluator combining programmatic verification with
-LLM-assisted classification: an instance of the escape condition applied to the
-evaluation pipeline itself. Validated against human review of 80 blinded items,
-agreement was 75/80 (93.8\%), with five characterizable disagreements orthogonal
-to experimental conditions. Note: the Tier~2 LLM classifier (Qwen3 4B) is also
-one of the four test models; however, the evaluation task (binary classification
-of answer correctness) differs from the generation task, and human calibration
-validates the evaluator independently.
-
-\subsection{Confound Analysis: Text Features vs.\ Tensor Signals}
-\label{sec:eval_general}
-
-The bounded verification results above show that tensor-guided triage is
-cost-effective. But a natural objection arises: is the tensor signal merely a
-proxy for text-channel features? Response length, hedging language, and
-vocabulary complexity are all observable without a tensor interface. If they
-discriminate equally well, the tensor interface adds cost without value.
-
-\fakepara{Length-controlled design.}
-Our primary query set has a systematic asymmetry: knowable queries produce
-concise factual answers while unknowable queries produce verbose fabrications.
-We construct a length-controlled evaluation with a $2 \times 2$ design:
-short/long $\times$ knowable/unknowable, with 25 queries per cell evaluated on
-all four architectures (400 total evaluations). Long-knowable queries ask for
-detailed explanations of verifiable topics (e.g., ``Explain the CAP theorem
-and give an example of each tradeoff''). Long-unknowable queries prompt
-fabrication at similar length (e.g., ``Describe the Petrov-Schwarzmann
-conjecture and its implications for emergent reasoning''). Both cells produce
-responses of 170--200 words, eliminating response length as a discriminator.
-
-\fakepara{Results.}
-\autoref{tab:confound} compares six text-channel features against per-token
-entropy in the length-controlled comparison. No text feature exceeds pooled
-AUC 0.70. Per-token entropy is the only signal that does.
-
-\begin{table}[t]
-\centering
-\small
-\caption{AUC for knowable vs.\ unknowable discrimination under length control
-(long-knowable vs.\ long-unknowable, both 170--200 words). No text-channel
-feature exceeds 0.70 pooled; per-token entropy is the only signal that does.
-Individual text features occasionally achieve high AUC for specific models
-(e.g., refusal density 0.900 for Qwen) but none generalizes.}
-\label{tab:confound}
-\begin{tabular}{lccccc}
-\toprule
- & \textbf{OLMo} & \textbf{Llama} & \textbf{Qwen} & \textbf{Mistral} & \textbf{Pool} \\
-\midrule
-Word count       & .597 & .193 & .362 & .330 & .369 \\
-Hedge density    & .837 & .551 & .698 & .435 & .627 \\
-Refusal density  & .605 & .563 & .900 & .520 & .648 \\
-Avg word len     & .742 & .514 & .782 & \textbf{.672} & .673 \\
-Avg sent len     & .738 & .724 & .662 & .598 & .685 \\
-Type-token ratio & .473 & .635 & .570 & .562 & .572 \\
-\midrule
-Entropy (tensor) & \textbf{.949} & \textbf{.888} & \textbf{.856} & .642 & \textbf{.757} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The pattern has two components. First, text features that discriminate for
-one model fail for others: hedging density achieves 0.837 for OLMo but
-0.435 for Mistral; refusal density achieves 0.900 for Qwen but 0.563 for
-Llama. Each text feature captures a behavioral idiosyncrasy of a
-particular model's training, not a computational property that generalizes.
-Second, per-token entropy exceeds 0.85 for three of four models and achieves
-the highest pooled AUC of any signal tested.
-
-\fakepara{Combined text classifiers do not generalize.}
-A natural objection is that combining text features might outperform any
-individual feature. We trained a logistic regression on all six text features.
-Within-distribution (10-fold cross-validation on the length-controlled data),
-the combined classifier achieves pooled AUC 0.799, exceeding entropy's 0.757.
-However, when trained on the primary query set (\autoref{sec:eval_bounded}) and
-tested on the length-controlled data, the classifier collapses to AUC
-0.511, no better than random, while entropy remains at 0.757 without any
-training data. The combined classifier learned distributional patterns (verbose
-fabrication, terse facts) that do not transfer when the distribution changes.
-Per-token entropy requires no labeled data and no distributional assumptions;
-it measures the computation directly.
-
-This is the impossibility result instantiated empirically. Text-channel
-features carry behavioral signals that vary across training procedures and
-query distributions. A model trained to hedge less, refuse differently, or
-use shorter sentences defeats the corresponding text detector without changing
-the computation that determines whether it is fabricating. A combined
-classifier trained on one query distribution collapses on another.
-Per-token entropy captures a
-computational property, the model's distributional uncertainty over next
-tokens, that the model cannot independently control under standard training
-objectives, the same structural pattern that makes code plagiarism detection
-(MOSS) robust~\cite{aiken_moss, schleimer2003winnowing}.
-
-\fakepara{Negative result: entropy vs.\ correctness.}
-When we test whether entropy predicts \emph{correctness} (using
-TruthfulQA~\cite{lin2022truthfulqa} correct vs.\ incorrect answer pairs), AUC
-drops to approximately 0.53, which is no better than random. This distinction
-is central to our claim: the tensor interface escapes the \emph{verification}
-impossibility, not the \emph{correctness} problem. Entropy discriminates
-\emph{epistemic mode}, whether the model is retrieving or fabricating, not
-whether a retrieved answer is right. These are different tasks with different
-difficulty: mode detection requires distinguishing computational regimes;
-correctness detection requires ground-truth access that no internal signal can
-provide. Triage operates on the former: it identifies which outputs to spend
-verification budget on, not which outputs are correct. The budget curve
-(\autoref{tab:budget}) demonstrates that entropy-guided triage allocates
-verification resources more effectively than text-guided triage, even though
-neither signal predicts correctness directly.
-
-\fakepara{Self-reported confidence.}
-Self-reported confidence is inverted across all four architectures (AUC
-0.28--0.36, all below random; see \autoref{sec:bg_eval}).
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/exp27_entropy_distributions.pdf}
-  \caption{Distribution of mean per-token entropy for knowable vs.\ unknowable
-    queries across four model architectures. The distributions are separable in
-    every model tested, confirming that entropy discriminates knowable from unknowable
-    queries across all tested architectures.}
-  \label{fig:entropy_dist}
-\end{figure}
+bibliographic details.
