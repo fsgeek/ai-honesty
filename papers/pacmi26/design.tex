@@ -137,7 +137,7 @@ Generation APIs already support returning logits; the entropy trace is a simple
 transformation. Attention patterns are available with \texttt{\small{output\_attentions=True}}
 in standard frameworks. 
 We provide a reference implementation supporting OLMo models that demonstrates
-the interface is practical. The overhead is modest: storing per-token entropy
+the interface is practical.\footnote{\url{https://github.com/fsgeek/ai-honesty}, archived at DOI \href{https://doi.org/10.5281/zenodo.21314137}{10.5281/zenodo.21314137}.} The overhead is modest: storing per-token entropy
 and summarizing attention patterns adds approximately 2--7\% latency depending
 on signal set, compared to generation itself.
 
