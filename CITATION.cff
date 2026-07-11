@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the software and the paper (see preferred-citation)."
+title: "Epistemic Observability in Language Models: reference implementation and experiments"
+type: software
+authors:
+  - family-names: Mason
+    given-names: Tony
+    affiliation: "The University of British Columbia"
+  - family-names: Anand
+    given-names: Vaastav
+    affiliation: "Max Planck Institute for Software Systems"
+repository-code: "https://github.com/fsgeek/ai-honesty"
+license: MIT
+keywords:
+  - epistemic observability
+  - hallucination detection
+  - language models
+  - verification
+  - entropy
+preferred-citation:
+  type: article
+  title: "Epistemic Observability in Language Models"
+  authors:
+    - family-names: Mason
+      given-names: Tony
+      affiliation: "The University of British Columbia"
+    - family-names: Anand
+      given-names: Vaastav
+      affiliation: "Max Planck Institute for Software Systems"
+  year: 2026
+  journal: "arXiv preprint arXiv:2603.20531"
+  url: "https://arxiv.org/abs/2603.20531"
