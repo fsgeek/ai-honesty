@@ -55,12 +55,22 @@ model is operating in \emph{grounded mode} (retrieving from stable
 representations) versus \emph{fabrication mode} (generating without anchoring).
 The tensor interface is a generation interface that returns:
 \begin{enumerate*}[label=(\roman*)]
-\item \textbf{Text}: The linearized response string (standard interface output).
+\item \textbf{Text}: The linearized response string.
 \item \textbf{Entropy trace}: Per-token entropy of the output distribution during
   generation.
 \item \textbf{Attention summary}: Statistics of attention patterns (concentration,
   self-attention ratio) from deeper processing layers.
 \end{enumerate*}
+
+\fakepara{Implementation.}
+The tensor interface requires no architectural changes to current transformers.
+Generation APIs already support returning logits; the entropy trace is a simple
+transformation. Attention patterns are available with \texttt{\small{output\_attentions=True}}
+in standard frameworks. 
+We provide a reference implementation\footnote{\url{https://github.com/fsgeek/ai-honesty}, archived at DOI \href{https://doi.org/10.5281/zenodo.21314137}{10.5281/zenodo.21314137}.} supporting OLMo models that demonstrates
+the interface is practical. The overhead is modest: storing per-token entropy
+and summarizing attention patterns adds approximately 2--7\% latency depending
+on signal set, compared to generation itself.
 
 % We extract three per-token signals from the generation process:
 
@@ -96,13 +106,13 @@ The tensor interface is a generation interface that returns:
 \quad{\normalfont Entropy: white = confident, red = uncertain}
 
 \etok{0}{\ low\ }\etok{1}{\ \ \ \ }\etok{2}{\ \ \ \ }\etok{3}{\ mid\ }\etok{4}{\ \ \ \ }\etok{5}{\ \ \ \ }\etok{6}{\ high\ }%
-\caption{Generated output along with its entropy trace for the query \textit{What shape is wombat scat?} The generated answer is a fabrication---wombat scat is distinctively cube-shaped. The trace illustrates exported telemetry, not a token-level truth detector.}
+\caption{Generated output along with its entropy trace for the query \textit{What shape is wombat scat?} The generated answer is a fabrication---wombat scat is distinctively cube-shaped. }
 \label{fig:entropy_trace}
 \end{figure}
 
 This interface exports telemetry that the model cannot separately control under current training objectives. The
 model can emit confidently false text, but it cannot present a different inference computation than
-the one it actually performed. Independent work on persona monitoring confirms this asymmetry: activation projections reveal
+the one it performed. Independent work on persona monitoring confirms this asymmetry: activation projections reveal
 that models adopt distinct internal configurations for different epistemic conditions even when
 producing textually similar outputs~\cite{lu2026assistantaxissituatingstabilizing}. This asymmetry is the foundation of the
 adversarial robustness argument: under current training objectives, computational signals (entropy, attention
@@ -131,21 +141,11 @@ epistemic assessment.
 
 % \fakepara{Compositional defense.} The tensor's blind spots characterize where other verification methods are most effective. \autoref{sec:escape}'s three principles — State Exteriority, Verification Independence, Provenance Binding — need not be satisfied by a single mechanism. The tensor provides Verification Independence: an orthogonal signal the model cannot separately control. Bounded judges provide State Exteriority: external lookup against verifiable sources. Input-side defenses (prompt analysis, supply chain detection) provide Provenance Binding at the system boundary. Each layer addresses the failure class where the others are weakest. The tensor catches uncertain fabrication where verification is expensive; the bounded judge catches confident fabrication where verification is cheap; input-side analysis catches adversarial inputs designed to exploit well-learned patterns. Composing these layers allocates a finite verification budget across failure classes rather than spreading it uniformly across the full output space.
 
-\fakepara{Implementation.}
-The tensor interface requires no architectural changes to current transformers.
-Generation APIs already support returning logits; the entropy trace is a simple
-transformation. Attention patterns are available with \texttt{\small{output\_attentions=True}}
-in standard frameworks. 
-We provide a reference implementation supporting OLMo models that demonstrates
-the interface is practical.\footnote{\url{https://github.com/fsgeek/ai-honesty}, archived at DOI \href{https://doi.org/10.5281/zenodo.21314137}{10.5281/zenodo.21314137}.} The overhead is modest: storing per-token entropy
-and summarizing attention patterns adds approximately 2--7\% latency depending
-on signal set, compared to generation itself.
-
 \fakepara{Example Entropy Trace.}\autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
 along with its entropy trace. We color code per-token entropy: white indicates low entropy (confident generation), shading through light red for moderate entropy to deep red for high entropy (uncertain generation).
 The entropy-enhanced output shows where generation proceeded with high
-confidence (low entropy, suggesting retrieval of a stored pattern)
-and where it proceeded with high uncertainty (high entropy, suggesting fabrication).
+confidence (suggesting retrieval of a stored pattern)
+and where it proceeded with high uncertainty (suggesting fabrication).
 
 
 % \fakepara{Quantitative demonstration.}
