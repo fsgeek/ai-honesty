@@ -12,6 +12,15 @@ import matplotlib
 matplotlib.use("Agg")
 import numpy as np
 
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["ps.fonttype"] = 42
+
+LEGEND_SIZE = 15
+LABEL_SIZE = 18
+TICK_SIZE = 15
+FIG_W_SIZE = 8
+FIG_H_SIZE = 4
+
 # Data from consistent Monte Carlo simulation (1000 trials, seed=42)
 # with stratified evaluator labels (75/80 human calibration, 93.8%)
 # Text baseline uses raw word count (the strongest text-channel signal,
@@ -25,7 +34,7 @@ data = {
 
 budgets = [10, 20, 30]
 
-fig, ax = plt.subplots(1, 1, figsize=(6, 4))
+fig, ax = plt.subplots(1, 1, figsize=(FIG_W_SIZE, FIG_H_SIZE))
 
 # Colorblind-friendly: blue, orange, brown, gray — no red-green
 # Distinct markers + linestyles ensure greyscale readability
@@ -42,23 +51,26 @@ for label, values in data.items():
             linestyle=s["linestyle"], linewidth=s["linewidth"],
             color=s["color"], markersize=8)
 
-# Annotate the growing gap at each budget level
+# Annotate the growing gap at each budget level, offset above the higher
+# line so the label doesn't collide with the Composed curve.
 for i, b in enumerate(budgets):
     tensor_y = data["Tensor-guided"][i]
     length_y = data["Text-guided (length)"][i]
+    composed_y = data["Composed"][i]
     gap = tensor_y - length_y
-    mid_y = (tensor_y + length_y) / 2
+    top_y = max(tensor_y, composed_y)
     ax.annotate(f"+{gap:.1f}pp",
-                xy=(b, mid_y), fontsize=8, color="#555555",
-                ha="left", va="center",
-                xytext=(b + 1.5, mid_y))
+                xy=(b, top_y), fontsize=TICK_SIZE - 3, color="#555555",
+                ha="center", va="bottom",
+                xytext=(b, top_y + 1.6))
 
-ax.set_xlabel("Verification Budget (%)", fontsize=11)
-ax.set_ylabel("End-to-End Accuracy (%)", fontsize=11)
+ax.set_xlabel("Verification Budget (%)", fontsize=LABEL_SIZE)
+ax.set_ylabel("End-to-End Accuracy (%)", fontsize=LABEL_SIZE)
 ax.set_xticks(budgets)
+ax.tick_params(axis="both", labelsize=TICK_SIZE)
 ax.set_xlim(5, 35)
-ax.set_ylim(73, 95)
-ax.legend(loc="lower right", fontsize=9)
+ax.set_ylim(73, 97)
+ax.legend(loc="lower right", fontsize=LEGEND_SIZE)
 ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
@@ -67,6 +79,7 @@ plt.tight_layout()
 for ext in ["pdf", "png"]:
     for dest in [
         f"papers/sosp/figures/exp27_aggregate_budget_curve.{ext}",
+        f"papers/pacmi26/figures/exp27_aggregate_budget_curve.{ext}",
         f"arxiv/exp27_aggregate_budget_curve.{ext}",
         f"exp27_aggregate_budget_curve.{ext}",
     ]:
