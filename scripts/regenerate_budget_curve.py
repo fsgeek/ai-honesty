@@ -12,15 +12,17 @@ import matplotlib
 matplotlib.use("Agg")
 import numpy as np
 
-# Data from consistent Monte Carlo simulation (1000 trials, seed=42)
-# with stratified evaluator labels (75/80 human calibration, 93.8%)
-# Text baseline uses raw word count (the strongest text-channel signal,
-# per-model AUC 0.85-0.97), not the lossy length_score heuristic.
+# Regenerated from the deterministic seeded simulation
+# (experiment27_realistic_verification.py, seed=42, 1000 trials; text baseline =
+# raw word count). These reproduce exactly from committed data — see the PACMI
+# artifact (pacmi26-observability, REPRODUCTION.md). They supersede earlier
+# hand-entered values that did not reproduce from any committed run (<1pp shift,
+# no claim change).
 data = {
     "No judge":                [75.8, 75.8, 75.8],
-    "Text-guided (length)":    [79.2, 82.8, 87.6],
-    "Tensor-guided":           [81.7, 86.7, 90.2],
-    "Composed":                [81.1, 87.7, 91.8],
+    "Text-guided (length)":    [78.5, 82.1, 87.5],
+    "Tensor-guided":           [81.7, 86.8, 90.9],
+    "Composed":                [80.2, 87.1, 91.5],
 }
 
 budgets = [10, 20, 30]
@@ -65,10 +67,11 @@ plt.tight_layout()
 
 # Save to all figure locations
 for ext in ["pdf", "png"]:
+    # Scoped to the PACMI paper: only its prose was reconciled to these
+    # reproducible numbers. SOSP and arXiv still carry the earlier values and
+    # must be updated together with their own prose/tables when next revised.
     for dest in [
-        f"papers/sosp/figures/exp27_aggregate_budget_curve.{ext}",
-        f"arxiv/exp27_aggregate_budget_curve.{ext}",
-        f"exp27_aggregate_budget_curve.{ext}",
+        f"papers/pacmi26/figures/exp27_aggregate_budget_curve.{ext}",
     ]:
         fig.savefig(dest, bbox_inches="tight", dpi=150)
         print(f"Saved: {dest}")
