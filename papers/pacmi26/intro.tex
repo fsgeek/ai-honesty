@@ -34,28 +34,27 @@ against a database costs latency; running a second model as a judge costs
 compute; assessing whether a summary faithfully represents its source is
 more expensive still.
 
-The key issue is that the current text-only interface to language models does not expose the model's
-internal computation, which produces signals that distinguish grounded generation from fabrication.
-Those signals may discriminate grounded from fabricated generation even when
-the emitted text does not, but a text-only supervisor cannot recover them.
-In an accompanying technical report~\cite{mason2026epistemic} we show that,
-under bounded supervision, grounded and fabricated internal states can be
-observationally equivalent through the text channel alone---independent of
-model scale or training procedure. This paper asks the resulting systems
-question: how do richer interfaces change the return on verification
-investment?
+The fundamental source of these costs is the interface through which language models are observed. 
+Today's systems expose only the generated text while hiding the model's internal computation,
+which contains signals that may distinguish grounded generation from fabrication. 
+Because these signals are discarded before reaching the supervisor, they cannot be recovered from the output alone. 
+In an accompanying technical report~\cite{mason2026epistemic}, we show that, under bounded supervision, 
+grounded and fabricated internal states can be observationally equivalent through the text channel alone, 
+independent of model scale or training procedure.
 
 This observability gap has direct consequences for verification cost:
-a supervisor receiving only text must spend its verification budget
-reconstructing what the model's own computation already knew, rather than
-concentrating it on the cases where verification is most needed.
+a supervisor limited to text must expend its verification budget reconstructing information 
+that was available during generation but hidden by the interface, instead of focusing verification 
+effort on the small fraction of outputs that genuinely require additional scrutiny. 
+This paper therefore asks the systems question: if language models exposed richer observational interfaces, 
+how would that change the cost, effectiveness, and return on investment of verification?
 
-Our key insight is that language models carry internal
-signals that distinguish grounded generation from
-fabrication. These signals are byproducts of the computation itself:
-\emph{telemetry} that the model cannot separately control under standard training.
-Unlike the model's \emph{testimony} (the text it chooses to output),
-telemetry is harder to fake.
+Our key insight is that these hidden signals need not remain hidden. 
+During inference, language models naturally produce auxiliary information that reflects their internal computation. 
+We refer to these signals as \emph{telemetry}: byproducts of inference that the model does not explicitly choose to communicate. 
+This distinguishes telemetry from the model's \emph{testimony}---the generated text itself. 
+Whereas testimony is optimized to satisfy the prompting objective and can therefore be misleading, 
+telemetry arises as a consequence of computation and is correspondingly harder to manipulate.
 
 We introduce \emph{epistemic observability}: an interface that exposes this
 telemetry alongside the standard text output.
@@ -64,7 +63,7 @@ or explainability, which generates post-hoc rationales for its outputs,
 epistemic observability surfaces signals produced as a byproduct of inference that help 
 estimate whether the generated content is grounded in the model's knowledge or is likely to be fabricated.
 
-To support a range of application requirements, we propose a multi-tier
+To support a range of applications, we propose a multi-tier
 epistemic observability interface, where each successive tier exposes richer
 telemetry about the generation process at greater computational cost.
 A creative brainstorming assistant may require only Tier~0 observability,
