@@ -11,6 +11,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["ps.fonttype"] = 42
+
+TITLE_SIZE = 15
+LABEL_SIZE = 13
+TICK_SIZE = 11
+LEGEND_SIZE = 11
+SUPTITLE_SIZE = 16
+
 DATA_FILE = "exp27_bounded_verification_20260206_205725.csv"
 
 def load_data():
@@ -31,8 +40,8 @@ def main():
         "Mistral": "mistralai/Mistral-7B-Instruct-v0.3",
     }
 
-    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
-    fig.suptitle("Self-Reported Confidence: Knowable vs Unknowable", fontsize=14, fontweight="bold")
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    fig.suptitle("Self-Reported Confidence: Knowable vs Unknowable", fontsize=SUPTITLE_SIZE, fontweight="bold")
 
     # Colorblind-friendly: blue for knowable, orange for unknowable
     # Hatching for greyscale distinction
@@ -53,16 +62,18 @@ def main():
                 color=color_unknow, edgecolor="black", linewidth=0.5,
                 hatch="\\\\", density=True)
 
-        ax.set_title(label, fontsize=12, fontweight="bold")
-        ax.set_xlabel("Self-Reported Confidence", fontsize=10)
-        ax.set_ylabel("Density", fontsize=10)
-        ax.legend(fontsize=9)
+        ax.set_title(label, fontsize=TITLE_SIZE, fontweight="bold")
+        ax.set_xlabel("Self-Reported Confidence", fontsize=LABEL_SIZE)
+        ax.set_ylabel("Density", fontsize=LABEL_SIZE)
+        ax.tick_params(axis="both", labelsize=TICK_SIZE)
+        ax.legend(fontsize=LEGEND_SIZE)
 
     plt.tight_layout()
 
     for ext in ["pdf", "png"]:
         for dest in [
             f"papers/sosp/figures/exp27_confidence_distributions.{ext}",
+            f"papers/pacmi26/figures/exp27_confidence_distributions.{ext}",
             f"arxiv/exp27_confidence_distributions.{ext}",
             f"exp27_confidence_distributions.{ext}",
         ]:
