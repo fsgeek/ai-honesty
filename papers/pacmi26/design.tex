@@ -12,7 +12,7 @@ response is likely to be fabricated.
 
 \subsection{Observability Tiers}
 
-We present a four-tier epistemic observability hierarchy that characterizes 
+We present a four-tier epistemic observability hierarchy that characterizes
 the trade-off between verification cost and the amount of epistemic information available to downstream systems
 for assessing reliability of the generated text.
 
@@ -23,15 +23,15 @@ Tier~0 exposes only the generated text, treating the language model as a black b
 Tier~1 augments the generated text with lightweight telemetry produced during decoding. Examples include token probabilities, logit distributions, entropy~\cite{ling2024uncertainty,xiao2021hallucination}, confidence scores, decoding statistics, and other signals that can be extracted with negligible overhead. These signals provide a coarse estimate of the model's uncertainty~\cite{shorinwa2025survey}, allowing systems to identify portions of the output that may warrant additional validation. While inexpensive to obtain, confidence signals are often imperfectly calibrated and may fail to distinguish confidently stated hallucinations from grounded generations.
 
 \fakepara{Tier 2: Representation Observability.}
-Tier~2 exposes information derived from the model's internal representations. Rather than observing only the final decoding probabilities, systems may access hidden-state embeddings, layer activations, attention statistics, or learned probes~\cite{belinkov2022probing,alain2016understanding} that estimate properties of the latent epistemic state. 
+Tier~2 exposes information derived from the model's internal representations. Rather than observing only the final decoding probabilities, systems may access hidden-state embeddings, layer activations, attention statistics, or learned probes~\cite{belinkov2022probing,alain2016understanding} that estimate properties of the latent epistemic state.
 Simple probes can catch deviant model behaviors~\cite{macdiarmid2024sleeperagentprobes,han2025simple,goldowsky2025detecting}.
 Recent techniques such as semantic entropy probes~\cite{kossen2024semantic,kuhn2023semanticuncertaintylinguisticinvariances}, hidden-state classifiers~\cite{zhang2025icr}, and activation-based uncertainty estimators demonstrate that these representations often contain substantially richer information about generation reliability than logits alone. Representation observability enables more accurate prioritization of verification effort while remaining significantly cheaper than exhaustive external validation.
 
 \fakepara{Tier 3: Mechanistic Observability.}
-Tier~3 exposes telemetry obtained through mechanistic analysis of the model's computation. 
-Mechanistic techniques identify the causal computations that produce a generation by tracing information flow through neurons, attention heads, and latent features~\cite{somvanshi2026bridging}. 
-This enables systems to distinguish between different failure modes and provides insight into \emph{why} a hallucination occurred rather than merely detecting that one occurred. 
-They can reveal whether a response is supported by robust internal computation or arises from fragile or spurious reasoning pathways. 
+Tier~3 exposes telemetry obtained through mechanistic analysis of the model's computation.
+Mechanistic techniques identify the causal computations that produce a generation by tracing information flow through neurons, attention heads, and latent features~\cite{somvanshi2026bridging}.
+This enables systems to distinguish between different failure modes and provides insight into \emph{why} a hallucination occurred rather than merely detecting that one occurred.
+They can reveal whether a response is supported by robust internal computation or arises from fragile or spurious reasoning pathways.
 Mechanistic observability provides the highest-fidelity view of a model's epistemic process at the highest cost.
 
 \fakepara{Choosing an Observability Tier.}
@@ -66,11 +66,17 @@ The tensor interface is a generation interface that returns:
 The tensor interface requires no architectural changes to current transformers.
 Generation APIs already support returning logits; the entropy trace is a simple
 transformation. Attention patterns are available with \texttt{\small{output\_attentions=True}}
-in standard frameworks. 
-We provide a reference implementation\footnote{\url{https://github.com/fsgeek/ai-honesty}, archived at DOI \href{https://doi.org/10.5281/zenodo.21314137}{10.5281/zenodo.21314137}.} supporting OLMo models that demonstrates
+in standard frameworks.
+We provide a reference implementation\footnote{\url{https://github.com/fsgeek/pacmi26-observability},
+archived at DOI \href{https://doi.org/10.5281/zenodo.21422488}{10.5281/zenodo.21422488};
+curated from the full research record at DOI
+\href{https://doi.org/10.5281/zenodo.21314137}{10.5281/zenodo.21314137}.}
+supporting OLMo models that demonstrates
 the interface is practical. The overhead is modest: storing per-token entropy
 and summarizing attention patterns adds approximately 2--7\% latency depending
 on signal set, compared to generation itself.
+
+
 
 % We extract three per-token signals from the generation process:
 
@@ -119,7 +125,7 @@ adversarial robustness argument: under current training objectives, computationa
 geometry) cannot be independently controlled by the model without changing the
 generation process itself, unlike behavioral signals (response length, hedging
 patterns) that can be adapted through training without altering what the model
-knows or does not know. 
+knows or does not know.
 
 \fakepara{What the tensor provides.}
 The entropy trace provides a falsifiability signal. If a model claims certainty
