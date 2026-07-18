@@ -41,10 +41,14 @@ and measure end-to-end accuracy.
 \autoref{fig:budget_curve} shows that
 \textbf{tensor-guided verification outperforms the text baseline
 at every budget level}:
-+2.5pp at 10\%, +3.9pp at 20\%, +2.6pp at 30\%.
++3.2pp at 10\%, +4.7pp at 20\%, +3.4pp at 30\%.
 Each line maps an investment strategy to its return: per-token entropy
 discriminates among outputs of similar length, reaching cases the
-text channel cannot.
+text channel cannot. Concurrent work scales verification on the judge side by
+taking the expectation over a judge's scoring-token distribution rather than its
+discrete score~\cite{kwok2026llmasaverifiergeneralpurposeverificationframework};
+our signals instead come from the generator's own computation, which---unlike a
+judge's scores---it cannot separately control.
 Per-model results confirm the pattern is consistent across all four tested model families.
 At 10\% budget, tensor-guided verification improves accuracy over the
 unverified baseline for every model tested: OLMo
