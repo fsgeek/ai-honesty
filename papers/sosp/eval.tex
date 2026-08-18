@@ -76,9 +76,9 @@ agreement, 93.8\%).}
 \textbf{Condition} & \textbf{10\%} & \textbf{20\%} & \textbf{30\%} \\
 \midrule
 No judge       & 75.8 & 75.8 & 75.8 \\
-Text-guided (length) & 79.2 & 82.8 & 87.6 \\
-Tensor-guided  & 81.7 & 86.7 & 90.2 \\
-Composed       & 81.1 & 87.7 & 91.8 \\
+Text-guided (length) & 78.4 & 82.2 & 87.6 \\
+Tensor-guided  & 81.7 & 86.8 & 90.9 \\
+Composed       & 81.5 & 87.1 & 91.5 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -89,14 +89,14 @@ Composed       & 81.1 & 87.7 & 91.8 \\
   \caption{End-to-end accuracy vs.\ verification budget for four judge
     conditions, averaged across four architectures. The text-guided baseline
     uses response word count. Tensor-guided triage outperforms at every budget
-    level by 2.5--3.9 percentage points.}
+    level by 3.3--4.6 percentage points.}
   \label{fig:budget_curve}
 \end{figure}
 
 \autoref{fig:budget_curve} shows that
 \textbf{tensor-guided verification outperforms the text baseline
 at every budget level}:
-+2.5pp at 10\%, +3.9pp at 20\%, +2.6pp at 30\%. The text baseline
++3.3pp at 10\%, +4.6pp at 20\%, +3.3pp at 30\%. The text baseline
 uses response word count, which captures the asymmetry between concise
 factual retrieval and verbose fabrication in this query set.
 Tensor signals discriminate among outputs of similar length, reaching cases
@@ -115,8 +115,8 @@ indicating the signal is substantially driven by query-level properties rather t
 model-specific artifacts.
 
 \fakepara{Composed judges and complementary failure modes.}
-At 30\% budget, the composed judge (91.8\%) outperforms the tensor-guided judge
-alone (90.2\%). The advantage is small in aggregate but structurally
+At 30\% budget, the composed judge (91.5\%) outperforms the tensor-guided judge
+alone (90.9\%). The advantage is small in aggregate but structurally
 significant: it comes entirely from citation queries where entropy signals
 \emph{invert}. Fabricated citations produce lower entropy than real ones because
 the model generates plausible fakes more fluently than it retrieves specific
@@ -132,7 +132,7 @@ the zero-investment baseline. Row~2 (Text-guided, length) uses response word
 count, a text-channel signal available at zero marginal cost. Row~3
 (Tensor-guided) uses per-token entropy, which discriminates among outputs of
 similar length, reaching cases the text channel cannot. The consistent advantage
-(+2.5--3.9pp across budget levels) reflects a structural difference
+(+3.3--4.6pp across budget levels) reflects a structural difference
 (\autoref{sec:eval_general}): text features capture behavioral patterns that
 vary across models; entropy captures computational uncertainty that generalizes.
 Row~4 (Composed) demonstrates that tiers compose: different judges cover

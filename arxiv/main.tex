@@ -118,7 +118,7 @@ We construct a \emph{tensor interface} that escapes the impossibility by
 exporting computational byproducts---per-token
 entropy and log-probability distributions---that are structurally coupled to correctness under standard training. Per-token
 entropy achieves pooled AUC 0.757, outperforming all text baselines by
-2.5--3.9 percentage points at every budget level tested (10\%, 20\%, 30\%).
+3.3--4.6 percentage points at every budget level tested (10\%, 20\%, 30\%).
 The entropy signal generalizes across architectures (Spearman $\rho = 0.762$).
 
 The core contribution is a \emph{cost surface}---the empirical mapping from verification budget (fraction of queries receiving expensive checks) to detection accuracy for each judge strategy---a practical lookup for system builders deciding how to allocate verification resources. The contribution is the map. The
@@ -152,7 +152,7 @@ We make three contributions:
 
 \textbf{2. A tensor interface that escapes the impossibility.} We construct an epistemic observability interface that exports internal signals alongside text: per-token entropy traces and log-probability distributions. These are byproducts of inference, telemetry the model generates during computation. Under standard training, the model cannot separately tune entropy without affecting correctness, which is why entropy generalizes where text features diverge.
 
-\textbf{3. The empirical cost surface.} We map verification effectiveness across four judge strategies (no judge, text-only, tensor-guided, composed) at three budget levels (10\%, 20\%, 30\%). Per-token entropy achieves pooled AUC 0.757 and outperforms text baselines by 2.5--3.9 percentage points at every budget level. The tensor interface works. The cost surface tells system builders what each level of verification investment buys.
+\textbf{3. The empirical cost surface.} We map verification effectiveness across four judge strategies (no judge, text-only, tensor-guided, composed) at three budget levels (10\%, 20\%, 30\%). Per-token entropy achieves pooled AUC 0.757 and outperforms text baselines by 3.3--4.6 percentage points at every budget level. The tensor interface works. The cost surface tells system builders what each level of verification investment buys.
 
 \subsection{Why This Matters}
 
@@ -776,18 +776,18 @@ For each model, outputs are evaluated under four conditions:
     \item \textbf{No judge baseline} (75.8\% accuracy):
     Raw model output, no verification. Establishes what unverified deployment looks like.
 
-    \item \textbf{Text-guided judge using response length} (79.2--87.6\% depending on budget):
+    \item \textbf{Text-guided judge using response length} (78.4--87.6\% depending on budget):
     Selects outputs for verification based on word count.
     Length is a text-channel signal: fabrications tend to be verbose; factual retrieval tends to be concise.
     Available at zero marginal cost; just count tokens.
     Verified fabrications are replaced with abstention (marked as ``the system cannot answer this'').
 
-    \item \textbf{Tensor-guided judge using per-token entropy} (81.7--90.2\% depending on budget):
+    \item \textbf{Tensor-guided judge using per-token entropy} (81.7--90.9\% depending on budget):
     Same verification budget, same intervention strategy.
     Selects outputs based on per-token entropy (mean and variance).
     Requires exporting internal signals; represents ${\sim}2.4\%$ overhead in inference cost.
 
-    \item \textbf{Composed judge (hybrid)} (81.1--91.8\% depending on budget):
+    \item \textbf{Composed judge (hybrid)} (81.5--91.5\% depending on budget):
     Uses tensor signals for general queries.
     Uses bounded lookup (checking if cited sources exist) for citation-specific queries.
     Tests whether different judge strategies can handle different failure modes.
@@ -804,16 +804,16 @@ Budget levels: 10\%, 20\%, 30\%. At each level, the judge selects that fraction 
 \textbf{Condition} & \textbf{10\% Budget} & \textbf{20\% Budget} & \textbf{30\% Budget} \\
 \midrule
 No judge & 75.8\% & 75.8\% & 75.8\% \\
-Text-guided (length) & 79.2\% & 82.8\% & 87.6\% \\
-Tensor-guided & 81.7\% & 86.7\% & 90.2\% \\
-Composed & 81.1\% & 87.7\% & 91.8\% \\
+Text-guided (length) & 78.4\% & 82.2\% & 87.6\% \\
+Tensor-guided & 81.7\% & 86.8\% & 90.9\% \\
+Composed & 81.5\% & 87.1\% & 91.5\% \\
 \bottomrule
 \end{tabular}
-\caption{Verification cost surface: accuracy at each budget level by judge strategy. Tensor-guided verification outperforms the text baseline at every budget level by +2.5--3.9 percentage points.}
+\caption{Verification cost surface: accuracy at each budget level by judge strategy. Tensor-guided verification outperforms the text baseline at every budget level by +3.3--4.6 percentage points.}
 \label{tab:cost-surface}
 \end{table}
 
-\textbf{Key finding: Tensor-guided verification outperforms the text baseline at every budget level by +2.5--3.9 percentage points.} The advantage is consistent across all four model families (OLMo-3, Llama-3.1, Qwen3, Mistral), with cross-model entropy agreement of Spearman $\rho = 0.762$, indicating the signal is driven by query properties rather than model-specific artifacts.
+\textbf{Key finding: Tensor-guided verification outperforms the text baseline at every budget level by +3.3--4.6 percentage points.} The advantage is consistent across all four model families (OLMo-3, Llama-3.1, Qwen3, Mistral), with cross-model entropy agreement of Spearman $\rho = 0.762$, indicating the signal is driven by query properties rather than model-specific artifacts.
 
 \begin{figure}[t]
     \centering
@@ -845,7 +845,7 @@ The entropy signal is powerful for general queries but has blind spots. The most
 
 This is not a flaw in entropy. It's evidence that entropy measures \emph{generation confidence}, not \emph{factual correctness}. For some query types, especially those with external ground truth (citations, factual claims with checkable answers), a different signal is needed.
 
-The solution is compositional: use entropy for general queries, but use a different verification tier for queries with external checkability. For citations: bounded lookup (does this DOI exist? Is this in CrossRef?). The composed judge (entropy + citation lookup) reaches 91.8\% at 30\% budget, a small improvement over entropy-only (90.2\%), because citation queries are a minority of the test set. But the improvement is \emph{structural}: it demonstrates that different failure modes require different signals.
+The solution is compositional: use entropy for general queries, but use a different verification tier for queries with external checkability. For citations: bounded lookup (does this DOI exist? Is this in CrossRef?). The composed judge (entropy + citation lookup) reaches 91.5\% at 30\% budget, a small improvement over entropy-only (90.9\%), because citation queries are a minority of the test set. But the improvement is \emph{structural}: it demonstrates that different failure modes require different signals.
 
 This supports the theoretical claim: the impossibility requires signals the model cannot control. Different failure classes need different signals. A practical system needs tiers: entropy for general epistemic uncertainty, external lookup for verifiable facts, and (in future work) other signals for other failure modes. The cost surface maps what each tier buys.
 
@@ -861,7 +861,7 @@ We corrected using a stratified evaluator: programmatic verification for facts w
 
 \subsection{What the Cost Surface Tells Us}
 
-A system builder can read \autoref{tab:cost-surface} as: ``If I invest in 30\% verification with text-only signals, I buy 87.6\% accuracy. If I instead export entropy and use that for triage, I buy 90.2\% for a bit more overhead. If I compose tensor with bounded lookup, I buy 91.8\%.'' Text-guided triage hits a ceiling around 87--88\% because length is a weak signal under fair comparison; the tensor advantage (+2--4pp) is consistent and architecturally driven. The composed judge's additional lift comes from handling failure modes that entropy alone cannot catch.
+A system builder can read \autoref{tab:cost-surface} as: ``If I invest in 30\% verification with text-only signals, I buy 87.6\% accuracy. If I instead export entropy and use that for triage, I buy 90.9\% for a bit more overhead. If I compose tensor with bounded lookup, I buy 91.5\%.'' Text-guided triage hits a ceiling around 87--88\% because length is a weak signal under fair comparison; the tensor advantage (+3--5pp) is consistent and architecturally driven. The composed judge's additional lift comes from handling failure modes that entropy alone cannot catch.
 
 \subsection{Cross-Architecture Generalization}
 

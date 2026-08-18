@@ -14,15 +14,17 @@ import numpy as np
 
 # Regenerated from the deterministic seeded simulation
 # (experiment27_realistic_verification.py, seed=42, 1000 trials; text baseline =
-# raw word count). These reproduce exactly from committed data — see the PACMI
+# raw word count; ties broken at random within each trial, see the artifact's
+# fig3_budget_curve.py v1.0.2 — np.argsort's default sort broke ties
+# differently under numpy 1.x vs 2.x). These reproduce exactly from committed data — see the PACMI
 # artifact (pacmi26-observability, REPRODUCTION.md). They supersede earlier
 # hand-entered values that did not reproduce from any committed run (<1pp shift,
 # no claim change).
 data = {
     "No judge":                [75.8, 75.8, 75.8],
-    "Text-guided (length)":    [78.5, 82.1, 87.5],
+    "Text-guided (length)":    [78.4, 82.2, 87.6],
     "Tensor-guided":           [81.7, 86.8, 90.9],
-    "Composed":                [80.2, 87.1, 91.5],
+    "Composed":                [81.5, 87.1, 91.5],
 }
 
 budgets = [10, 20, 30]
@@ -70,9 +72,11 @@ plt.tight_layout()
 
 # Save to all figure locations
 for ext in ["pdf", "png"]:
-    # Scoped to the PACMI paper: only its prose was reconciled to these
-    # reproducible numbers. SOSP and arXiv still carry the earlier values and
-    # must be updated together with their own prose/tables when next revised.
+    # 2026-08-18: SOSP and arXiv prose/tables were reconciled to these
+    # reproducible numbers as well; all four locations now carry the same
+    # figure. The canonical generator is scripts/fig3_budget_curve.py in the
+    # public artifact (fsgeek/pacmi26-observability, v1.0.1); this script is
+    # kept as a convenience and mirrors its data.
     for dest in [
         f"papers/sosp/figures/exp27_aggregate_budget_curve.{ext}",
         f"papers/pacmi26/figures/exp27_aggregate_budget_curve.{ext}",
