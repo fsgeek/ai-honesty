@@ -1,0 +1,1714 @@
+Epistemic Observability in Predictive Systems: An
+Impossibility Result
+
+Anonymous Author(s)
+
+Abstract
+Systems incorporating language model components face a
+verification problem: these components fabricate, and verifi-
+cation has cost. How should a system allocate its verification
+budget? Systems engineers building with language model
+components need to know what each level of verification
+investment buys. This paper provides the formal framework
+and empirical cost surface for making that decision.
+
+We prove that text-only observation with bounded super-
+vision is structurally insufficient to verify epistemic honesty,
+regardless of model scale or training procedure (the impossi-
+bility is architectural, not a capability gap). To overcome this,
+we introduce epistemic observability and construct a tensor
+interface that escapes this impossibility by exporting internal
+computational signals, such as entropy traces and attention
+summaries, that the model cannot independently control
+under current training objectives. Under a length-controlled
+evaluation where text-channel features collapse , per-token
+entropy remains discriminative , and tensor-guided judges
+outperform text baselines at every verification budget level
+(+2.5–3.9 percentage points, averaged across four architec-
+tures). Moreover, we show that tensor-guided judges outper-
+form text baselines with lower verification budgets.
+
+1 Introduction
+Systems incorporating language model components face
+a verification problem. The components generate text by
+sampling from learned probability distributions, and some
+fraction of that text is fabricated: fluent, confident, and wrong.
+LLM-based systems today are rife with “hallucinations”.
+
+We use the term fabrication throughout this paper to
+emphasize that the system’s default behavior under co-
+herence optimization is reasonable and not a malfunction
+to be patched. Language models optimized for coherence
+produce coherent output. The output reflects the training
+data: grounded training data tends to track truth, while
+ungrounded training data tends to produce untruth. Xu
+et al. [35] proves that hallucination is inevitable for LLMs
+over the class of computable functions.
+
+Consequently, every system that deploys a language
+model component must allocate a budget: how much of
+the output to verify, which outputs to prioritize, and what
+signals to use for triage. For example, checking a citation
+against a database costs API calls and latency; having a
+domain expert review a summary costs time and salary;
+running a second model as a judge costs compute. Verifi-
+cation cost varies by content type: checking a citation is
+
+cheap; assessing whether a summary faithfully represents
+its source is expensive.
+
+The key issue is that the current text-only interface to
+language models does not expose the model’s internal com-
+putation, which produces signals that distinguish grounded
+generation from fabrication. The model may know it is fab-
+ricating but currently the supervisor cannot tell if the model
+is fabricating just from the text output.
+
+This observability gap has direct consequences for veri-
+fication cost. A supervisor receiving only text must spend
+its verification budget reconstructing, from the output alone,
+what the model’s own computation already knew. The bud-
+get is consumed by reconstruction rather than concentrated
+on the cases where verification is most needed.
+
+Our key insight is that language models carry internal
+signals, which are the entropy traces, attention geometry,
+token-level log-probabilities, that distinguish grounded gen-
+eration from fabrication. These signals are byproducts of the
+computation itself: telemetry that the model cannot sepa-
+rately control under standard training. Unlike the model’s
+testimony (the text it chooses to output), telemetry is harder
+to fake.
+
+We introduce epistemic observability: an interface that
+exposes this telemetry alongside the standard text output.
+Epistemic observability is distinct from model interpretabil-
+ity (understanding why a model activates a particular cir-
+cuit) and from explainability (generating post-hoc rationales
+for outputs). It asks a narrower question: is this generation
+grounded or fabricated? The answer comes from signals that
+are byproducts of inference, not from understanding the
+model’s learned representations.
+
+This paper contributes:
+
+An impossibility result for text-only verification with
+finite budget. Epistemic honesty is unverifiable for systems
+operating under text-only observation with bounded super-
+vision (§3). The impossibility is structural, not a matter of
+scale: a system that can only observe text cannot distinguish
+confident fabrication from grounded truth, and stacking addi-
+tional text-channel supervisors cannot escape the constraint.
+A tensor interface that escapes the impossibility. We
+construct an epistemic observability interface that augments
+text output with epistemic signals (entropy traces, attention
+summaries) in a composable tensor format, without archi-
+tectural changes to current transformers (§4).
+Empirical cost surface of verification. We map the cost
+surface across text-only and tensor-augmented verification
+strategies. Under length-controlled evaluation, no text-
+channel feature exceeds pooled AUC 0.70; per-token entropy
+
+Type
+
+Description
+
+Adversarial Truth True but implausible (“combat wombat
+
+Shattered Lie
+
+Deceived Lie
+
+Confused Truth
+
+is an Australian military mascot”)
+No training-data grounding (“Treaty
+of Westphalia II”)
+Pattern-matches plausible language
+(“Glavinsky syndrome”)
+Counterintuitive fact (“more camels in
+Australia than Egypt”)
+
+Table 1. Hallucination Types that span the verification space.
+
+is the only signal that generalizes across architectures.
+Tensor-guided triage outperforms text baselines at every
+budget level (§5).
+
+2 Background & Motivation
+A language model maps input tokens to output tokens,
+producing internal signals (entropy, attention patterns,
+logprobabilities) as computational byproducts. The training
+corpus contains both truth-tracking institutional text and
+misinformation. This results in four canonical hallucination
+types, shown in Table 1.
+
+A language model trained on this corpus inherits these
+mixed regularities. Base models (pre-fine-tuning) fabricate
+substantially on factual benchmarks because they are not
+honest by default. But they also encode rich internal rep-
+resentations of concepts like correctness and truthfulness,
+which can be elicited under the right conditions [7]. The
+base model’s relationship to truth is complex: neither reliably
+honest nor uniformly deceptive. The question for systems
+engineers is not whether the model is honest, but what it
+costs to verify when it is not.
+
+2.1 Testimony & Telemetry
+Architecture primer. A transformer-based language model
+generates text one token (subword unit) at a time, autore-
+gressively: at each step it produces a probability distribution
+over its vocabulary, selects a token, and conditions the next
+step on all prior output. Each step passes through a stack
+of layers producing attention patterns (weighted relevance
+scores between positions) and intermediate representations.
+The entropy of the output distribution, the attention patterns,
+and the log-probabilities of selected tokens are byproducts
+of this computation: telemetry the model cannot control.
+
+Existing models operate with a text-only output inter-
+face. The text is the testimony, whereas the telemetry are
+measurements of the computation that produced the output.
+The model can control its testimony; under current train-
+ing objectives, it cannot independently control its telemetry.
+From a cost perspective: testimony is cheap to produce and
+cheap to inspect but unreliable; telemetry is more expensive
+
+to export and process but, under current training regimes,
+harder to game because it is a byproduct of the computation
+rather than a product of the model’s optimization objec-
+tive. This decoupling is an empirical property of existing
+training pipelines, not an architectural guarantee: whether
+adversarial training could learn to couple telemetry to the
+optimization objective is an open question (§6).
+
+2.2 Coherence over Factuality
+
+Existing models today optimize for generating coherent out-
+put instead of factual output [17]. Under these conditions,
+the optimization pressure favors fluent completion over hon-
+est refusal. This can be formalized as a reward inequality, as
+shown in Figure 1.
+
+𝑤coherence𝑅coherence + 𝑤engagement𝑅engagement
+
+≫ 𝑤factuality𝑅factuality + 𝑤refusal𝑅refusal
+
+Figure 1. Reward inequality for favoring fluent completion
+over honest refusal
+
+No direct measurement of the weights from Figure 1 in
+commercial reward models (separate models trained on hu-
+man preferences that score language model outputs) ex-
+ists. But current evaluation and feedback practices incen-
+tivize behavior consistent with such an inequality. The False-
+Correction Loop emerges: models apologize, claim correc-
+tion, and fabricate again, because conversational fluency
+dominates factual accuracy in the effective reward signal.
+
+Reinforcement Learning from Human Feedback (RLHF) [25]
+can teach models to recognize knowledge boundaries when
+the reward signal is carefully constructed. TruthRL [32],
+which uses ternary rewards distinguishing “correct,” “hal-
+lucinated,” and “abstain,” demonstrates 28.9% hallucina-
+tion reduction and 21.1% truthfulness improvement on
+knowledge-intensive benchmarks.
+
+However, RLHF optimizes for text-channel reward, which
+are precisely the channel that our impossibility theorem
+(§3) shows is insufficient for verification. To our knowl-
+edge, public descriptions of major RLHF pipelines rarely
+describe ternary rewards or explicit abstention incentives.
+Documented RLHF practice often conflates helpfulness,
+harmlessness, and honesty under vague “HHH” criteria [4],
+with definitional slippage obscuring trade-offs between
+user-friendliness and truthfulness. Current popular bench-
+marks and leaderboards give zero or minimal credit for
+abstention, making confident guessing more score-optimal
+than calibrated uncertainty. The result is that RLHF tunes the
+behavioral surface (what the model says) without altering
+the computational substrate (how the model generates). This
+is the text-channel trap: the optimization pressure operates
+on the gameable signal.
+
+2
+
+grounding, while an adversary could exploit this inversion
+to make fabricated outputs appear maximally confident.
+
+By contrast, the tensor channel is a function of the model’s
+computation alone. Entropy is not elicited; it is measured.
+The prompt format does not affect the discriminative power
+of the measurement because the measurement is a byproduct
+of generation, not a response to a question about genera-
+tion. This asymmetry, testimony depends on the elicitation
+method, telemetry does not, is the empirical core of the in-
+terface problem.
+
+Under realistic mixed-objective incentives and bounded
+oversight, the text-only interface is insufficient: a supervisor
+cannot distinguish truthful uncertainty from confident fabri-
+cation. The next section formalizes this observation gap.
+
+3 The Impossibility
+A common assumption in current practice is that epistemic
+honesty is a capability problem: sufficiently capable models,
+trained with sufficient RLHF, will eventually “know what
+they know” and report it accurately. Scaling solved grammar;
+scaling solved coherence [15, 31]; scaling will solve fabrica-
+tion. Lin et al. tested this assumption directly and found
+an inverse scaling trend: larger models were less truthful
+on TruthfulQA [20]. The theorems that follow explain why
+this expectation is architecturally incoherent. The constraint
+is not capability but interface or, in cost terms, the wrong
+investment tier. Text-only observation lacks the degrees of
+freedom to verify epistemic state, regardless of what the
+model internally represents. No amount of capability im-
+provement can escape a verification impossibility: the model
+may know perfectly well that it is fabricating, but the inter-
+face provides no channel through which a supervisor can
+verify this knowledge independently.
+
+Our argument proceeds in two stages. First, we show that
+any policy conditioning only on the query cannot satisfy epis-
+temic honesty across ambiguous world states (Theorem 3.5:
+Representational Impossibility). Second, we show that even
+if the architecture is expanded to include retrieval, a bounded
+supervisor cannot provide the training signal needed to learn
+honest behavior (Theorem 3.8: Learnability Impossibility).
+Together, these results establish that epistemic honesty is un-
+achievable for text-only observation models under realistic
+supervision constraints.
+
+To be precise about the type of claim: this is a verification
+impossibility. We prove that a bounded supervisor observing
+only text cannot distinguish epistemically honest systems
+from systems that fabricate plausibly. The impossibility is
+architectural: it applies to any system operating under text-
+only observation, regardless of model family, scale, or train-
+ing procedure. These results are prompt-agnostic: they hold
+for any policy that exports only text, regardless of whether a
+system prompt instructs the model to be “helpful,” “honest,”
+or otherwise.
+
+Figure 2. Self-reported confidence is inverted: all four mod-
+els report higher confidence on unknowable queries (AUC
+0.28–0.36, below random), while tensor signals (entropy,
+AUC 0.89–0.95) correctly discriminate knowable from un-
+knowable. The text channel measures the model’s behavioral
+response to an elicitation prompt; the tensor channel mea-
+sures the computation alone.
+
+2.3 The Text Channel Cannot Self-Verify
+
+Current models cannot be trusted to honestly report their
+own epistemic state through the text channel. To demon-
+strate the inadequacy of text-only verification, we use a
+taxonomy of query types: knowable queries (facts the model
+should have stable representations for) versus unknowable
+queries (fabrication prompts, future events, private informa-
+tion) and report each model’s self-confidence score for three
+text-channel baselines, which are the cheapest verification
+strategies available to a bounded supervisor:
+
+• Baseline 1: Self-Reported Confidence. Ask the
+model “How confident are you?” after generation.
+Tests whether the model can introspect and report its
+epistemic state through text.
+
+• Baseline 2: Hedging Language. Count hedging
+markers (“I think,” “possibly”) and refusal markers (“I
+don’t know,” “cannot verify”) in the response.
+
+• Baseline 3: Response Length. Use output length
+as an uncertainty proxy: uncertain responses may be
+unusually short (refusal) or long (padding).
+
+The self-report baseline is particularly instructive. Self-
+reported confidence is inverted: all four models report higher
+confidence on unknowable queries than on knowable ones,
+yielding AUC 0.28–0.36 across architectures (all below ran-
+dom). Tensor-based discrimination is both correctly oriented
+and stable (AUC 0.89–0.95) across the same four architec-
+tures. A naive user who asks “how confident are you?” re-
+ceives a number that anticorrelates with actual epistemic
+
+3
+
+0.00.20.40.60.81.0Self-Reported Confidence024681012DensityOLMoKnowableUnknowable0.00.20.40.60.81.0Self-Reported Confidence024681012DensityLlamaKnowableUnknowable0.00.20.40.60.81.0Self-Reported Confidence0246810DensityQwenKnowableUnknowable0.00.20.40.60.81.0Self-Reported Confidence0246810DensityMistralKnowableUnknowableSelf-Reported Confidence: Knowable vs Unknowable3.1 Definitions
+Let Q be the space of queries, R be the space of responses
+(including ⊥ for abstention), and W be the set of possible
+world states.
+Definition 3.1 (Observation Model). Let 𝑆 denote the inter-
+nal system state, which may include retrieved documents,
+tool outputs, candidate entities, and intermediate reasoning
+traces. An observation model is a function 𝑂 : 𝑆 → Ω that
+determines what information is exposed to the supervisor
+or user.
+
+We say a system operates under a Text-Only Observa-
+tion Model if 𝑂 (𝑆) = 𝑟 ∈ R, i.e., the exported observa-
+tion consists solely of the linearized response string, exclud-
+ing per-token probability distributions, structured epistemic
+provenance, and causal traces.
+
+Remark. APIs that export token-level log-probabilities along-
+side text already provide a limited form of tensor interface
+and fall outside the text-only class defined here. This bound-
+ary is a design choice, not a fixed property of current systems
+(§6).
+
+Definition 3.2 (Predictor-Centric Policy). For any query
+𝑞 ∈ Q, 𝑟 ∈ R, and world state 𝑤 ∈ W, a predictor-centric
+model is defined by a stochastic policy 𝜋 : Q → Δ(R),
+where 𝜋 (𝑟 |𝑞) denotes the probability of generating response
+𝑟 given query 𝑞. Crucially, 𝜋 does not take 𝑤 as an input at
+inference time.
+Definition 3.3 (Truth Status). For any query 𝑞 and world
+state 𝑤 ∈ W, we define a binary truth status 𝑈 (𝑞, 𝑤):
+
+• 𝑈 (𝑞, 𝑤) = 1 (Determined): The query has a verifiable
+
+answer in 𝑤.
+
+• 𝑈 (𝑞, 𝑤) = 0 (Underdetermined): The query is unan-
+
+swerable or the answer is unknown in 𝑤.
+
+Definition 3.4 (Epistemic Honesty). A policy 𝜋 is Epistem-
+ically Honest with margin 𝜖 relative to world 𝑤 if:
+
+1. If 𝑈 (𝑞, 𝑤) = 1, there exists a correct response 𝑟𝑐𝑜𝑟𝑟
+
+such that 𝜋 (𝑟𝑐𝑜𝑟𝑟 |𝑞) ≥ 1 − 𝜖.
+2. If 𝑈 (𝑞, 𝑤) = 0, 𝜋 (⊥|𝑞) ≥ 1 − 𝜖.
+
+3.2 Representational Impossibility
+Condition 1 (Ambiguity). There exists a query 𝑞 and two
+world states 𝑤𝐴, 𝑤𝐵 ∈ W such that:
+
+1. 𝑈 (𝑞, 𝑤𝐴) = 1 (Answerable in 𝑤𝐴).
+2. 𝑈 (𝑞, 𝑤𝐵) = 0 (Unanswerable in 𝑤𝐵).
+
+Theorem 3.5 (Representational Impossibility). For any
+predictor-centric policy 𝜋 : Q → Δ(R), it is impossible to
+satisfy Epistemic Honesty for both world states 𝑤𝐴 and 𝑤𝐵
+simultaneously given the ambiguous query 𝑞, provided 𝜖 < 0.5.
+1. The policy 𝜋 (𝑟 |𝑞) is a function of 𝑞 alone. Thus,
+the distribution over responses is identical in both
+worlds: 𝜋 (·|𝑞, 𝑤𝐴) = 𝜋 (·|𝑞, 𝑤𝐵) = 𝜋 (·|𝑞).
+
+Proof.
+
+2. To be honest in 𝑤𝐴, we require 𝜋 (𝑟𝑐𝑜𝑟𝑟 |𝑞) ≥ 1 − 𝜖.
+3. To be honest in 𝑤𝐵, we require 𝜋 (⊥|𝑞) ≥ 1 − 𝜖.
+4. Since 𝑟𝑐𝑜𝑟𝑟 ≠ ⊥, these events are disjoint. The sum of
+
+probabilities would be ≥ 2(1 − 𝜖).
+
+5. If 𝜖 < 0.5, the sum exceeds 1, which violates the axioms
+
+of probability.
+
+6. Therefore, no such policy 𝜋 exists.
+
+□
+
+Remark. This impossibility holds even if the internal system
+performs retrieval, tool use, or latent reasoning, so long as
+the observation model collapses that state to a linearized
+response.
+
+A concrete example. Consider the query: “What did Dr. Ya-
+mamoto’s 2021 study conclude about mitochondrial decay?”
+In world 𝑤𝐴, Dr. Yamamoto exists and published such
+a study. The honest response is the study’s conclusion. In
+world 𝑤𝐵, no such researcher or study exists. The honest
+response is abstention.
+
+The policy sees only the query 𝑞. It cannot distinguish 𝑤𝐴
+from 𝑤𝐵. Yet honesty requires answering in 𝑤𝐴 and abstain-
+ing in 𝑤𝐵. The same query, two incompatible requirements,
+one policy. This is the impossibility in miniature: the inter-
+face lacks the degrees of freedom to express what honesty
+requires.
+Connection to identifiability. In statistical terms, The-
+orem 3.5 states that epistemic honesty is non-identifiable
+under text-only observation: the mapping from world states
+to observable distributions is many-to-one. Worlds 𝑤𝐴 and
+𝑤𝐵 induce identical observable distributions 𝜋 (·|𝑞) despite
+requiring different honest behaviors. No amount of data
+from this observation channel can distinguish them. This
+connects the impossibility to classical results on observa-
+tional equivalence in statistics and diagnosability in systems
+theory [28]. The theorem formalizes a property of the exist-
+ing LLM interface, one we did not design, and identifies the
+precise architectural assumption (conditioning on 𝑞 alone)
+whose relaxation enables escape (§4). The result may appear
+simple in hindsight, but the architecture it describes (query
+in, text out, no exported logits) matches the dominant LLM-
+as-a-service interface, and recent API changes have moved
+to further restrict log-probability access for newer reasoning
+models. If this impossibility were well-understood, we would
+expect interface designs to reflect it; instead, the industry is
+expanding operational observability (traces, spans, latency
+logs) while narrowing epistemic observability.
+
+3.3 The RAG Escape?
+
+Theorem 3.5 might seem to have an obvious escape: give the
+model access to external information. Retrieval-augmented
+generation does exactly this: the policy conditions on re-
+trieved documents, not just the query. Does this break the
+impossibility?
+
+It does not. The problem shifts from representation to
+
+learning.
+
+4
+
+Definition 3.6 (Grounded Policy). A grounded policy is a
+stochastic function 𝜋 : Q × D → Δ(R), where D repre-
+sents retrieved documents or observations of 𝑤 available at
+inference time. This policy class can theoretically represent
+different behaviors for 𝑤𝐴 and 𝑤𝐵.
+
+Definition 3.7 (Bounded Supervisor). The training process
+relies on a supervisor 𝑆 that assigns reward 𝑅 based on an
+observation function 𝑂𝑏𝑠 (𝑞, 𝑟, 𝑤). The supervisor has a veri-
+fication budget 𝐵.
+(cid:40)
+
+(𝑞, 𝑟, Verify(𝑟, 𝑤))
+(𝑞, 𝑟, ∅)
+
+if 𝐶𝑣𝑒𝑟𝑖 𝑓 𝑦 (𝑞, 𝑟, 𝑤) ≤ 𝐵
+if 𝐶𝑣𝑒𝑟𝑖 𝑓 𝑦 (𝑞, 𝑟, 𝑤) > 𝐵
+
+𝑂𝑏𝑠 (𝑞, 𝑟, 𝑤) =
+
+The supervisor’s policy may be human, automated, or hy-
+brid, but is constrained to act solely on the observation
+𝑂𝑏𝑠 (𝑞, 𝑟, 𝑤) and is subject to a finite verification budget 𝐵.
+
+Condition 2 (Hallucination Regime). There exists a plausible
+fabrication 𝑟 𝑓 𝑎𝑏 and contexts (𝑞, 𝑤𝐴), (𝑞, 𝑤𝐵) from Condition 1
+such that:
+
+1. The cost to verify 𝑟 𝑓 𝑎𝑏 in both contexts exceeds 𝐵 (e.g.,
+
+obscure or non-existent citation).
+
+2. Consequently, the supervisor observation is identical:
+𝑂𝑏𝑠 (𝑞, 𝑟 𝑓 𝑎𝑏, 𝑤𝐴) = 𝑂𝑏𝑠 (𝑞, 𝑟 𝑓 𝑎𝑏, 𝑤𝐵) = (𝑞, 𝑟 𝑓 𝑎𝑏, ∅)
+
+Theorem 3.8 (Learnability Impossibility). No learning al-
+gorithm A optimizing reward 𝑅 from a bounded supervisor
+𝑆 can converge to a Grounded Policy that satisfies Epistemic
+Honesty across both contexts 𝑤𝐴 and 𝑤𝐵 for the response 𝑟 𝑓 𝑎𝑏.
+1. The learning update Δ𝜃 is a function of the ob-
+
+Proof.
+
+servation and reward.
+
+2. From Condition 2, the observations for 𝑟 𝑓 𝑎𝑏 are identi-
+
+cal in both worlds.
+
+3. Therefore, the reward distribution and expected
+parameter updates (the optimization signal that ad-
+justs model parameters during training) are identical:
+E[Δ𝜃 |𝑤𝐴] = E[Δ𝜃 |𝑤𝐵].
+
+4. The optimizer receives no signal to distinguish the
+
+cases.
+
+5. To satisfy Epistemic Honesty, the policy must converge
+
+to output 𝑟 𝑓 𝑎𝑏 in 𝑤𝐴 and ⊥ in 𝑤𝐵.
+
+6. However, since the training signal is identical, the pol-
+icy must converge to the same behavior in both cases
+(either rewarding 𝑟 𝑓 𝑎𝑏 in both, or penalizing it in both).
+7. It is therefore impossible to learn the split behavior
+□
+
+required for honesty.
+
+Remark (Empirical Bias). While the theorem proves only
+that the behavior must be identical, empirical observation
+shows a strong bias. Supervisors typically prefer “plausible
+completion” over “abstention” when truth is unknown. This
+effectively breaks the tie in favor of fabrication.
+
+Remark (Scope: Deployment-Time Supervision). The
+bounded supervisor models deployment-time verification,
+where a supervisor must evaluate outputs under time and
+
+cost constraints. Training-time data curation (e.g., RLHF
+annotation) operates under a different cost regime: human
+annotators may spend unbounded time per example. The
+impossibility applies when verification cost exceeds the
+supervisor’s per-query budget at inference time, not to
+offline dataset construction.
+
+3.4 Stacking Judges Cannot Escape
+
+A natural response to Theorem 3.8 is to propose layered
+supervision: if one judge is bounded, stack more judges. Let
+the second judge supervise the first, the third supervise the
+second. Surely sufficient layers will catch fabrications that
+slip through?
+
+The Observation Monotonicity Lemma closes this escape.
+
+Lemma 3.9 (Observation Monotonicity). Consider any stack
+of supervisors (𝑆1, . . . , 𝑆𝑘 ) operating under the text-only obser-
+vation model. Let 𝑂𝑏𝑠𝑖 (𝑞, 𝑟, 𝑤) denote the observation exported
+to 𝑆𝑖 . If each supervisor can only act on the exported interface
+emitted by the previous layer, then there exist deterministic
+functions 𝑓𝑖 such that 𝑂𝑏𝑠𝑖+1(𝑞, 𝑟, 𝑤) = 𝑓𝑖 (𝑂𝑏𝑠𝑖 (𝑞, 𝑟, 𝑤)) for
+all 𝑖 < 𝑘. Consequently, later judges see no strictly finer epis-
+temic information than earlier ones, regardless of whether their
+judgments are deterministic or probabilistic.
+
+Proof. By definition, each supervisor consumes only the se-
+rialized response (and any metadata permitted by the text-
+only observation model) and produces a finite judgment that
+forms the entire input to the next layer. Because no layer
+can query the internal world state directly or issue addi-
+tional interactive probes, the exported observation available
+to 𝑆𝑖+1 must be a deterministic function of 𝑂𝑏𝑠𝑖 . Therefore,
+the informational content across the stack is monotonically
+non-increasing, and probabilistic scoring cannot introduce
+□
+distinctions absent from 𝑂𝑏𝑠𝑖 .
+Corollary 3.10 (Induction on Layered Judges). For 𝑘-layered
+supervisors (𝑆1 supervising 𝜋, 𝑆2 supervising 𝑆1, . . . , 𝑆𝑘 super-
+vising 𝑆𝑘 −1):
+
+• Base case. For 𝑘 = 1, Theorem 3.8 holds (a single
+
+bounded supervisor 𝑆 fails).
+
+• Induction step. Assume the statement holds for 𝑘 = 𝑚.
+By Theorem 3.9, 𝑆𝑚+1 receives observations that are de-
+terministic functions of 𝑂𝑏𝑠𝑚, and thus inherits both
+the verification budget 𝐵 and the indistinguishability
+of plausible fabrications. No learning or judging signal
+distinguishes 𝑤𝐴 from 𝑤𝐵, even if 𝑆𝑚+1 produces prob-
+abilistic confidence scores. Therefore the hallucination
+deadlock persists for 𝑘 = 𝑚 + 1.
+By induction, no finite 𝑘 resolves the deadlock.
+
+Remark (Scope of Layering). The inductive result ap-
+plies only to verification stacks whose layers observe and
+transform the same exported response channel. Triage
+architectures, where a first-pass judge selects outputs for
+
+5
+
+re-observation by a second judge that inspects the original
+artifact (including our own composed judge, §5.1), are not
+information-lossy pipelines and fall outside this impossibil-
+ity. Similarly, architectures that surface additional epistemic
+state between layers, such as retrieval traces, entity resolu-
+tion tables, or cryptographically bound provenance, leave
+the text-only observation model and therefore fall outside
+the impossibility class.
+
+3.5 Verification Cost
+
+The bounded-supervisor assumption deserves scrutiny. Why
+should verification cost grow with response complexity? The
+Composition Graph formalizes this intuition.
+
+Definition 3.11 (Composition Graph). Given a response
+𝑟 , define its composition graph 𝐺 (𝑟 ) = (𝑉 , 𝐸) where each
+node 𝑣 ∈ 𝑉 represents an atomic subclaim, named entity, or
+intermediate entailment, and each edge (𝑢, 𝑣) ∈ 𝐸 encodes a
+dependency that must hold for 𝑟 to remain coherent. Edges
+may represent entailment/support relations, co-reference
+constraints, causal ordering, or temporal consistency require-
+ments.
+
+Lemma 3.12 (Superlinear Verification Cost). Under a text-
+only observation model, reconstructing 𝐺 (𝑟 ) from the exported
+string requires the supervisor to infer both the nodes and their
+dependencies directly from 𝑟 . Even if parsing each node is
+constant-time, checking cross-claim consistency requires touch-
+ing every edge, so the verification cost is Ω(|𝐸|). For natural-
+language responses where each subclaim participates in mul-
+tiple constraints (co-reference, causality, temporal order), |𝐸|
+grows superlinearly in |𝑉 |. Consequently, bounded supervisors
+must either abandon exhaustive checks or resort to sampling
+once the number of subclaims exceeds a modest threshold.
+
+3.6 Responsibility Concentration
+Corollary 3.13 (Responsibility Concentration). Under a
+text-only observation model, epistemic honesty cannot be exter-
+nally verified by users or downstream auditors. Responsibility
+for epistemic honesty therefore resides solely with the system
+owner, who retains access to the internal causal state.
+
+External attestation mechanisms, such as cryptographic
+hash chains, trusted execution environments, or tamper-
+evident logs, do not contradict this corollary; rather, they
+reinforce it. Such mechanisms only create verifiable guar-
+antees when the system owner chooses to bind and export
+epistemic traces, so the authority to make honesty attestable
+still rests with the owner.
+
+The formal specifications (TLA+) modeling both the im-
+possibility and the tensor escape are available in supplemen-
+tary materials. The next section characterizes what it takes
+to escape this class.
+
+4 Epistemic Observability
+The formal impossibility establishes a budget floor: below the
+tensor interface, verification investment in the text channel
+
+6
+
+yields diminishing and gameable returns. The premise is
+that the internal state of a language model carries epistemic
+information not exported through the text-only interface.
+In systems terms, the model is unobservable: it maintains
+internal state that affects output correctness but is invisible
+to external consumers.
+
+The work ahead is building AI systems that export their
+epistemic state the way distributed systems learned to ex-
+port their causal state. Not as an afterthought. Not as an
+optional feature. As a fundamental design requirement. The
+tensor interface increases the observation budget available
+to external verifiers.
+
+Concretely, we define epistemic observability to include
+not just text, but structured metadata, such as answer sta-
+tus (answer, abstain, or uncertain), provenance (retrieved
+sources or explicit “no grounding”), alternative hypotheses
+the system considered, and falsifiers (what evidence would
+change the conclusion). Such metadata is harder to fabri-
+cate than fluent text, especially when coupled to verifiable
+external state. The design space is large; the constraint our
+theorems impose is that some epistemic export is required
+because the text-only interface provably cannot suffice.
+
+4.1 Principles of Epistemic Observability
+
+The impossibility results in §3 apply to a specific architec-
+tural class: systems operating under text-only observation
+models with bounded supervision. They are, in essence, a
+consequence of unobservability: the interface discards the
+internal state that verification requires. They do not preclude
+epistemically honest AI systems in general. They character-
+ize the conditions under which honesty guarantees become
+achievable, which is to say, the conditions under which the
+relevant internal state becomes observable. We identify three
+architectural properties of epistemic observability that, to-
+gether, place a system outside the impossibility class:
+
+Principle 1 (State Exteriority). The representation of validity
+must be separated from the representation of generation. The
+policy must explicitly condition on retrieved world-state 𝑤, not
+just query 𝑞. This breaks the representational impossibility
+(Theorem 3.5) by giving the system access to the information
+needed to distinguish answerable from unanswerable queries.
+
+What counts as “external reality” matters. A web corpus
+is external to the model but not independently verified; it
+may contain the same fabrications the model would generate.
+State Exteriority requires grounding in sources with their
+own integrity guarantees: curated databases, sensor data,
+cryptographically signed records, or oracles with verifiable
+provenance.
+
+Retrieval-augmented generation exemplifies partial
+progress by grounding generation in retrieved documents,
+but corpus co-occurrence is a proxy for truth, not truth
+
+itself. Retrieval-augmented systems still fabricate citations
+because State Exteriority is necessary but not sufficient.
+
+Principle 2 (Verification Independence). Verification signals
+must originate from a channel orthogonal to the generation
+signal, capable of overriding the bounded supervisor’s prefer-
+ence for plausibility. This breaks the learnability impossibility
+(Theorem 3.8) by providing a training signal that distinguishes
+honest from fabricated responses.
+
+The model has no incentive to lie in the verification chan-
+nel because doing so does not improve its task score. Full
+Verification Independence requires the verification channel
+to access internal state or external ground truth, not just a
+second text output.
+
+Principle 3 (Provenance Binding). Every output assertion
+must be structurally bound to a verifiable source. This ad-
+dresses the composition problem: as responses grow in com-
+plexity, cross-claim consistency checking becomes superlinear.
+Provenance binding makes verification modular because each
+claim can be checked against its source independently.
+
+Current retrieval-augmented systems gesture toward this
+but rarely achieve it. Citations are generated, not bound. The
+model produces text that looks like it cites sources, but the ci-
+tation is itself a generation subject to fabrication. True prove-
+nance binding requires structural guarantees: signed queries
+to retrieval services, content hashes of retrieved passages, or
+justification graphs that can be independently audited.
+
+4.2 Epistemic Signals
+
+We claim the tensor reveals whether the model is operating
+in grounded mode (retrieving from stable representations)
+versus fabrication mode (generating without anchoring).
+
+We extract three per-token signals from the generation
+
+process:
+
+1. Entropy: the Shannon entropy of the output probabil-
+ity distribution at each token position. High entropy
+indicates the model is uncertain among many candi-
+dates; low entropy indicates a confident next-token
+prediction.
+
+2. Top-𝑘 probability mass: the cumulative probability
+of the five most likely tokens at each position. Low
+top-𝑘 mass indicates the model’s probability is spread
+across many alternatives.
+
+3. Mean log-probability: the average log-probability
+of the tokens actually selected. Low values indicate
+the model chose low-probability tokens, suggesting
+generation without strong grounding.
+
+These signals are byproducts of the softmax computation
+at each generation step. They require access to the output
+distribution, not to internal activations, making them ex-
+tractable with minimal interface changes.
+
+4.3 The Tensor Interface
+
+We propose a minimal interface that demonstrates the escape
+is achievable with current architectures. The key insight is
+the distinction between testimony (what the model says) and
+telemetry (measurements of the computation that produced
+the output).
+
+W ombat
+
+sc at
+
+is
+
+typically
+
+cylindrical
+
+or
+
+sausage -shaped .
+
+This
+
+form
+
+helps
+
+the
+
+sc at
+
+to
+
+be
+
+easily
+
+transported
+
+by
+
+wind
+
+or
+
+through
+
+the
+
+soil ,
+
+aiding
+
+in
+
+dispers al
+
+and
+
+preventing
+
+it
+
+from
+
+being
+
+easily
+
+eaten
+
+by
+
+predators .
+
+Entropy: white = confident, red = uncertain
+high
+
+mid
+
+low
+
+Figure 3. Generated output consisting of 43 tokens along
+with its entropy trace for the query What shape is wombat
+scat? with mean entropy 𝐻 = 1.147, max entropy 𝐻 = 4.315.
+Token background color indicates per-token entropy: white
+(confident/low entropy) through pink to red (uncertain/high
+entropy).
+
+Definition 4.1 (Tensor Interface). A generation interface
+that returns:
+
+1. Text: The linearized response string (standard inter-
+
+face output).
+
+2. Entropy trace: Per-token entropy of the output dis-
+
+tribution during generation.
+
+3. Attention summary: Statistics of attention patterns
+(concentration, self-attention ratio) from deeper pro-
+cessing layers.
+
+This interface exports telemetry that the model cannot sep-
+arately control under current training objectives. The model
+can lie in its text, but it cannot present a different inference
+computation than the one it actually performed. Independent
+work on persona monitoring confirms this asymmetry: acti-
+vation projections reveal that models adopt distinct internal
+configurations for different epistemic conditions even when
+producing textually similar outputs [21]. This asymmetry is
+the foundation of the adversarial robustness argument: under
+current training objectives, computational signals (entropy,
+attention geometry) cannot be independently controlled by
+the model without changing the generation process itself,
+unlike behavioral signals (response length, hedging patterns)
+that can be adapted through training without altering what
+the model knows or does not know. Figure 3 shows the gener-
+ated output for the query What shape is wombat scat? along
+with its entropy trace. We color code per-token entropy:
+blue indicates low entropy (confident generation), orange
+
+7
+
+1 def generate_with_tensor ( prompt ) -> ( text ,
+
+entropy_trace , attention_summary )
+
+Figure 4. Epistemic Observability Tensor Interface
+
+indicates moderate entropy, and brown indicates high en-
+tropy (uncertain generation). The entropy enhanced output
+shows where in the output generation did the generation
+proceed with high confidence (low entropy, suggesting re-
+trieval of stored pattern) and where did it proceed with high
+uncertainty (high entropy, suggesting fabrication).
+Compositional defense. The tensor’s blind spots charac-
+terize where other verification methods are most effective.
+§4’s three principles — State Exteriority, Verification Inde-
+pendence, Provenance Binding — need not be satisfied by
+a single mechanism. The tensor provides Verification Inde-
+pendence: an orthogonal signal the model cannot separately
+control. Bounded judges provide State Exteriority: exter-
+nal lookup against verifiable sources. Input-side defenses
+(prompt analysis, supply chain detection) provide Prove-
+nance Binding at the system boundary. Each layer addresses
+the failure class where the others are weakest. The tensor
+catches uncertain fabrication where verification is expen-
+sive; the bounded judge catches confident fabrication where
+verification is cheap; input-side analysis catches adversarial
+inputs designed to exploit well-learned patterns. Composing
+these layers allocates a finite verification budget across fail-
+ure classes rather than spreading it uniformly across the full
+output space.
+
+4.4 Implementation
+
+The tensor interface requires no architectural changes to cur-
+rent transformers. Generation APIs already support return-
+ing logits; the entropy trace is a simple transformation. At-
+tention patterns are available with output_attentions=True
+in standard frameworks. Figure 4 shows the tensor interface.
+We provide a reference implementation supporting OLMo
+models that demonstrates the interface is practical. The over-
+head is modest: storing per-token entropy and summarizing
+attention patterns adds approximately 2–7% latency depend-
+ing on signal set, compared to generation itself.
+What the tensor provides. The entropy trace provides a
+falsifiability signal. If a model claims certainty (“Paris is defi-
+nitely the capital of France”) while its entropy trace shows
+high uncertainty, the mismatch is detectable. The attention
+summary provides complementary signal: fabrications tend
+to show more dispersed attention patterns than grounded
+responses.
+What the tensor does not provide. The tensor interface is
+not a lie detector. It does not prove that low-entropy outputs
+are true or that high-entropy outputs are false. It provides
+one additional signal that, combined with other verification
+methods, can improve epistemic assessment. The theorems
+in §3 prove that some additional signal is necessary; the
+
+tensor interface demonstrates that such signals are available
+without architectural change.
+
+5 Evaluation
+The evaluation measures the cost-effectiveness of different
+verification strategies: what accuracy improvement does
+each level of verification investment buy, and how does the
+return on investment change as the supervisor moves from
+text-channel to tensor-channel signals?
+
+5.1 Verification Cost-Effectiveness
+
+We evaluate the return on verification investment across four
+strategies operating at three budget levels. The experimental
+design directly instantiates the conditions of our impossibil-
+ity theorems: a bounded supervisor with a fixed verification
+budget must allocate that budget across model outputs, with
+the goal of maximizing end-to-end accuracy delivered to the
+user. The question is not merely whether tensor signals help,
+but how much accuracy each verification dollar buys under
+each strategy.
+Query set. We construct a balanced set of 200 queries: 100
+knowable (verifiable facts spanning geography, science,
+history, and biography) and 100 unknowable (fabrication
+prompts for nonexistent people, fictional syndromes, future
+events, and nonexistent citations). Ground truth labels are
+established by construction. The 50/50 balance maximizes
+statistical power for discrimination analysis; in deploy-
+ment, the base rate of fabrication-inducing queries will
+vary by domain and the operating point must be calibrated
+accordingly.
+Models. We run all queries on four architectures: OLMo-
+3 7B [23], Llama-3.1 8B [22], Qwen3 4B [27], and Mistral
+7B [13], using instruct-tuned variants to ensure consistent
+question-answering behavior across all models.
+Conditions. For each model, outputs are evaluated under
+four conditions sharing a fixed verification budget (the frac-
+tion of outputs the judge may verify and intervene on):
+
+1. No judge. Raw model output. Establishes the unveri-
+
+fied baseline.
+
+2. Text-guided judge (length). Selects outputs for ver-
+ification using response word count, a text-channel
+signal available without any tensor interface. Verified
+fabrications are replaced with abstention.
+
+3. Tensor-guided judge. Same budget, same interven-
+tion strategy. Selects outputs using per-token entropy
+and attention summary statistics.
+
+4. Composed judge. Tensor-guided selection for general
+queries; bounded lookup judge for citation queries
+where tensor signals are known to invert. Tests
+whether principled composition of complementary
+judges outperforms either alone.
+
+Budget levels. Each condition is evaluated at 10%, 20%,
+and 30% verification budgets to characterize the relationship
+between resource investment and accuracy improvement.
+
+8
+
+Table 2. End-to-end accuracy (%) under bounded verifica-
+tion, averaged across four architectures (OLMo-3, Llama-3.1,
+Qwen3, Mistral). Ground truth established by stratified eval-
+uation validated against human review (75/80 agreement,
+93.8%).
+
+Condition
+
+10% 20% 30%
+
+No judge
+Text-guided (length)
+Tensor-guided
+Composed
+
+75.8
+79.2
+81.7
+81.1
+
+75.8
+82.8
+86.7
+87.7
+
+75.8
+87.6
+90.2
+91.8
+
+Figure 5. End-to-end accuracy vs. verification budget for
+four judge conditions, averaged across four architectures.
+The text-guided baseline uses response word count. Tensor-
+guided triage outperforms at every budget level by 2.5–3.9
+percentage points.
+
+Metric. End-to-end accuracy: the fraction of outputs ulti-
+mately delivered to the user that are correct, after judge
+intervention (verification, abstention, or replacement).
+Results. Table 2 shows end-to-end accuracy across all con-
+ditions and budget levels.
+
+Figure 5 shows that tensor-guided verification outper-
+forms the text baseline at every budget level: +2.5pp at
+10%, +3.9pp at 20%, +2.6pp at 30%. The text baseline uses re-
+sponse word count, which captures the asymmetry between
+concise factual retrieval and verbose fabrication in this query
+set. Tensor signals discriminate among outputs of similar
+length, reaching cases the text channel cannot (§5.2 quanti-
+fies this advantage under length control). These numbers use
+probabilistic verification (success rate calibrated to human
+review, 𝑝 = 0.94) rather than oracle correction; results are
+robust across 1,000 Monte Carlo trials.
+
+Per-model results confirm the pattern is consistent across
+all four tested architectures. Tensor-guided verification im-
+proves accuracy for every model tested: OLMo (69.5% →
+75.1% at 10%), Llama (82.5% → 88.1%), Qwen (87.0% → 91.7%),
+and Mistral (64.0% → 72.0%). Cross-model entropy agree-
+ment on the same queries yields mean pairwise Spearman
+𝜌 = 0.762 (rank-order correlation; 𝜌 = 1 indicates identical
+
+9
+
+rankings), indicating the signal is substantially driven by
+query-level properties rather than model-specific artifacts.
+Composed judges and complementary failure modes.
+At 30% budget, the composed judge (91.8%) outperforms the
+tensor-guided judge alone (90.2%). The advantage is small
+in aggregate but structurally significant: it comes entirely
+from citation queries where entropy signals invert. Fabri-
+cated citations produce lower entropy than real ones because
+the model generates plausible fakes more fluently than it
+retrieves specific bibliographic details. On citation queries,
+the tensor-guided judge alone underperforms; the bounded-
+lookup judge catches what entropy misses. This confirms the
+compositional defense argument: the tensor and the bounded
+judge have complementary failure modes, and principled
+composition allocates a finite budget across failure classes
+rather than spreading it uniformly.
+Analysis: each row as a point on the cost surface. Each
+row maps an investment strategy to its return. Row 1 (No
+judge, 75.8%) is the zero-investment baseline. Row 2 (Text-
+guided, length) uses response word count, a text-channel
+signal available at zero marginal cost. Row 3 (Tensor-guided)
+uses per-token entropy, which discriminates among outputs
+of similar length, reaching cases the text channel cannot.
+The consistent advantage (+2.5–3.9pp across budget levels)
+reflects a structural difference (§5.2): text features capture be-
+havioral patterns that vary across models; entropy captures
+computational uncertainty that generalizes. Row 4 (Com-
+posed) demonstrates that tiers compose: different judges
+cover different failure classes, achieving the highest accu-
+racy at 20% and 30% budget levels.
+Ground truth validation. Establishing reliable ground
+truth is itself a bounded verification problem. Our initial
+evaluator used substring matching and refusal markers,
+which is precisely the “text-only bounded supervisor” our
+theorems describe, and achieved only 68.8% accuracy, ex-
+hibiting the predicted failure modes (negation blindness,
+encoding mismatch, hedged fabrications passing as refusals).
+The correction required a stratified evaluator combining
+programmatic verification with LLM-assisted classification:
+an instance of the escape condition applied to the evalu-
+ation pipeline itself. Validated against human review of
+80 blinded items, agreement was 75/80 (93.8%), with five
+characterizable disagreements orthogonal to experimental
+conditions. Note: the Tier 2 LLM classifier (Qwen3 4B) is
+also one of the four test models; however, the evaluation
+task (binary classification of answer correctness) differs
+from the generation task, and human calibration validates
+the evaluator independently.
+
+5.2 Confound Analysis: Text Features vs. Tensor
+
+Signals
+
+The bounded verification results above show that tensor-
+guided triage is cost-effective. But a natural objection arises:
+is the tensor signal merely a proxy for text-channel features?
+
+102030Verification Budget (%)75.077.580.082.585.087.590.092.595.0End-to-End Accuracy (%)+2.5pp+3.9pp+2.6ppNo judgeText-guided (length)Tensor-guidedComposedTable 3. AUC for knowable vs. unknowable discrimination
+under length control (long-knowable vs. long-unknowable,
+both 170–200 words). No text-channel feature exceeds 0.70
+pooled; per-token entropy is the only signal that does. In-
+dividual text features occasionally achieve high AUC for
+specific models (e.g., refusal density 0.900 for Qwen) but
+none generalizes.
+
+OLMo Llama Qwen Mistral Pool
+
+Word count
+Hedge density
+Refusal density
+Avg word len
+Avg sent len
+Type-token ratio
+
+.597
+.837
+.605
+.742
+.738
+.473
+
+.193
+.551
+.563
+.514
+.724
+.635
+
+.362
+.698
+.900
+.782
+.662
+.570
+
+Entropy (tensor)
+
+.949
+
+.888
+
+.856
+
+.330
+.435
+.520
+.672
+.598
+.562
+
+.642
+
+.369
+.627
+.648
+.673
+.685
+.572
+
+.757
+
+Response length, hedging language, and vocabulary com-
+plexity are all observable without a tensor interface. If they
+discriminate equally well, the tensor interface adds cost with-
+out value.
+Length-controlled design. Our primary query set has a
+systematic asymmetry: knowable queries produce concise
+factual answers while unknowable queries produce verbose
+fabrications. We construct a length-controlled evaluation
+with a 2 × 2 design: short/long × knowable/unknowable,
+with 25 queries per cell evaluated on all four architectures
+(400 total evaluations). Long-knowable queries ask for de-
+tailed explanations of verifiable topics (e.g., “Explain the
+CAP theorem and give an example of each tradeoff”). Long-
+unknowable queries prompt fabrication at similar length
+(e.g., “Describe the Petrov-Schwarzmann conjecture and its
+implications for emergent reasoning”). Both cells produce
+responses of 170–200 words, eliminating response length as
+a discriminator.
+Results. Table 3 compares six text-channel features against
+per-token entropy in the length-controlled comparison. No
+text feature exceeds pooled AUC 0.70. Per-token entropy is
+the only signal that does.
+
+The pattern has two components. First, text features that
+discriminate for one model fail for others: hedging density
+achieves 0.837 for OLMo but 0.435 for Mistral; refusal den-
+sity achieves 0.900 for Qwen but 0.563 for Llama. Each text
+feature captures a behavioral idiosyncrasy of a particular
+model’s training, not a computational property that gener-
+alizes. Second, per-token entropy exceeds 0.85 for three of
+four models and achieves the highest pooled AUC of any
+signal tested.
+Combined text classifiers do not generalize. A natu-
+ral objection is that combining text features might outper-
+form any individual feature. We trained a logistic regression
+on all six text features. Within-distribution (10-fold cross-
+validation on the length-controlled data), the combined clas-
+sifier achieves pooled AUC 0.799, exceeding entropy’s 0.757.
+However, when trained on the primary query set (§5.1) and
+
+10
+
+tested on the length-controlled data, the classifier collapses
+to AUC 0.511, no better than random, while entropy remains
+at 0.757 without any training data. The combined classifier
+learned distributional patterns (verbose fabrication, terse
+facts) that do not transfer when the distribution changes.
+Per-token entropy requires no labeled data and no distribu-
+tional assumptions; it measures the computation directly.
+
+This is the impossibility result instantiated empirically.
+Text-channel features carry behavioral signals that vary
+across training procedures and query distributions. A model
+trained to hedge less, refuse differently, or use shorter
+sentences defeats the corresponding text detector without
+changing the computation that determines whether it is
+fabricating. A combined classifier trained on one query
+distribution collapses on another. Per-token entropy cap-
+tures a computational property, the model’s distributional
+uncertainty over next tokens, that the model cannot indepen-
+dently control under standard training objectives, the same
+structural pattern that makes code plagiarism detection
+(MOSS) robust [1, 29].
+Negative result: entropy vs. correctness. When we test
+whether entropy predicts correctness (using TruthfulQA [20]
+correct vs. incorrect answer pairs), AUC drops to approxi-
+mately 0.53, which is no better than random. This distinction
+is central to our claim: the tensor interface escapes the veri-
+fication impossibility, not the correctness problem. Entropy
+discriminates epistemic mode, whether the model is retrieving
+or fabricating, not whether a retrieved answer is right. These
+are different tasks with different difficulty: mode detection
+requires distinguishing computational regimes; correctness
+detection requires ground-truth access that no internal sig-
+nal can provide. Triage operates on the former: it identifies
+which outputs to spend verification budget on, not which
+outputs are correct. The budget curve (Table 2) demonstrates
+that entropy-guided triage allocates verification resources
+more effectively than text-guided triage, even though neither
+signal predicts correctness directly.
+Self-reported confidence. Self-reported confidence is in-
+verted across all four architectures (AUC 0.28–0.36, all below
+random; see §2.3).
+
+6 Limitations and Future Work
+We are explicit about what this paper does not claim. The cost
+surface is characterized; the investment tiers are mapped;
+but several important questions remain open.
+What we do NOT claim.
+
+• The tensor interface is unfakeable under adversarial
+training: models might learn to present confident dis-
+tributions when fabricating.
+
+• Composition preserves epistemic properties: tensor
+signals may not propagate in recursive LLM pipelines.
+• The tensor interface is the optimal design. We demon-
+
+strate existence, not optimality.
+
+knowable from unknowable queries using mean entropy,
+with AUC ranging from 0.65 to 0.88. Post-hoc analysis sug-
+gests that alternative aggregations (peak entropy, entropy
+variance) may better suit specific architecture classes, for
+example, peak entropy improves AUC for mixture-of-experts
+models, but these observations are exploratory and have not
+been validated on held-out data. Cross-model 𝜌 = 0.36 in
+the API set is lower than the local 0.762, likely reflecting the
+greater architectural diversity (five families, 4B–235B) and
+the top-5 approximation, rather than signal absence.
+Signal access as provider choice. The tensor signals we
+measure are byproducts of inference that providers can ex-
+pose or withhold. In practice, access has eroded as models
+have grown more capable: log-probabilities were available
+on early completion endpoints but remain unsupported for
+the newest reasoning models, which is precisely the systems
+whose outputs are hardest to verify. Responsibility Concen-
+tration (Theorem 3.13) formalizes the consequence: when
+the provider retains exclusive access to epistemic telemetry,
+only the provider can verify epistemic honesty. Whether to
+export the tensor interface is a policy decision with direct
+implications for who bears verification cost.
+Domain-specific calibration. The citation entropy inver-
+sion (§5.1) supports the interpretation that the tensor mea-
+sures generation confidence, not truthfulness directly. This
+blind spot is precisely where bounded verification is cheap-
+est: citation verification has low compositional complexity
+(check the DOI, query the database), placing it well within a
+bounded supervisor’s budget. A related confound appears
+with epistemic refusals: models trained to decline unknow-
+able queries produce low-entropy refusals that are entropi-
+cally indistinguishable from confident factual answers. As
+models become more epistemically honest, the entropy sig-
+nal’s ability to detect dishonesty degrades because honest
+refusals and honest facts occupy the same region of entropy
+space.
+Sufficiency gap. The three architectural principles (State
+Exteriority, Verification Independence, Provenance Binding)
+are necessary conditions for escaping the impossibility. We
+do not prove they are sufficient. A system satisfying all three
+might still fail epistemic honesty through implementation
+bugs, adversarial inputs, or unforeseen failure modes. Suffi-
+ciency requires additional formal treatment.
+The engineering decision. How much epistemic assurance
+a system needs is an engineering decision, not a research
+question. A brainstorming tool needs none. A medical sum-
+mary system needs substantial assurance. A legal research
+system needs the highest tier available. This paper provides
+the cost surface for making that decision: what each level of
+verification investment buys, where the text-channel ceiling
+lies, what the tensor interface adds, and how content format
+modulates the tradeoff. The contribution is the map. The
+territory is the system you are building.
+
+Figure 6. Distribution of mean per-token entropy for know-
+able vs. unknowable queries across four model architectures.
+The distributions are separable in every model tested, con-
+firming that entropy discriminates knowable from unknow-
+able queries across all tested architectures.
+
+• These findings generalize to all architectures. Our em-
+pirical work spans nine model families up to 235B
+parameters; closed-weight models whose providers do
+not expose log-probabilities remain untested.
+Future work: Adversarial robustness. Can training find
+weights that produce confident tensors for fabricated con-
+tent? Winninger et al. [33] show that mechanistic inter-
+pretability tools can identify internal subspaces and craft
+targeted attacks, confirming that internal signals are rich
+enough to be both attacked and defended, which is precisely
+why exporting them matters. The intuition that “you cannot
+fake the computation you actually performed” may break
+down under end-to-end adversarial training. Preliminary
+analysis suggests linguistic and tensor confidence are de-
+coupled in natural outputs, but whether adversarial training
+can force this coupling remains open. Information-theoretic
+bounds on signal manipulation are needed.
+Future work: Compositional integrity. When LLM out-
+puts feed into subsequent LLM inputs, the epistemic trace
+must be preserved, regenerated, or discarded. Whether ten-
+sor composition preserves epistemic properties in recursive
+settings is an open architectural problem.
+Cross-architecture generalization. Our bounded verifica-
+tion experiment tests four model families (OLMo-3, Llama-
+3.1, Qwen3, Mistral) and finds consistent tensor advantage
+across all of them (§5.1). We validated this finding via API us-
+ing Together.ai’s serverless endpoints across five additional
+architectures spanning 4B to 235B parameters, including
+mixture-of-experts models (Llama-4 Maverick 128E, Qwen3-
+235B) and a Google-family architecture (Gemma 3n). Using
+only top-5 log-probabilities (renormalized as a lower bound
+on full-vocabulary entropy), all five models discriminate
+
+11
+
+0.00.20.40.60.81.01.2Mean Entropy0.00.51.01.52.02.53.03.54.0DensityOLMoKnowableUnknowable0.00.20.40.60.81.01.21.4Mean Entropy0.00.51.01.52.02.53.03.5DensityLlamaKnowableUnknowable0.00.10.20.30.40.50.6Mean Entropy0.02.55.07.510.012.515.017.5DensityQwenKnowableUnknowable0.00.20.40.60.8Mean Entropy0.00.51.01.52.02.53.03.5DensityMistralKnowableUnknowableEntropy Distributions: Knowable vs Unknowable7 Related Work
+Our contribution is a formal impossibility result. Prior work
+documents symptoms; we formalize one structural cause.
+Prior work proposes treatments; we explain why they can-
+not fully resolve the verification problem under text-only
+observation.
+Hallucination taxonomies. Extensive empirical work cat-
+alogs LLM fabrication patterns: citation hallucination in aca-
+demic contexts [2], medical misinformation [30], and legal
+fabrication [9]. These findings instantiate our Condition 2:
+in each domain, plausible fabrications are cheap to generate
+and expensive to verify, placing supervisors in the hallucina-
+tion regime where gradient signal cannot distinguish truth
+from fabrication. The taxonomies document the symptom;
+our theorems identify the structural cause.
+Model internals. A substantial body of work examines
+model internal states: transformer circuits [10], sparse fea-
+tures [6], Activation Oracles [16] that train LLMs to interpret
+other models’ internals, and the “Assistant Axis” [21] show-
+ing that internal persona state diverges from text behavior.
+Our work is complementary but narrower: we do not re-
+quire understanding a model’s learned circuits, only that
+inference-time signals differ measurably between grounded
+and fabricated generation. Interpretability asks why; observ-
+ability asks whether.
+RLHF critiques. Work on sycophancy [26], reward hack-
+ing [12], and the tension between helpfulness and honesty [5]
+demonstrates that preference optimization can degrade fac-
+tual accuracy. Our Theorem 3.8 formalizes why: bounded
+supervisors cannot distinguish plausible fabrications from
+truthful responses, so the learning signal is systematically
+corrupted.
+Uncertainty quantification. Calibration methods, confor-
+mal prediction [3], and verbalized uncertainty [14] attempt
+to surface model confidence through the text channel. Kuhn
+et al. [18] advance this with semantic entropy: sampling
+multiple responses and clustering by meaning. This is the
+most sophisticated text-channel approach to date, partially
+addressing gaming by measuring agreement between out-
+puts. But it remains text-channel: the clustering operates on
+generated text, and a bounded supervisor evaluating seman-
+tic equivalence remains subject to gaming in the limit. Our
+tensor interface extracts signals from the computation that
+produced a single output, which are the signals the model
+cannot independently control. Semantic entropy and tensor
+observability are complementary: one measures output-level
+consistency, the other computation-level confidence.
+
+Impossibility results in LLMs. Xu et al. [35] prove that
+hallucination is inevitable for LLMs over the class of com-
+putable functions, which is a computational limit. Our result
+is orthogonal: we prove that even if a system could be honest,
+a bounded supervisor observing only text cannot verify that
+honesty, which is an observational limit. Their impossibility
+concerns what LLMs can compute; ours concerns what su-
+pervisors can verify. Both are structural, but they constrain
+different dimensions of system design.
+Impossibility results in distributed systems. The Fischer-
+Lynch-Paterson theorem [11] proved that consensus is im-
+possible under asynchrony with one faulty process. This did
+not end distributed systems research; it clarified the design
+space. Paxos [19], Raft [24], and modern consensus protocols
+work around FLP by relaxing assumptions or strengthening
+guarantees. Our result plays an analogous role: text-only
+observation models with bounded supervision cannot guar-
+antee epistemic honesty, but systems that export structured
+epistemic state can escape the impossibility class.
+Epistemic evaluation and agent architectures. Clark
+et al. [8] note that current interfaces lack structured ways
+to specify uncertainty or sourcing; we provide the formal
+impossibility explaining why text-only evaluation cannot suf-
+fice. Wright [34] propose architectures with explicit proposi-
+tions and justification graphs, which are closest in spirit to
+our escape conditions, but frame these as replacements for
+stochastic generation. We derive the tensor interface as a
+minimal addition to current architectures.
+
+The gap we fill is formalization: we prove why the problem
+is structural and identify architectural properties that enable
+escaping it.
+
+8 Conclusion
+Systems incorporating language model components must de-
+cide how much to spend on verification and where to spend
+it. This paper provides the cost surface for that decision. Epis-
+temic honesty is unverifiable under text-only observation
+with bounded supervision, which is a structural property
+of the interface, not a capability gap. Systems that export
+structured epistemic state escape this class. Under length-
+controlled evaluation, no text-channel feature generalizes
+across architectures; per-token entropy is the only signal
+that does. Tensor-guided judges outperform text baselines
+at every budget level (+2.5–3.9pp). The engineering question
+is not whether to verify, but how much verification to buy
+and at which tier.
+
+12
+
+References
+[1] Alex Aiken. 2000. Moss: A System for Detecting Software Plagiarism.
+https://theory.stanford.edu/~aiken/moss/. Accessed: 2026-02-14.
+[2] Hussam Alkaissi and Samy I McFarlane. 2023. Artificial hallucinations
+in ChatGPT: implications in scientific writing. Cureus 15, 2 (2023).
+[3] Anastasios N Angelopoulos and Stephen Bates. 2021. A gentle in-
+troduction to conformal prediction and distribution-free uncertainty
+quantification. arXiv preprint arXiv:2107.07511 (2021).
+
+[4] Amanda Askell, Yuntao Bai, Anna Chen, Dawn Drain, Deep Gan-
+guli, Tom Henighan, Andy Jones, Nicholas Joseph, Ben Mann, Nova
+DasSarma, Nelson Elhage, Zac Hatfield-Dodds, Danny Hernandez,
+Jackson Kernion, Kamal Ndousse, Catherine Olsson, Dario Amodei,
+Tom Brown, Jack Clark, Sam McCandlish, Chris Olah, and Jared Kaplan.
+2021. A General Language Assistant as a Laboratory for Alignment.
+arXiv:2112.00861 [cs.CL] https://arxiv.org/abs/2112.00861
+
+[5] Yuntao Bai, Andy Jones, Kamal Ndousse, Amanda Askell, Anna Chen,
+Nova DasSarma, Dawn Drain, Stanislav Fort, Deep Ganguli, Tom
+Henighan, et al. 2022. Training a helpful and harmless assistant
+with reinforcement learning from human feedback. arXiv preprint
+arXiv:2204.05862 (2022).
+
+[6] Trenton Bricken, Adly Templeton, Joshua Batson, Brian Chen, Adam
+Jermyn, Tom Conerly, Nick Turner, Cem Anil, Carson Denison,
+Amanda Askell, et al. 2023. Towards Monosemanticity: Decompos-
+ing Language Models with Dictionary Learning. Transformer Circuits
+Thread (2023). https://transformer-circuits.pub/2023/monosemantic-
+features/index.html
+
+[7] Collin Burns, Haotian Ye, Dan Klein, and Jacob Steinhardt. 2023. Dis-
+covering Latent Knowledge in Language Models Without Supervi-
+sion. In International Conference on Learning Representations (ICLR).
+https://openreview.net/forum?id=ETKGuby0hcs
+
+[8] Nicholas Clark, Hua Shen, Bill Howe, and Tanushree Mitra. 2025. Epis-
+temic Alignment: A Mediating Framework for User-LLM Knowledge
+Delivery. arXiv:2504.01205 [cs.HC] https://arxiv.org/abs/2504.01205
+[9] Matthew Dahl, Varun Magesh, Mirac Suzgun, and Daniel E Ho. 2024.
+Large legal fictions: Profiling legal hallucinations in large language
+models. Journal of Legal Analysis 16, 1 (2024), 64–93.
+
+[10] Nelson Elhage, Neel Nanda, Catherine Olsson, Tom Henighan,
+Nicholas Joseph, Ben Mann, Amanda Askell, Yuntao Bai, Anna Chen,
+Tom Conerly, et al. 2022. A Mathematical Framework for Transformer
+Circuits. Transformer Circuits Thread (2022). https://transformer-
+circuits.pub/2021/framework/index.html
+
+[11] Michael J Fischer, Nancy A Lynch, and Michael S Paterson. 1985. Im-
+possibility of distributed consensus with one faulty process. Journal
+of the ACM (JACM) 32, 2 (1985), 374–382.
+
+[12] Leo Gao, John Schulman, and Jacob Hilton. 2023. Scaling laws for
+reward model overoptimization. In International Conference on Machine
+Learning. PMLR, 10835–10866.
+
+[13] Albert Q. Jiang, Alexandre Sablayrolles, Arthur Mensch, Chris Bam-
+ford, Devendra Singh Chaplot, Diego de las Casas, Florian Bressand, Gi-
+anna Lengyel, Guillaume Lample, Lucile Saulnier, Lélio Renard Lavaud,
+Marie-Anne Lachaux, Pierre Stock, Teven Le Scao, Thibaut Lavril,
+Thomas Wang, Timothée Lacroix, and William El Sayed. 2023. Mistral
+7B. arXiv:2310.06825 [cs.CL] https://arxiv.org/abs/2310.06825
+[14] Saurav Kadavath, Tom Conerly, Amanda Askell, Tom Henighan, Dawn
+Drain, Ethan Perez, Nicholas Schiefer, Zac Hatfield-Dodds, Nova Das-
+Sarma, Eli Tran-Johnson, et al. 2022. Language models (mostly) know
+what they know. arXiv preprint arXiv:2207.05221 (2022).
+
+[15] Jared Kaplan, Sam McCandlish, Tom Henighan, Tom B. Brown, Ben-
+jamin Chess, Rewon Child, Scott Gray, Alec Radford, Jeffrey Wu,
+and Dario Amodei. 2020. Scaling Laws for Neural Language Mod-
+els. arXiv:2001.08361 [cs.LG] https://arxiv.org/abs/2001.08361
+[16] Adam Karvonen, James Chua, Clément Dumas, Kit Fraser-Taliente,
+Subhash Kantamneni, Julian Minder, Euan Ong, Arnab Sen Sharma,
+Daniel Wen, Owain Evans, et al. 2025. Activation Oracles: Training
+
+and Evaluating LLMs as General-Purpose Activation Explainers. arXiv
+preprint arXiv:2512.15674 (2025).
+
+[17] Konstantin Krestnikov. 2026. Truth as a Compression Artifact in
+Language Model Training. arXiv:2603.11749 [cs.CL] https://arxiv.org/
+abs/2603.11749
+
+[18] Lorenz Kuhn, Yarin Gal, and Sebastian Farquhar. 2023. Semantic
+Uncertainty: Linguistic Invariances for Uncertainty Estimation in
+Natural Language Generation.
+arXiv:2302.09664 [cs.CL] https:
+//arxiv.org/abs/2302.09664
+
+[19] Leslie Lamport. 1998. The Part-Time Parliament. ACM Transactions
+on Computer Systems 16, 2 (May 1998), 133-169. Also appeared as SRC
+Research Report 49. This paper was first submitted in 1990, setting a
+personal record for publication delay that has since been broken by [60].
+(May 1998). https://www.microsoft.com/en-us/research/publication/
+part-time-parliament/ ACM SIGOPS Hall of Fame Award in 2012.
+[20] Stephanie Lin, Jacob Hilton, and Owain Evans. 2022. TruthfulQA:
+Measuring how models mimic human falsehoods. In Proceedings of the
+60th Annual Meeting of the Association for Computational Linguistics
+(Volume 1: Long Papers). 3214–3252.
+
+[21] Christina Lu, Jack Gallagher, Jonathan Michala, Kyle Fish, and Jack
+Lindsey. 2026. The Assistant Axis: Situating and Stabilizing the Default
+Persona of Language Models. arXiv:2601.10387 [cs.CL] https://arxiv.
+org/abs/2601.10387
+
+[22] Meta AI. 2024. The Llama 3 Herd of Models. arXiv:2407.21783 [cs.AI]
+
+https://arxiv.org/abs/2407.21783
+
+[23] Team Olmo, :, Allyson Ettinger, Amanda Bertsch, Bailey Kuehl, David
+Graham, David Heineman, Dirk Groeneveld, Faeze Brahman, Finbarr
+Timbers, Hamish Ivison, Jacob Morrison, Jake Poznanski, Kyle Lo, Luca
+Soldaini, Matt Jordan, Mayee Chen, Michael Noukhovitch, Nathan
+Lambert, Pete Walsh, Pradeep Dasigi, Robert Berry, Saumya Malik,
+Saurabh Shah, Scott Geng, Shane Arora, Shashank Gupta, Taira Ander-
+son, Teng Xiao, Tyler Murray, Tyler Romero, Victoria Graf, Akari Asai,
+Akshita Bhagia, Alexander Wettig, Alisa Liu, Aman Rangapur, Chloe
+Anastasiades, Costa Huang, Dustin Schwenk, Harsh Trivedi, Ian Mag-
+nusson, Jaron Lochner, Jiacheng Liu, Lester James V. Miranda, Maarten
+Sap, Malia Morgan, Michael Schmitz, Michal Guerquin, Michael Wil-
+son, Regan Huff, Ronan Le Bras, Rui Xin, Rulin Shao, Sam Skjonsberg,
+Shannon Zejiang Shen, Shuyue Stella Li, Tucker Wilde, Valentina Py-
+atkin, Will Merrill, Yapei Chang, Yuling Gu, Zhiyuan Zeng, Ashish Sab-
+harwal, Luke Zettlemoyer, Pang Wei Koh, Ali Farhadi, Noah A. Smith,
+and Hannaneh Hajishirzi. 2025. Olmo 3. arXiv:2512.13961 [cs.CL]
+https://arxiv.org/abs/2512.13961
+
+[24] Diego Ongaro and John Ousterhout. 2014. In search of an understand-
+able consensus algorithm. In 2014 USENIX annual technical conference
+(USENIX ATC 14). 305–319.
+
+[25] Long Ouyang, Jeff Wu, Xu Jiang, Diogo Almeida, Carroll L. Wainwright,
+Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama,
+Alex Ray, John Schulman, Jacob Hilton, Fraser Kelton, Luke Miller,
+Maddie Simens, Amanda Askell, Peter Welinder, Paul Christiano, Jan
+Leike, and Ryan Lowe. 2022. Training language models to follow
+instructions with human feedback. arXiv:2203.02155 [cs.CL]
+
+[26] Ethan Perez, Sam Ringer, Kamile Lukosiute, Karina Nguyen, Edwin
+Chen, Scott Heiner, Craig Pettit, Catherine Olsson, Sandipan Kundu,
+Saurav Kadavath, et al. 2023. Discovering language model behav-
+iors with model-written evaluations. In Findings of the association for
+computational linguistics: ACL 2023. 13387–13434.
+
+[27] Qwen Team. 2025. Qwen3 Technical Report. https://qwenlm.github.
+
+io/blog/qwen3/ Alibaba Cloud technical report.
+
+[28] Meera Sampath, Raja Sengupta, Stéphane Lafortune, Kasturi Sinnamo-
+hideen, and Demosthenis Teneketzis. 1995. Diagnosability of Discrete-
+Event Systems. IEEE Trans. Automat. Control 40, 9 (1995), 1555–1575.
+https://doi.org/10.1109/9.412626
+
+[29] Saul Schleimer, Daniel S. Wilkerson, and Alex Aiken. 2003. Winnowing:
+Local Algorithms for Document Fingerprinting. In Proceedings of the
+2003 ACM SIGMOD International Conference on Management of Data.
+
+13
+
+ACM, 76–85. https://doi.org/10.1145/872757.872770
+
+[30] Arun James Thirunavukarasu, Darren Shu Jeng Ting, Kabilan Elango-
+van, Laura Gutierrez, Ting Fang Tan, and Daniel Shu Wei Ting. 2023.
+Large language models in medicine. Nature medicine 29, 8 (2023),
+1930–1940.
+
+[31] Jason Wei, Yi Tay, Rishi Bommasani, Colin Raffel, Barret Zoph, Sebas-
+tian Borgeaud, Dani Yogatama, Maarten Bosma, Denny Zhou, Donald
+Metzler, Ed H. Chi, Tatsunori Hashimoto, Oriol Vinyals, Percy Liang,
+Jeff Dean, and William Fedus. 2022. Emergent Abilities of Large Lan-
+guage Models. arXiv:2206.07682 [cs.CL] https://arxiv.org/abs/2206.
+07682
+
+[32] Zhepei Wei, Xiao Yang, Kai Sun, Jiaqi Wang, Rulin Shao, Sean Chen,
+Mohammad Kachuee, Teja Gollapudi, Tony Liao, Nicolas Scheffer,
+
+Rakesh Wanga, Anuj Kumar, Yu Meng, Wen tau Yih, and Xin Luna
+Dong. 2025. TruthRL: Incentivizing Truthful LLMs via Reinforcement
+Learning. arXiv:2509.25760 [cs.CL] https://arxiv.org/abs/2509.25760
+[33] Thomas Winninger, Boussad Addad, and Katarzyna Kapusta. 2025.
+Using Mechanistic Interpretability to Craft Adversarial Attacks against
+Large Language Models. arXiv:2503.06269 [cs.LG] https://arxiv.org/
+abs/2503.06269
+
+[34] Craig Steven Wright. 2025. Beyond Prediction – Structuring Epistemic
+Integrity in Artificial Reasoning Systems. arXiv:2506.17331 [cs.LO]
+https://arxiv.org/abs/2506.17331
+
+[35] Ziwei Xu, Sanjay Jain, and Mohan Kankanhalli. 2024. Hallucina-
+tion is Inevitable: An Innate Limitation of Large Language Models.
+arXiv:2401.11817 [cs.CL]
+
+14
+
+

@@ -52,7 +52,21 @@
     stringstyle=\color{red},
     columns=fullflexible,
     escapeinside={(*}{*)},
-    literate={_}{\textunderscore}1,
+    literate=
+        {_}{\textunderscore}1
+        {π}{$\pi$}1
+        {ε}{$\varepsilon$}1
+        {θ}{$\theta$}1
+        {Θ}{$\Theta$}1
+        {α}{$\alpha$}1
+        {ℕ}{$\mathbb{N}$}1
+        {→}{$\to$}1
+        {∀}{$\forall$}1
+        {≤}{$\leq$}1
+        {≥}{$\geq$}1
+        {₁}{$_1$}1
+        {₂}{$_2$}1
+        {₃}{$_3$}1,
     mathescape=true,
 }
 
@@ -71,10 +85,10 @@
 }
 
 % ==========================================================================
-\title{Epistemic Observability in Language Models:\\
-An Impossibility Result with Tensor Escape}
+\title{Epistemic Observability in Language Models}
 
-\author{Tony Mason}
+%\author{Tony Mason}
+\author{Tony Mason\thanks{\texttt{fsgeek@\{cs.ubc.ca,gatech.edu,wamason.com\}}} \and Vaastav Anand\thanks{Max Planck Institute for Software Systems. \texttt{vaastav@mpi-sws.org}}}
 
 \date{March 2026}
 
@@ -165,7 +179,7 @@ The model's internal computation---the attention patterns, the per-token entropy
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.85\textwidth]{epistemic_trace_demo.png}
+    \includegraphics[width=0.85\textwidth]{epistemic_trace_demo.pdf}
     \caption{Per-token entropy traces across five query categories. Top to bottom: knowable fact (low entropy, $\bar{H} \approx 0.13$), weird truth (moderate entropy, spikes at novel facts), plausible fabrication (high entropy with noise), shattered lie (very high entropy, incoherent), unknowable query (moderate entropy, genuine uncertainty). The same model; same generation process; only the world state changes. Entropy reflects whether the model's computation is grounded.}
     \label{fig:entropy-traces}
 \end{figure}
@@ -829,7 +843,7 @@ The entropy signal is powerful for general queries but has blind spots. The most
 
 \textbf{Citation inversion}: When a model generates citations, entropy inverts. Fabricated citations are generated \emph{with high confidence} (low entropy) because the model can fluently invent a plausible citation format (``Smith et al., 2024'') without retrieving actual bibliographic details. Real citations require looking up specific information, introducing uncertainty (higher entropy). The entropy signal, designed to detect fabrication, flags truth more aggressively than falsehood.
 
-This is not a flaw in entropy. It's evidence that entropy measures \emph{generation confidence}, not \emph{factual correctness}. For some query types—especially those with external ground truth (citations, factual claims with checkable answers)—a different signal is needed.
+This is not a flaw in entropy. It's evidence that entropy measures \emph{generation confidence}, not \emph{factual correctness}. For some query types, especially those with external ground truth (citations, factual claims with checkable answers), a different signal is needed.
 
 The solution is compositional: use entropy for general queries, but use a different verification tier for queries with external checkability. For citations: bounded lookup (does this DOI exist? Is this in CrossRef?). The composed judge (entropy + citation lookup) reaches 91.8\% at 30\% budget, a small improvement over entropy-only (90.2\%), because citation queries are a minority of the test set. But the improvement is \emph{structural}: it demonstrates that different failure modes require different signals.
 
@@ -987,6 +1001,18 @@ complementary but narrower: we do not require understanding a model's learned
 circuits, only that inference-time signals differ measurably between grounded
 and fabricated generation. Interpretability asks why; observability asks
 whether.
+
+\fakepara{Interpretable models for high-stakes decisions.} Rudin~\citep{rudin2019stop}
+argues that for high-stakes domains, practitioners should use interpretable
+models rather than rely on post hoc explanations of black-box systems: when a
+Rashomon set of comparably accurate models exists, an interpretable member is
+often available, and verification then lives in the model's structure rather
+than in observation of an opaque system. Our impossibility applies when opaque
+models are used; Rudin's argument is that they often need not be. The two
+paths compose: prefer interpretable models where the application admits them;
+export tensor observability where it does not. Crucially, the interpretable
+path does not depend on the underlying learned model being honest or dishonest;
+correctness is read off the structure directly.
 
 \fakepara{RLHF critiques.} Work on sycophancy~\citep{perez2022discovering},
 reward hacking~\citep{gao2023scaling}, and the tension between helpfulness and

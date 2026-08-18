@@ -1,0 +1,2 @@
+branch,stage_idx,stage,fab_entropy_mean,fab_entropy_median,n_probes,disclaimer_rate
+instruct,0,base,1.6372125650416196,1.3342603020778925,4,0.0
