@@ -17,43 +17,29 @@ the trade-off between verification cost and the amount of epistemic information 
 for assessing reliability of the generated text.
 
 \fakepara{Tier 0: Output Observability.}
-Tier~0 exposes only the generated text, treating the language model as a black box. This is the interface available through most commercial APIs and forms the basis of existing validation techniques such as retrieval-based verification, secondary LLM judges, symbolic validators, and application-specific consistency checks. Since no internal telemetry is available, verification must rely entirely on properties of the generated output, often requiring expensive external computation.
+Tier~0 exposes only the generated text, treating the model as a black box. This is the interface of most commercial APIs and the basis of existing validation techniques: retrieval-based verification, secondary LLM judges, symbolic validators, and application-specific consistency checks. With no internal telemetry, verification must rely entirely on properties of the output, often at the cost of expensive external computation.
 
 \fakepara{Tier 1: Confidence Observability.}
-Tier~1 augments the generated text with lightweight telemetry produced during decoding. Examples include token probabilities, logit distributions, entropy~\cite{ling2024uncertainty,xiao2021hallucination}, confidence scores, decoding statistics, and other signals that can be extracted with negligible overhead. These signals provide a coarse estimate of the model's uncertainty~\cite{shorinwa2025survey}, allowing systems to identify portions of the output that may warrant additional validation. While inexpensive to obtain, confidence signals are often imperfectly calibrated and may fail to distinguish confidently stated hallucinations from grounded generations.
+Tier~1 augments the generated text with lightweight telemetry produced during decoding. Examples include token probabilities, entropy~\cite{ling2024uncertainty,xiao2021hallucination}, confidence scores, and other decoding statistics extractable with negligible overhead. These give a coarse estimate of the model's uncertainty~\cite{shorinwa2025survey} and identify portions of the output that may warrant validation, but they are often imperfectly calibrated and may fail to distinguish confidently stated hallucinations from grounded generations.
 
 \fakepara{Tier 2: Representation Observability.}
-Tier~2 exposes information derived from the model's internal representations. Rather than observing only the final decoding probabilities, systems may access hidden-state embeddings, layer activations, attention statistics, or learned probes~\cite{belinkov2022probing,alain2016understanding} that estimate properties of the latent epistemic state.
-Simple probes can catch deviant model behaviors~\cite{macdiarmid2024sleeperagentprobes,han2025simple,goldowsky2025detecting}.
-Recent techniques such as semantic entropy probes~\cite{kossen2024semantic,kuhn2023semanticuncertaintylinguisticinvariances}, hidden-state classifiers~\cite{zhang2025icr}, and activation-based uncertainty estimators demonstrate that these representations often contain substantially richer information about generation reliability than logits alone. Representation observability enables more accurate prioritization of verification effort while remaining significantly cheaper than exhaustive external validation.
+Tier~2 exposes information derived from the model's internal representations. Systems may access hidden-state embeddings, layer activations, attention statistics, or learned probes~\cite{belinkov2022probing,alain2016understanding} that estimate properties of the latent epistemic state.
+Simple probes can catch deviant model behaviors~\cite{macdiarmid2024sleeperagentprobes,han2025simple,goldowsky2025detecting}, and semantic entropy probes~\cite{kossen2024semantic,kuhn2023semanticuncertaintylinguisticinvariances} and hidden-state classifiers~\cite{zhang2025icr} show that these representations carry substantially richer information about reliability than logits alone, at a cost still well below exhaustive external validation.
 
 \fakepara{Tier 3: Mechanistic Observability.}
 Tier~3 exposes telemetry obtained through mechanistic analysis of the model's computation.
-Mechanistic techniques identify the causal computations that produce a generation by tracing information flow through neurons, attention heads, and latent features~\cite{somvanshi2026bridging}.
-This enables systems to distinguish between different failure modes and provides insight into \emph{why} a hallucination occurred rather than merely detecting that one occurred.
-They can reveal whether a response is supported by robust internal computation or arises from fragile or spurious reasoning pathways.
-Mechanistic observability provides the highest-fidelity view of a model's epistemic process at the highest cost.
-
-\fakepara{Choosing an Observability Tier.}
-The appropriate tier depends on the reliability requirements and resource
-constraints of the target application. Creative writing and conversational
-agents may operate effectively at Tier~0 or Tier~1, where occasional
-hallucinations are acceptable and verification budgets are limited;
-high-assurance systems such as medical decision support or legal analysis
-may justify Tier~2 or Tier~3, focusing verification resources on the portions
-of a generation most likely to be fabricated. Rather than prescribing a
-single solution, the hierarchy provides a principled framework for trading
-verification cost against the epistemic information available to guide it.
+Mechanistic techniques trace information flow through neurons, attention heads, and latent features~\cite{somvanshi2026bridging}.
+We do not claim that Tier~3 identifies the \emph{cause} of a hallucination in the interventional sense (a component which, when altered, changes the outcome); that is the aim of mechanistic interpretability, whose tools Tier~3 exposes but does not itself deliver.
+The claim is narrower: Tier~3 telemetry can distinguish between failure modes---a response with no stable internal support versus one produced by a confident but spurious pathway---rather than only flagging that a failure occurred.
 
 \subsection{Tier 1 Tensor Interface}
 
-We propose a minimal tensor interface for low-cost observability:
-it exports Tier~1 decoding telemetry (the per-token entropy trace)
-together with one lightweight Tier~2 signal (attention summary statistics).
-We claim the tensor reveals whether the
-model is operating in \emph{grounded mode} (retrieving from stable
-representations) versus \emph{fabrication mode} (generating without anchoring).
-The tensor interface is a generation interface that returns:
+We propose a minimal tensor interface for low-cost observability,
+exporting Tier~1 decoding telemetry (the per-token entropy trace) with one
+lightweight Tier~2 signal (attention summary statistics). We claim the tensor
+reveals whether the model is operating in \emph{grounded mode} (retrieving from
+stable representations) or \emph{fabrication mode} (generating without
+anchoring). The interface returns:
 \begin{enumerate*}[label=(\roman*)]
 \item \textbf{Text}: The linearized response string.
 \item \textbf{Entropy trace}: Per-token entropy of the output distribution during
@@ -63,18 +49,17 @@ The tensor interface is a generation interface that returns:
 \end{enumerate*}
 
 \fakepara{Implementation.}
-The tensor interface requires no architectural changes to current transformers.
-Generation APIs already support returning logits; the entropy trace is a simple
-transformation. Attention patterns are available with \texttt{\small{output\_attentions=True}}
-in standard frameworks.
+The tensor interface requires no architectural changes: generation APIs
+already return logits, from which the entropy trace is a simple
+transformation, and attention patterns are available with
+\texttt{\small{output\_attentions=True}} in standard frameworks.
 We provide a reference implementation\footnote{\url{https://github.com/fsgeek/pacmi26-observability},
 archived at DOI \href{https://doi.org/10.5281/zenodo.21422488}{10.5281/zenodo.21422488};
 curated from the full research record at DOI
 \href{https://doi.org/10.5281/zenodo.21314137}{10.5281/zenodo.21314137}.}
 supporting OLMo models that demonstrates
-the interface is practical. The overhead is modest: storing per-token entropy
-and summarizing attention patterns adds approximately 2--7\% latency depending
-on signal set, compared to generation itself.
+the interface is practical. Overhead is modest: 2--7\% added latency relative to
+generation, depending on signal set.
 
 
 
@@ -116,16 +101,27 @@ on signal set, compared to generation itself.
 \label{fig:entropy_trace}
 \end{figure}
 
-This interface exports telemetry that the model cannot separately control under current training objectives. The
-model can emit confidently false text, but it cannot present a different inference computation than
-the one it performed. Independent work on persona monitoring confirms this asymmetry: activation projections reveal
-that models adopt distinct internal configurations for different epistemic conditions even when
-producing textually similar outputs~\cite{lu2026assistantaxissituatingstabilizing}. This asymmetry is the foundation of the
-adversarial robustness argument: under current training objectives, computational signals (entropy, attention
-geometry) cannot be independently controlled by the model without changing the
-generation process itself, unlike behavioral signals (response length, hedging
-patterns) that can be adapted through training without altering what the model
-knows or does not know.
+\fakepara{Threat model.}\label{sec:threat}
+Telemetry is produced by the same model that produces the testimony, so it is
+not fixed: fine-tuning moves it, and a model optimized against a monitored
+signal could learn to move it deliberately. Our claim is therefore not that
+telemetry is unfakeable, but that it is not \emph{separately} controllable.
+Behavioral signals (response length, hedging) can be adapted by training
+without changing what the model computes; the entropy trace and attention
+geometry cannot change without the computation that produced the text
+changing too, and under current objectives nothing rewards that change.
+Independent work on persona monitoring supports the asymmetry: activation
+projections reveal distinct internal configurations for different epistemic
+conditions even when the text is similar~\cite{lu2026assistantaxissituatingstabilizing}.
+Two limits follow. First, the property holds under \emph{current}
+pipelines: the models we evaluate are instruction-tuned, so standard
+post-training did not erase the signal in our data, but optimization that
+includes the monitor in the objective is a different regime about which we
+make no claim, and the interface's long-term validity depends on it. Second,
+mechanistic tools can already locate the subspaces such an attack would
+target~\cite{winninger2025usingmechanisticinterpretabilitycraft}; exporting
+telemetry makes manipulation auditable rather than invisible---an argument
+for the interface, not a guarantee of the signal.
 
 \fakepara{What the tensor provides.}
 The entropy trace provides a falsifiability signal. If a model claims certainty
@@ -136,9 +132,30 @@ patterns than grounded responses.
 
 \fakepara{What the tensor does not provide.}
 The tensor interface is not a lie detector. It does not prove that low-entropy
-outputs are true or that high-entropy outputs are false. It provides \emph{one
-additional signal} that, combined with other verification methods, can improve
-epistemic assessment.
+outputs are true or that high-entropy outputs are false. Output entropy also
+conflates epistemic uncertainty with aleatoric spread (many valid
+continuations); a triage signal tolerates this conflation because it ranks
+rather than classifies, but a classifier built on it would not. It provides
+\emph{one additional signal} that, combined with other verification methods,
+can improve epistemic assessment.
+
+\fakepara{Runtime integration.}
+The tensor is a triage primitive, not a verdict: it ranks a model's outputs
+(or spans within one output) by fabrication risk, and the runtime binds rank
+to action under its verification budget. The bindings form a ladder ordered by
+cost: \emph{abstain or flag} (withhold or annotate the output); \emph{re-generate} (sample again or add reasoning steps and require
+agreement); \emph{tool verification} (route the output to a bounded external
+check---a citation lookup, a database query, a test); \emph{escalation}
+(request Tier~2 telemetry or a stronger fallback model for what Tier~1 cannot
+resolve); and \emph{human review}, reserved for the top of the ranking. Our
+evaluation (\autoref{sec:eval}) instantiates the first and third rungs:
+flagged outputs are verified and confirmed fabrications replaced by abstention,
+and the composed judge routes citation queries to a lookup tool because entropy
+inverts there. In multi-step agents the natural hook is the composition
+boundary, where the runtime already intercepts tool and sub-agent calls and
+can gate whether a flagged output propagates into the next call. We have not
+evaluated the interface in an agent loop, and thresholds must be calibrated on
+domain-specific held-out data before deployment.
 
 % When the model generates ``Dr. Tanaka's 2023
 % paper found that...'', its entropy trace reveals whether the generation
@@ -148,9 +165,8 @@ epistemic assessment.
 % \fakepara{Compositional defense.} The tensor's blind spots characterize where other verification methods are most effective. \autoref{sec:escape}'s three principles — State Exteriority, Verification Independence, Provenance Binding — need not be satisfied by a single mechanism. The tensor provides Verification Independence: an orthogonal signal the model cannot separately control. Bounded judges provide State Exteriority: external lookup against verifiable sources. Input-side defenses (prompt analysis, supply chain detection) provide Provenance Binding at the system boundary. Each layer addresses the failure class where the others are weakest. The tensor catches uncertain fabrication where verification is expensive; the bounded judge catches confident fabrication where verification is cheap; input-side analysis catches adversarial inputs designed to exploit well-learned patterns. Composing these layers allocates a finite verification budget across failure classes rather than spreading it uniformly across the full output space.
 
 \fakepara{Example Entropy Trace.}\autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
-along with its entropy trace. We color code per-token entropy: white indicates low entropy (confident generation), shading through light red for moderate entropy to deep red for high entropy (uncertain generation).
-The entropy-enhanced output shows where generation proceeded with high
-confidence (suggesting retrieval of a stored pattern)
+with per-token entropy color coded from white (confident) to deep red (uncertain).
+The trace shows where generation proceeded with high confidence (suggesting retrieval of a stored pattern)
 and where it proceeded with high uncertainty (suggesting fabrication).
 
 
