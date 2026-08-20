@@ -32,7 +32,7 @@ Mechanistic techniques trace information flow through neurons, attention heads, 
 We do not claim that Tier~3 identifies the \emph{cause} of a hallucination in the interventional sense (a component which, when altered, changes the outcome); that is the aim of mechanistic interpretability, whose tools Tier~3 exposes but does not itself deliver.
 The claim is narrower: Tier~3 telemetry can distinguish between failure modes---a response with no stable internal support versus one produced by a confident but spurious pathway---rather than only flagging that a failure occurred.
 
-\subsection{Tier 1 Tensor Interface}
+\subsection{Tier 1 Tensor Interface}\label{sec:threat}
 
 We propose a minimal tensor interface for low-cost observability,
 exporting Tier~1 decoding telemetry (the per-token entropy trace) with one
@@ -101,7 +101,7 @@ generation, depending on signal set.
 \label{fig:entropy_trace}
 \end{figure}
 
-\fakepara{Threat model.}\label{sec:threat}
+\fakepara{Threat model.}
 Telemetry is produced by the same model that produces the testimony, so it is
 not fixed: fine-tuning moves it, and a model optimized against a monitored
 signal could learn to move it deliberately. Our claim is therefore not that
@@ -147,15 +147,26 @@ cost: \emph{abstain or flag} (withhold or annotate the output); \emph{re-generat
 agreement); \emph{tool verification} (route the output to a bounded external
 check---a citation lookup, a database query, a test); \emph{escalation}
 (request Tier~2 telemetry or a stronger fallback model for what Tier~1 cannot
-resolve); and \emph{human review}, reserved for the top of the ranking. Our
-evaluation (\autoref{sec:eval}) instantiates the first and third rungs:
-flagged outputs are verified and confirmed fabrications replaced by abstention,
-and the composed judge routes citation queries to a lookup tool because entropy
-inverts there. In multi-step agents the natural hook is the composition
-boundary, where the runtime already intercepts tool and sub-agent calls and
-can gate whether a flagged output propagates into the next call. We have not
-evaluated the interface in an agent loop, and thresholds must be calibrated on
-domain-specific held-out data before deployment.
+resolve); and \emph{human review}, reserved for the top of the ranking.
+
+Concretely, the interface touches an agent runtime at three points. At the
+\emph{serving layer}, the trace is exported alongside the text it describes:
+the same forward pass produces both, so the marginal cost is bandwidth rather
+than compute. At the \emph{composition boundary}---where the runtime already
+intercepts tool and sub-agent calls---the risk ranking gates propagation: a
+flagged output can be verified, re-generated, or held before it becomes the
+premise of the next step, which is exactly where an unexamined fabrication
+would otherwise compound. At the \emph{policy layer}, a budget allocator maps
+rank to rung; because the tensor ranks rather than classifies, the same trace
+serves any budget, and thresholds are a deployment-time calibration on
+domain-specific held-out data rather than a property of the model. Our
+evaluation (\autoref{sec:eval}) instantiates the first and third rungs in a
+single-step setting: flagged outputs are verified and confirmed fabrications
+replaced by abstention, and the composed judge routes citation queries to a
+lookup tool because entropy inverts there. The multi-step case---whether
+gating at the composition boundary stops an early fabrication from
+propagating across subsequent steps---is the experiment this interface
+exists to enable, and the one we have not yet run.
 
 % When the model generates ``Dr. Tanaka's 2023
 % paper found that...'', its entropy trace reveals whether the generation

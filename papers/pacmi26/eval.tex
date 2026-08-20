@@ -33,7 +33,7 @@ and measure end-to-end accuracy.
 
 \begin{figure}[t]%
 \centering%
-\includegraphics[scale=0.36]{figures/exp27_aggregate_budget_curve.pdf}%
+\includegraphics[scale=0.42]{figures/exp27_aggregate_budget_curve.pdf}%
 \caption{End-to-end accuracy vs.\ verification budget for four judge conditions, averaged across four architectures.}%
 \label{fig:budget_curve}%
 \end{figure}
@@ -44,7 +44,11 @@ at every budget level}:
 +3.3pp at 10\%, +4.6pp at 20\%, +3.3pp at 30\%.
 Each line maps an investment strategy to its return: per-token entropy
 discriminates among outputs of similar length, reaching cases the
-text channel cannot.
+text channel cannot. Concurrent work scales verification on the judge side by
+taking the expectation over a judge's scoring-token distribution rather than its
+discrete score~\cite{kwok2026llmasaverifiergeneralpurposeverificationframework};
+our signals instead come from the generator's own computation, which---unlike a
+judge's scores---the model does not separately control (\autoref{sec:threat}).
 Per-model results confirm the pattern is consistent across all four tested model families.
 At 10\% budget, tensor-guided verification improves accuracy over the
 unverified baseline for every model tested: OLMo
