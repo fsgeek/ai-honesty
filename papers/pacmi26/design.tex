@@ -32,7 +32,67 @@ Mechanistic techniques trace information flow through neurons, attention heads, 
 We do not claim that Tier~3 identifies the \emph{cause} of a hallucination in the interventional sense (a component which, when altered, changes the outcome); that is the aim of mechanistic interpretability, whose tools Tier~3 exposes but does not itself deliver.
 The claim is narrower: Tier~3 telemetry can distinguish between failure modes---a response with no stable internal support versus one produced by a confident but spurious pathway---rather than only flagging that a failure occurred.
 
-\subsection{Tier 1 Tensor Interface}\label{sec:threat}
+\subsection{Telemetry is Coupled to Computation}
+\label{sec:threat}
+
+Telemetry is produced by the same model that produces the testimony, so it is mutable.
+Fine-tuning can shift it, and a model trained against a monitored signal could learn to manipulate it deliberately.
+Changing the telemetry such as the entropy trace or attention geometry requires 
+changing the computation that produces the text. 
+In contrast, behavioral signals (response length, hedging) can be adapted by training
+without changing the underlying computation. Thus, telemetry
+has an additional robustness property as compared to the behavioral signal
+that the telemetry is not \emph{separately} controllable from the computation
+being monitored.
+
+Under current training objectives, models receive no explicit incentive to make 
+such changes for the purpose of evading a telemetry-based monitor.
+Independent work on persona monitoring supports the asymmetry: activation
+projections reveal distinct internal configurations for different epistemic
+conditions even when the text is similar~\cite{lu2026assistantaxissituatingstabilizing}.
+
+This distinction comes with two important limits. First, the property holds under \emph{current}
+pipelines: the models we evaluate are instruction-tuned, so standard
+post-training does not erase the signal in our data.
+Optimization that explicitly incorporates the monitor into the training objective, 
+however, constitutes a different regime about which we make no claim.
+Second, mechanistic tools can already locate the subspaces such an attack would
+target~\cite{winninger2025usingmechanisticinterpretabilitycraft}.
+Exposing telemetry therefore makes such manipulation observable and 
+auditable rather than hidden behind the model interface.
+
+\subsection{Runtime integration}
+
+The tensor is a triage primitive, not a verdict: it ranks a model's outputs
+(or spans within one output) by fabrication risk, and the runtime binds rank
+to action under its verification budget. The bindings form a ladder ordered by
+cost: \emph{abstain or flag} (withhold or annotate the output); \emph{re-generate} (sample again or add reasoning steps and require
+agreement); \emph{tool verification} (route the output to a bounded external
+check---a citation lookup, a database query, a test); \emph{escalation}
+(request Tier~2 telemetry or a stronger fallback model for what Tier~1 cannot
+resolve); and \emph{human review}, reserved for the top of the ranking.
+
+Concretely, the interface touches an agent runtime at three points. At the
+\emph{serving layer}, the trace is exported alongside the text it describes:
+the same forward pass produces both, so the marginal cost is bandwidth rather
+than compute. At the \emph{composition boundary}---where the runtime already
+intercepts tool and sub-agent calls---the risk ranking gates propagation: a
+flagged output can be verified, re-generated, or held before it becomes the
+premise of the next step, which is exactly where an unexamined fabrication
+would otherwise compound. At the \emph{policy layer}, a budget allocator maps
+rank to rung; because the tensor ranks rather than classifies, the same trace
+serves any budget, and thresholds are a deployment-time calibration on
+domain-specific held-out data rather than a property of the model. Our
+evaluation (\autoref{sec:eval}) instantiates the first and third rungs in a
+single-step setting: flagged outputs are verified and confirmed fabrications
+replaced by abstention, and the composed judge routes citation queries to a
+lookup tool because entropy inverts there. The multi-step case---whether
+gating at the composition boundary stops an early fabrication from
+propagating across subsequent steps---is the experiment this interface
+exists to enable, and the one we have not yet run.
+
+
+\subsection{Low Cost Tensor Interface}
 
 We propose a minimal tensor interface for low-cost observability,
 exporting Tier~1 decoding telemetry (the per-token entropy trace) with one
@@ -47,21 +107,6 @@ anchoring). The interface returns:
 \item \textbf{Attention summary}: Statistics of attention patterns (concentration,
   self-attention ratio) from deeper processing layers.
 \end{enumerate*}
-
-\fakepara{Implementation.}
-The tensor interface requires no architectural changes: generation APIs
-already return logits, from which the entropy trace is a simple
-transformation, and attention patterns are available with
-\texttt{\small{output\_attentions=True}} in standard frameworks.
-We provide a reference implementation\footnote{\url{https://github.com/fsgeek/pacmi26-observability},
-archived at DOI \href{https://doi.org/10.5281/zenodo.21422488}{10.5281/zenodo.21422488};
-curated from the full research record at DOI
-\href{https://doi.org/10.5281/zenodo.21314137}{10.5281/zenodo.21314137}.}
-supporting OLMo models that demonstrates
-the interface is practical. Overhead is modest: 2--7\% added latency relative to
-generation, depending on signal set.
-
-
 
 % We extract three per-token signals from the generation process:
 
@@ -101,28 +146,6 @@ generation, depending on signal set.
 \label{fig:entropy_trace}
 \end{figure}
 
-\fakepara{Threat model.}
-Telemetry is produced by the same model that produces the testimony, so it is
-not fixed: fine-tuning moves it, and a model optimized against a monitored
-signal could learn to move it deliberately. Our claim is therefore not that
-telemetry is unfakeable, but that it is not \emph{separately} controllable.
-Behavioral signals (response length, hedging) can be adapted by training
-without changing what the model computes; the entropy trace and attention
-geometry cannot change without the computation that produced the text
-changing too, and under current objectives nothing rewards that change.
-Independent work on persona monitoring supports the asymmetry: activation
-projections reveal distinct internal configurations for different epistemic
-conditions even when the text is similar~\cite{lu2026assistantaxissituatingstabilizing}.
-Two limits follow. First, the property holds under \emph{current}
-pipelines: the models we evaluate are instruction-tuned, so standard
-post-training did not erase the signal in our data, but optimization that
-includes the monitor in the objective is a different regime about which we
-make no claim, and the interface's long-term validity depends on it. Second,
-mechanistic tools can already locate the subspaces such an attack would
-target~\cite{winninger2025usingmechanisticinterpretabilitycraft}; exporting
-telemetry makes manipulation auditable rather than invisible---an argument
-for the interface, not a guarantee of the signal.
-
 \fakepara{What the tensor provides.}
 The entropy trace provides a falsifiability signal. If a model claims certainty
 while its entropy trace shows
@@ -139,34 +162,23 @@ rather than classifies, but a classifier built on it would not. It provides
 \emph{one additional signal} that, combined with other verification methods,
 can improve epistemic assessment.
 
-\fakepara{Runtime integration.}
-The tensor is a triage primitive, not a verdict: it ranks a model's outputs
-(or spans within one output) by fabrication risk, and the runtime binds rank
-to action under its verification budget. The bindings form a ladder ordered by
-cost: \emph{abstain or flag} (withhold or annotate the output); \emph{re-generate} (sample again or add reasoning steps and require
-agreement); \emph{tool verification} (route the output to a bounded external
-check---a citation lookup, a database query, a test); \emph{escalation}
-(request Tier~2 telemetry or a stronger fallback model for what Tier~1 cannot
-resolve); and \emph{human review}, reserved for the top of the ranking.
+\fakepara{Implementation.}
+The tensor interface requires no architectural changes: generation APIs
+already return logits, from which the entropy trace is a simple
+transformation, and attention patterns are available with
+\texttt{\small{output\_attentions=True}} in standard frameworks.
+We provide a reference implementation\footnote{\url{https://github.com/fsgeek/pacmi26-observability},
+archived at DOI \href{https://doi.org/10.5281/zenodo.21422488}{10.5281/zenodo.21422488};
+curated from the full research record at DOI
+\href{https://doi.org/10.5281/zenodo.21314137}{10.5281/zenodo.21314137}.}
+supporting OLMo models that demonstrates
+the interface is practical. Overhead is modest: 2--7\% added latency relative to
+generation, depending on signal set.
 
-Concretely, the interface touches an agent runtime at three points. At the
-\emph{serving layer}, the trace is exported alongside the text it describes:
-the same forward pass produces both, so the marginal cost is bandwidth rather
-than compute. At the \emph{composition boundary}---where the runtime already
-intercepts tool and sub-agent calls---the risk ranking gates propagation: a
-flagged output can be verified, re-generated, or held before it becomes the
-premise of the next step, which is exactly where an unexamined fabrication
-would otherwise compound. At the \emph{policy layer}, a budget allocator maps
-rank to rung; because the tensor ranks rather than classifies, the same trace
-serves any budget, and thresholds are a deployment-time calibration on
-domain-specific held-out data rather than a property of the model. Our
-evaluation (\autoref{sec:eval}) instantiates the first and third rungs in a
-single-step setting: flagged outputs are verified and confirmed fabrications
-replaced by abstention, and the composed judge routes citation queries to a
-lookup tool because entropy inverts there. The multi-step case---whether
-gating at the composition boundary stops an early fabrication from
-propagating across subsequent steps---is the experiment this interface
-exists to enable, and the one we have not yet run.
+\fakepara{Example Entropy Trace.}\autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
+with per-token entropy color coded from white (confident) to deep red (uncertain).
+The trace shows where generation proceeded with high confidence (suggesting retrieval of a stored pattern)
+and where it proceeded with high uncertainty (suggesting fabrication).
 
 % When the model generates ``Dr. Tanaka's 2023
 % paper found that...'', its entropy trace reveals whether the generation
@@ -174,11 +186,6 @@ exists to enable, and the one we have not yet run.
 % pattern) or uncertainty (high entropy, suggesting fabrication).
 
 % \fakepara{Compositional defense.} The tensor's blind spots characterize where other verification methods are most effective. \autoref{sec:escape}'s three principles — State Exteriority, Verification Independence, Provenance Binding — need not be satisfied by a single mechanism. The tensor provides Verification Independence: an orthogonal signal the model cannot separately control. Bounded judges provide State Exteriority: external lookup against verifiable sources. Input-side defenses (prompt analysis, supply chain detection) provide Provenance Binding at the system boundary. Each layer addresses the failure class where the others are weakest. The tensor catches uncertain fabrication where verification is expensive; the bounded judge catches confident fabrication where verification is cheap; input-side analysis catches adversarial inputs designed to exploit well-learned patterns. Composing these layers allocates a finite verification budget across failure classes rather than spreading it uniformly across the full output space.
-
-\fakepara{Example Entropy Trace.}\autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
-with per-token entropy color coded from white (confident) to deep red (uncertain).
-The trace shows where generation proceeded with high confidence (suggesting retrieval of a stored pattern)
-and where it proceeded with high uncertainty (suggesting fabrication).
 
 
 % \fakepara{Quantitative demonstration.}

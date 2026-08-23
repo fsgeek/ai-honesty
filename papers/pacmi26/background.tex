@@ -16,43 +16,43 @@ but implausible), \emph{shattered lies} (no training-data grounding),
 A model trained on this corpus inherits its mixed regularities: base models
 fabricate substantially on factual benchmarks, yet also encode internal
 representations of correctness that can be elicited under the right
-conditions~\cite{burns2023discovering}. The model is neither reliably honest
-nor uniformly deceptive; the question for systems engineers is not whether it
-is honest, but what it costs to verify when it is not.
+conditions~\cite{burns2023discovering}. Consequently, the model is neither reliably honest
+nor uniformly deceptive. 
+This uncertainty makes verification necessary: 
+the challenge is determining which outputs require scrutiny and at what cost.
 
 \subsection{Testimony \& Telemetry}
 
 \fakepara{Architecture primer.}
-A transformer generates text one \emph{token} (subword unit) at a time: at
+A transformer generates text one token at a time. At
 each step it produces a probability distribution over its vocabulary, selects
 a token, and conditions the next step on all prior output. Each step passes
 through a stack of layers producing \emph{attention patterns} (weighted
-relevance scores between positions) and intermediate representations. The
+relevance scores between positions) and intermediate representations
+to generate a final text output, which we call its \emph{testimony}. The
 \emph{entropy} of the output distribution, the attention patterns, and the
 \emph{log-probabilities} of selected tokens are byproducts of this
-computation.
+computation, which we call its \emph{telemetry}.
 
-Existing models expose only text. The text is the testimony; the telemetry
-are measurements of the computation that produced it. From a cost
-perspective, testimony is cheap to produce and inspect but unreliable;
-telemetry is more expensive to export and process but, under current training
-regimes, harder to game, because it is a byproduct of the computation rather
-than a product of the optimization objective (\autoref{sec:threat}).
+From a verification cost perspective, testimony is cheap to produce and inspect but unreliable;
+telemetry is more expensive to export and process but harder to game (under current training
+regimes (\autoref{sec:threat})), because it is a byproduct of the computation rather
+than a product of the optimization objective.
+Existing models expose only its testimony and discard its telemetry.
 
 \subsection{The Text Channel Cannot Self-Verify}
 \label{sec:bg_eval}
 
-Current models cannot
-be trusted to honestly report their own epistemic state through the text channel.
+% Current models cannot
+% be trusted to honestly report their own epistemic state through the text channel.
 To demonstrate the inadequacy of text-only verification, we use a taxonomy of
-query types defined by construction rather than by inspecting any model's
-training data: \emph{knowable} queries have a determinate, publicly verifiable
+query types defined by construction: \emph{knowable} queries have a determinate, publicly verifiable
 answer (e.g., national capitals, well-documented scientific facts), whereas
 \emph{unknowable} queries have no correct answer for any model, because the
 entity does not exist, the event has not happened, or the information is
 private. ``Knowable'' is a property of the query, not a claim about a
-particular model's weights; a model may still fail a knowable query, and the
-evaluator scores that failure. We report each model's self-confidence
+particular model's weights; a model may still fail a knowable query. 
+We report each model's self-confidence
 score for the self-reported confidence baseline, the cheapest verification strategy
 available to a bounded supervisor. In this baseline, the supervisor
 asks the model ``How confident are you?'' after generation and tests whether the
@@ -60,7 +60,7 @@ model can introspect and report its epistemic state through text.
 
 \begin{figure}[t]%
 \centering%
-\includegraphics[width=0.92\columnwidth]{figures/exp27_confidence_distributions.pdf}%
+\includegraphics[width=\columnwidth]{figures/exp27_confidence_distributions.pdf}%
 \caption{Self-reported confidence is inverted: all four models report higher
   confidence on unknowable queries}
 \label{fig:confidence_dist}%

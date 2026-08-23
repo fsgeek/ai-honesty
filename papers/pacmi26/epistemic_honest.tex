@@ -3,14 +3,14 @@
 %% Target: SOSP 2026
 %%
 \documentclass[sigplan,10pt,screen]{acmart}
-\renewcommand\footnotetextcopyrightpermission[1]{}
+%\renewcommand\footnotetextcopyrightpermission[1]{}
 
 %% Bibliography setup
 \AtBeginDocument{%
   \providecommand\BibTeX{{Bib\TeX}}}
 
 %% Rights - will be filled in upon acceptance
-\setcopyright{none}
+%\setcopyright{none}
 \acmConference[PACMI'26]{Practical Adoption Challenges of ML for Systems}{October 2026}{Prague, Czechia}
 
 
@@ -120,6 +120,15 @@
 \def\subsubsectionautorefname{\Snospace}
 \def\conditionautorefname{Condition}
 
+% Custom subsubsection definition
+\newcounter{mysubsub}[subsection]
+\newcommand{\mysubsubsection}[1]{%
+  \refstepcounter{mysubsub}%
+  \vspace{0.25\baselineskip}
+  \noindent\textbf{\thesubsection.\themysubsub.\ #1}\par
+  \vspace{0.25\baselineskip}
+}
+
 
 %%
 %% Document metadata
@@ -140,27 +149,27 @@
 %%
 
 %% VA: We can add these later. Not required for submission and they eat space.
-% \begin{CCSXML}
-% <ccs2012>
-% <concept>
-% <concept_id>10010147.10010178</concept_id>
-% <concept_desc>Computing methodologies~Artificial intelligence</concept_desc>
-% <concept_significance>500</concept_significance>
-% </concept>
-% <concept>
-% <concept_id>10011007.10011074</concept_id>
-% <concept_desc>Software and its engineering~Software verification and validation</concept_desc>
-% <concept_significance>300</concept_significance>
-% </concept>
-% </ccs2012>
-% \end{CCSXML}
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10010147.10010178</concept_id>
+<concept_desc>Computing methodologies~Artificial intelligence</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10011007.10011074</concept_id>
+<concept_desc>Software and its engineering~Software verification and validation</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
 
-%\keywords{epistemic observability, language models, impossibility results, RLHF, verification}
+\keywords{epistemic observability, agentic reliability}
 
 % Disable acm stuff for now.
-\settopmatter{printacmref=false}
-\setcopyright{none}
-\renewcommand\footnotetextcopyrightpermission[1]{}
+% \settopmatter{printacmref=false}
+% \setcopyright{none}
+% \renewcommand\footnotetextcopyrightpermission[1]{}
 
 %% Tighten float spacing for page budget
 \setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
@@ -202,7 +211,7 @@ improved this paper.
 %% ==========================================================================
 %\clearpage
 \bibliographystyle{ACM-Reference-Format}
-\clearpage
+%\clearpage
 \bibliography{epistemic_honesty,probes}
 
 \end{document}
