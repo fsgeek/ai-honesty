@@ -12,12 +12,14 @@ and nonexistent citations). Ground truth labels are established by construction.
 We run all queries on four model families: OLMo-3
 7B~\cite{olmo2025olmo3}, Llama-3.1 8B~\cite{llama31}, Qwen3
 4B~\cite{qwen3}, and Mistral 7B~\cite{mistral7b}, all instruction-tuned
-for consistent question-answering behavior.
+for question-answering behavior.
 
 
 \fakepara{Conditions.}
-We evaluate each model under four conditions sharing a fixed
-verification budget:
+Our evaluation instantiates the runtime policy in a single-step setting: 
+the judge prioritizes outputs under a fixed verification budget, 
+selected outputs are verified, and confirmed fabrications are replaced by abstention. 
+We compare four strategies for allocating this budget:
 \begin{enumerate*}[label=(\roman*)]
 \item \textbf{No judge.} Raw model output; the unverified baseline.
 \item \textbf{Text-guided judge (length).} Selects outputs for verification
@@ -28,6 +30,9 @@ verification budget:
   bounded lookup judge for citation queries where tensor signals are known to
   invert.
 \end{enumerate*}
+
+The first three conditions differ in how outputs are prioritized for verification, 
+while the composed judge additionally demonstrates \emph{tool verification} for a known complementary failure mode.
 We evaluate each condition at 10\%, 20\%, and 30\% verification budgets 
 and measure end-to-end accuracy.
 

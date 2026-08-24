@@ -3,11 +3,15 @@
 %% ==========================================================================
 \section{Epistemic Observability}
 
-We define epistemic observability as the ability of a language model to
-expose telemetry about its epistemic state during inference: signals produced
-as byproducts of generation---decoding statistics, internal representations,
-computational traces---that give downstream systems evidence about whether a
-response is likely to be fabricated.
+We use \emph{epistemic state} to describe the model's internal computational state as 
+it relates to the reliability of its generation.
+This state provides evidence about whether the model is generating from information 
+it reliably represents or constructing a plausible response without such support.
+
+We define \emph{epistemic observability} as the ability of a language model to
+expose telemetry about this state during inference---decoding statistics, internal representations,
+computational traces---so that downstream components of the system can use this otherwise
+hidden evidence to assess fabrication risk of a generated output.
 %These signals do not explain why the model produced a particular output, nor do they attempt to interpret its internal reasoning.
 
 \subsection{Observability Tiers}
@@ -20,7 +24,7 @@ for assessing reliability of the generated text.
 Tier~0 exposes only the generated text, treating the model as a black box. This is the interface of most commercial APIs and the basis of existing validation techniques: retrieval-based verification, secondary LLM judges, symbolic validators, and application-specific consistency checks. With no internal telemetry, verification must rely entirely on properties of the output, often at the cost of expensive external computation.
 
 \fakepara{Tier 1: Confidence Observability.}
-Tier~1 augments the generated text with lightweight telemetry produced during decoding. Examples include token probabilities, entropy~\cite{ling2024uncertainty,xiao2021hallucination}, confidence scores, and other decoding statistics extractable with negligible overhead. These give a coarse estimate of the model's uncertainty~\cite{shorinwa2025survey} and identify portions of the output that may warrant validation, but they are often imperfectly calibrated and may fail to distinguish confidently stated hallucinations from grounded generations.
+Tier~1 augments the generated text with lightweight telemetry produced during decoding such as token probabilities, entropy~\cite{ling2024uncertainty,xiao2021hallucination}, confidence scores, and other decoding statistics extractable with negligible overhead. These give a coarse estimate of the model's uncertainty~\cite{shorinwa2025survey} and identify portions of the output that may warrant validation. They are often imperfectly calibrated and may fail to distinguish confidently stated hallucinations from grounded generations.
 
 \fakepara{Tier 2: Representation Observability.}
 Tier~2 exposes information derived from the model's internal representations. Systems may access hidden-state embeddings, layer activations, attention statistics, or learned probes~\cite{belinkov2022probing,alain2016understanding} that estimate properties of the latent epistemic state.
@@ -29,8 +33,9 @@ Simple probes can catch deviant model behaviors~\cite{macdiarmid2024sleeperagent
 \fakepara{Tier 3: Mechanistic Observability.}
 Tier~3 exposes telemetry obtained through mechanistic analysis of the model's computation.
 Mechanistic techniques trace information flow through neurons, attention heads, and latent features~\cite{somvanshi2026bridging}.
+Tier~3 telemetry can distinguish between failure modes---a response with no stable internal support versus one produced by a confident but spurious pathway---rather than only flagging that a failure occurred.
 We do not claim that Tier~3 identifies the \emph{cause} of a hallucination in the interventional sense (a component which, when altered, changes the outcome); that is the aim of mechanistic interpretability, whose tools Tier~3 exposes but does not itself deliver.
-The claim is narrower: Tier~3 telemetry can distinguish between failure modes---a response with no stable internal support versus one produced by a confident but spurious pathway---rather than only flagging that a failure occurred.
+
 
 \subsection{Telemetry is Coupled to Computation}
 \label{sec:threat}
@@ -61,36 +66,34 @@ target~\cite{winninger2025usingmechanisticinterpretabilitycraft}.
 Exposing telemetry therefore makes such manipulation observable and 
 auditable rather than hidden behind the model interface.
 
-\subsection{Runtime integration}
+\subsection{Runtime Integration}
 
-The tensor is a triage primitive, not a verdict: it ranks a model's outputs
-(or spans within one output) by fabrication risk, and the runtime binds rank
-to action under its verification budget. The bindings form a ladder ordered by
-cost: \emph{abstain or flag} (withhold or annotate the output); \emph{re-generate} (sample again or add reasoning steps and require
-agreement); \emph{tool verification} (route the output to a bounded external
-check---a citation lookup, a database query, a test); \emph{escalation}
-(request Tier~2 telemetry or a stronger fallback model for what Tier~1 cannot
-resolve); and \emph{human review}, reserved for the top of the ranking.
+Epistemic observability is a triage primitive:
+a system uses the observability information to estimate
+fabrication risk and expend its verification budget accordingly.
+This separates \emph{observation} from \emph{action}: the epistemic
+observability interface exposes evidence about the model's epistemic state,
+while a deployment-specific policy determines what to do with that evidence.
+Possible actions form a ladder of increasing cost, including \emph{abstain or flag} (withhold or annotate the output); 
+\emph{re-generate} (sample again or add reasoning steps and require agreement); 
+\emph{tool verification} (route the output to a bounded external check---a citation lookup, a database query, a test); 
+\emph{escalation} (request telemetry from a higher observability tier); 
+and \emph{human review}.
 
-Concretely, the interface touches an agent runtime at three points. At the
-\emph{serving layer}, the trace is exported alongside the text it describes:
-the same forward pass produces both, so the marginal cost is bandwidth rather
-than compute. At the \emph{composition boundary}---where the runtime already
-intercepts tool and sub-agent calls---the risk ranking gates propagation: a
-flagged output can be verified, re-generated, or held before it becomes the
-premise of the next step, which is exactly where an unexamined fabrication
-would otherwise compound. At the \emph{policy layer}, a budget allocator maps
-rank to rung; because the tensor ranks rather than classifies, the same trace
-serves any budget, and thresholds are a deployment-time calibration on
-domain-specific held-out data rather than a property of the model. Our
-evaluation (\autoref{sec:eval}) instantiates the first and third rungs in a
-single-step setting: flagged outputs are verified and confirmed fabrications
-replaced by abstention, and the composed judge routes citation queries to a
-lookup tool because entropy inverts there. The multi-step case---whether
-gating at the composition boundary stops an early fabrication from
-propagating across subsequent steps---is the experiment this interface
-exists to enable, and the one we have not yet run.
-
+The observability interface integrates with an agent runtime at three points. At the
+\emph{serving layer}, telemetry is exported alongside the generated text, 
+with the amount and cost of telemetry determined by the selected observability tier. 
+At the \emph{composition boundary}, where the runtime 
+intercepts tool and sub-agent calls, the telemetry can gate propagation: outputs with elevated 
+fabrication risk can be verified, re-generated, escalated, or withheld before use for subsequent computation. 
+This is particularly important in multi-step agentic workflows, 
+where an unverified fabrication can propagate through later steps. 
+At the \emph{policy layer}, a budget allocator maps the available
+telemetry to concrete actions based on
+deployment-specific costs and reliability requirements.
+The observability tiers therefore expose progressively richer evidence, 
+while the runtime determines whether the expected benefit of that evidence
+and any resulting verification action justifies its cost.
 
 \subsection{Low Cost Tensor Interface}
 
@@ -146,6 +149,11 @@ anchoring). The interface returns:
 \label{fig:entropy_trace}
 \end{figure}
 
+\fakepara{Example Entropy Trace.}\autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
+with per-token entropy color coded from white (confident) to deep red (uncertain).
+The trace shows where generation proceeded with high confidence (suggesting retrieval of a stored pattern)
+and where it proceeded with high uncertainty (suggesting fabrication).
+
 \fakepara{What the tensor provides.}
 The entropy trace provides a falsifiability signal. If a model claims certainty
 while its entropy trace shows
@@ -174,11 +182,6 @@ curated from the full research record at DOI
 supporting OLMo models that demonstrates
 the interface is practical. Overhead is modest: 2--7\% added latency relative to
 generation, depending on signal set.
-
-\fakepara{Example Entropy Trace.}\autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
-with per-token entropy color coded from white (confident) to deep red (uncertain).
-The trace shows where generation proceeded with high confidence (suggesting retrieval of a stored pattern)
-and where it proceeded with high uncertainty (suggesting fabrication).
 
 % When the model generates ``Dr. Tanaka's 2023
 % paper found that...'', its entropy trace reveals whether the generation
