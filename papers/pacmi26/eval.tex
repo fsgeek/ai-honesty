@@ -35,11 +35,19 @@ The first three conditions differ in how outputs are prioritized for verificatio
 while the composed judge additionally demonstrates \emph{tool verification} for a known complementary failure mode.
 We evaluate each condition at 10\%, 20\%, and 30\% verification budgets 
 and measure end-to-end accuracy.
+Verification outcomes are simulated (1{,}000 seeded Monte Carlo trials):
+a selected fabrication is caught with probability 0.938, the stratified
+evaluator's agreement with a blinded author review of 80 items, and a
+selected knowable error is corrected with an assumed probability 0.95.
+Response correctness was labeled programmatically where the query admits it
+(370 of 800) and otherwise by Qwen3-4B (430), which is also a model under
+test; the labeling task differs from the generation task, and the 80-item
+review above is the check on it.
 
 \begin{figure}[t]%
 \centering%
 \includegraphics[scale=0.42]{figures/exp27_aggregate_budget_curve.pdf}%
-\caption{End-to-end accuracy vs.\ verification budget for four judge conditions, averaged across four architectures.}%
+\caption{End-to-end accuracy vs.\ verification budget for four judge conditions, with the 800 responses from four architectures pooled under one budget.}%
 \label{fig:budget_curve}%
 \end{figure}
 
@@ -54,11 +62,14 @@ taking the expectation over a judge's scoring-token distribution rather than its
 discrete score~\cite{kwok2026llmasaverifiergeneralpurposeverificationframework};
 our signals instead come from the generator's own computation, which---unlike a
 judge's scores---the model does not separately control (\autoref{sec:threat}).
-Per-model results confirm the pattern is consistent across all four tested model families.
+Per-model results, each with its own budget, show the same pattern.
 At 10\% budget, tensor-guided verification improves accuracy over the
 unverified baseline for every model tested: OLMo
 (69.5\% $\to$ 75.1\%), Llama (82.5\% $\to$ 88.1\%), Qwen (87.0\%
 $\to$ 91.7\%), and Mistral (64.0\% $\to$ 72.0\%).
+The margin over the length baseline is not uniform, however: averaged
+per family it is +2.6/+3.9/+2.6pp, and on Mistral at 30\% budget length
+ranking wins by 2.2pp.
 The signal is not confined to small local models: using only the top-5
 log-probabilities that serverless APIs return (a lower bound on full-vocabulary
 entropy), mean entropy separates knowable from unknowable queries on five

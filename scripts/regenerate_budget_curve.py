@@ -29,6 +29,8 @@ data = {
 
 budgets = [10, 20, 30]
 
+FIG_W_SIZE, FIG_H_SIZE = 6.0, 4.0  # inches; these five were undefined (NameError)
+LABEL_SIZE, TICK_SIZE, LEGEND_SIZE = 11, 10, 9
 fig, ax = plt.subplots(1, 1, figsize=(FIG_W_SIZE, FIG_H_SIZE))
 
 # Colorblind-friendly: blue, orange, brown, gray — no red-green
