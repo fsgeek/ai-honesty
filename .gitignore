@@ -34,3 +34,4 @@ __pycache__
 
 # ignore things in tmp
 tmp/
+exp34_traces_20260825_115313.jsonl

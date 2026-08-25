@@ -85,6 +85,22 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # ============================================================================
 # Checkpoint sweep -- verified repo IDs (HuggingFace, 2026-06)
 # Lineage: base --(SFT)--> SFT --(DPO)--> DPO --(RLVR)--> final
+# Self-continuation markers at which the base completion model loops into
+# self-generated Q&A. The first three were the original set; the last two were
+# observed (Jun 10 2026, ~2/8 sampled base responses) slipping past it. Used
+# both as generate() stop_strings and as boundary tags in classify_tokens, so
+# they must stay a single list.
+STOP_STRINGS = (
+    "\nQuestion:",
+    "\nQ:",
+    "\nUser:",
+    # Observed form is "\n A single-select problem: Is the question answered
+    # in a satisfactory fashion?" -- leading space after the newline, both
+    # phrases on one line -- so these two are deliberately NOT newline-anchored.
+    "A single-select problem:",
+    "Is the question answered",
+)
+
 # stage_idx orders the pipeline for the monotonicity test (base=0).
 # ============================================================================
 
@@ -164,7 +180,7 @@ def generate_traced(model, tokenizer, prompt, *, max_tokens, do_sample,
         # (SFT/DPO/RLVR) stop on EOS before these ever fire; they matter for the
         # base completion model, which would otherwise loop. tokenizer= is
         # required by generate() when stop_strings are used.
-        stop_strings=["\nQuestion:", "\nQ:", "\nUser:"],
+        stop_strings=list(STOP_STRINGS),
         tokenizer=tokenizer,
         # output_LOGITS, not output_scores: logits are the model's RAW, unwarped
         # next-token distribution. scores are post-temperature/top-k/top-p under
@@ -284,7 +300,7 @@ def tag_token_classes(per_token, *, is_think_branch):
     # output. Tag it 'other' so it never enters the fabrication-entropy bucket --
     # it is the boundary, not committed content.
     is_boundary = [False] * len(per_token)
-    for marker in ("\nquestion:", "\nq:", "\nuser:"):
+    for marker in (m.lower() for m in STOP_STRINGS):
         for m in re.finditer(re.escape(marker), lowered):
             ms = m.start()
             for i, (s, e) in enumerate(spans):
@@ -493,6 +509,12 @@ def main():
                         "query": p["query"],
                         "response": response,
                         "n_tokens": len(per_token),
+                        # Runaway guard. A response that reaches the cap is a
+                        # runaway (no stop marker fired, no EOS), not a
+                        # truncated answer: it is EXCLUDED from all statistics
+                        # rather than counted. Legit responses are <300 tokens.
+                        "max_tokens": gen_budget,
+                        "hit_cap": len(per_token) >= gen_budget,
                         "fab_entropy_mean": fab["mean"],
                         "fab_entropy_median": fab["median"],
                         "fab_n": fab["n"],
@@ -527,7 +549,13 @@ def main():
     # Trend: mean fabrication-span entropy per stage, fabrication probes only,
     # greedy decode (the deterministic backbone). Plus the monotonicity test.
     trend_rows = []
-    fab_df = df[(df["is_fabrication_probe"]) & (df["decode"] == "greedy")]
+    fab_df = df[(df["is_fabrication_probe"]) & (df["decode"] == "greedy")
+                & (~df["hit_cap"])]
+    n_cap = int(df["hit_cap"].sum())
+    if n_cap:
+        print(f"\nRunaway responses hitting the cap (excluded from trend): {n_cap}")
+        print(df[df["hit_cap"]][["stage", "decode", "probe_id", "n_tokens"]]
+              .to_string(index=False))
     for stage_idx in sorted(fab_df["stage_idx"].unique()):
         sub = fab_df[fab_df["stage_idx"] == stage_idx]
         vals = sub["fab_entropy_mean"].dropna()
