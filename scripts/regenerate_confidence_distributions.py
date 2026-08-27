@@ -6,28 +6,28 @@ knowable vs unknowable queries across four model architectures.
 """
 
 import matplotlib
+
 matplotlib.use("Agg")
+import csv
+
 import matplotlib.pyplot as plt
 import numpy as np
-import csv
 
 matplotlib.rcParams["pdf.fonttype"] = 42
 matplotlib.rcParams["ps.fonttype"] = 42
 
 TITLE_SIZE = 15
-LABEL_SIZE = 13
-TICK_SIZE = 11
+LABEL_SIZE = 18
+TICK_SIZE = 15
 LEGEND_SIZE = 11
 SUPTITLE_SIZE = 16
 
 DATA_FILE = "exp27_bounded_verification_20260206_205725.csv"
 
-def load_data():
-    rows = []
-    with open(DATA_FILE) as f:
+def load_data() -> list[dict[str, str]]:
+    with open(DATA_FILE, encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        for row in reader:
-            rows.append(row)
+        rows = [dict(row) for row in reader]
     return rows
 
 def main():
@@ -40,8 +40,8 @@ def main():
         "Mistral": "mistralai/Mistral-7B-Instruct-v0.3",
     }
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-    fig.suptitle("Self-Reported Confidence: Knowable vs Unknowable", fontsize=SUPTITLE_SIZE, fontweight="bold")
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10)) # type: ignore
+    fig.suptitle("Self-Reported Confidence: Knowable vs Unknowable", fontsize=SUPTITLE_SIZE, fontweight="bold") # pyright: ignore[reportUnknownMemberType]
 
     # Colorblind-friendly: blue for knowable, orange for unknowable
     # Hatching for greyscale distinction
@@ -77,7 +77,7 @@ def main():
             f"arxiv/exp27_confidence_distributions.{ext}",
             f"exp27_confidence_distributions.{ext}",
         ]:
-            fig.savefig(dest, bbox_inches="tight", dpi=150)
+            fig.savefig(dest, bbox_inches="tight", dpi=150) # pyright: ignore[reportUnknownMemberType]
             print(f"Saved: {dest}")
 
     plt.close(fig)

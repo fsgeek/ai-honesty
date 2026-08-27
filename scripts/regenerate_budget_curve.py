@@ -7,10 +7,10 @@ mixed judge (self-report + hedging + length) that was hobbled by the
 inverted self-report signal.
 """
 
-import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.pyplot as plt
+
 matplotlib.use("Agg")
-import numpy as np
 
 # Regenerated from the deterministic seeded simulation
 # (experiment27_realistic_verification.py, seed=42, 1000 trials; text baseline =
@@ -29,13 +29,13 @@ data = {
 
 budgets = [10, 20, 30]
 
-FIG_W_SIZE, FIG_H_SIZE = 6.0, 4.0  # inches; these five were undefined (NameError)
+FIG_W_SIZE, FIG_H_SIZE = 8.0, 4.0  # inches; these five were undefined (NameError)
 LABEL_SIZE, TICK_SIZE, LEGEND_SIZE = 11, 10, 9
-fig, ax = plt.subplots(1, 1, figsize=(FIG_W_SIZE, FIG_H_SIZE))
+fig, ax = plt.subplots(1, 1, figsize=(FIG_W_SIZE, FIG_H_SIZE)) # pyright: ignore[reportUnknownMemberType]
 
 # Colorblind-friendly: blue, orange, brown, gray — no red-green
 # Distinct markers + linestyles ensure greyscale readability
-styles = {
+styles: dict[str, dict[str, object]] = {
     "No judge":              {"color": "#888888", "marker": "s", "linestyle": "--", "linewidth": 1.5},
     "Text-guided (length)":  {"color": "#e66101", "marker": "o", "linestyle": "-", "linewidth": 2},
     "Tensor-guided":         {"color": "#2166ac", "marker": "^", "linestyle": "-", "linewidth": 2},
@@ -44,7 +44,7 @@ styles = {
 
 for label, values in data.items():
     s = styles[label]
-    ax.plot(budgets, values, label=label, marker=s["marker"],
+    ax.plot(budgets, values, label=label, marker=s["marker"], # pyright: ignore[reportUnknownMemberType]
             linestyle=s["linestyle"], linewidth=s["linewidth"],
             color=s["color"], markersize=8)
 
@@ -56,19 +56,19 @@ for i, b in enumerate(budgets):
     composed_y = data["Composed"][i]
     gap = tensor_y - length_y
     top_y = max(tensor_y, composed_y)
-    ax.annotate(f"+{gap:.1f}pp",
+    ax.annotate(f"+{gap:.1f}pp", # pyright: ignore[reportUnknownMemberType]
                 xy=(b, top_y), fontsize=TICK_SIZE - 3, color="#555555",
                 ha="center", va="bottom",
                 xytext=(b, top_y + 1.6))
 
-ax.set_xlabel("Verification Budget (%)", fontsize=LABEL_SIZE)
-ax.set_ylabel("End-to-End Accuracy (%)", fontsize=LABEL_SIZE)
-ax.set_xticks(budgets)
-ax.tick_params(axis="both", labelsize=TICK_SIZE)
+ax.set_xlabel("Verification Budget (%)", fontsize=LABEL_SIZE) # pyright: ignore[reportUnknownMemberType]
+ax.set_ylabel("End-to-End Accuracy (%)", fontsize=LABEL_SIZE) # pyright: ignore[reportUnknownMemberType]
+ax.set_xticks(budgets) # pyright: ignore[reportUnknownMemberType]
+ax.tick_params(axis="both", labelsize=TICK_SIZE) # pyright: ignore[reportUnknownMemberType]
 ax.set_xlim(5, 35)
 ax.set_ylim(73, 97)
-ax.legend(loc="lower right", fontsize=LEGEND_SIZE)
-ax.grid(True, alpha=0.3)
+ax.legend(loc="lower right", fontsize=LEGEND_SIZE) # pyright: ignore[reportUnknownMemberType]
+ax.grid(True, alpha=0.3) # pyright: ignore[reportUnknownMemberType]
 
 plt.tight_layout()
 
@@ -85,5 +85,5 @@ for ext in ["pdf", "png"]:
         f"arxiv/exp27_aggregate_budget_curve.{ext}",
         f"exp27_aggregate_budget_curve.{ext}",
     ]:
-        fig.savefig(dest, bbox_inches="tight", dpi=150)
+        fig.savefig(dest, bbox_inches="tight", dpi=150) # pyright: ignore[reportUnknownMemberType]
         print(f"Saved: {dest}")
