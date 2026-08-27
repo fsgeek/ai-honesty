@@ -12,6 +12,10 @@ import matplotlib.pyplot as plt
 
 matplotlib.use("Agg")
 
+# ACM's PDF checker rejects Type 3 fonts; matplotlib emits them by default.
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["ps.fonttype"] = 42
+
 # Regenerated from the deterministic seeded simulation
 # (experiment27_realistic_verification.py, seed=42, 1000 trials; text baseline =
 # raw word count; ties broken at random within each trial, see the artifact's
