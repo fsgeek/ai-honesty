@@ -87,3 +87,14 @@ significant: it comes entirely from citation queries where entropy signals
 \emph{invert}. Fabricated citations produce lower entropy than real ones because
 the model generates plausible fakes more fluently than it retrieves specific
 bibliographic details.
+
+\fakepara{Effect of post-training.}
+To test whether standard post-training degrades the telemetry signals used by our interface, we run the same probes across four public OLMo-3 checkpoints---base, SFT, DPO, and RLVR---using greedy decoding on 16 knowable and 32 fabrication prompts. 
+Post-training reduces entropy for both classes, but does so disproportionately for knowable responses. 
+Mean entropy on knowable queries falls from 1.18 nats in the base model to 0.18 after post-training, 
+while entropy on fabrication prompts falls from 1.49 to 0.98 after SFT and remains nearly unchanged through RLVR (0.99). 
+Consequently, the separation between knowable and fabricated responses \emph{increases}, 
+with entropy-based discrimination improving from AUC 0.67 to 1.00. 
+Post-training also changes the model's testimony: the fraction of fabrication prompts that elicit a refusal rises from 0\% to 56\%. 
+Thus, in this diagnostic, standard post-training improves the model's observable behavior while preserving---and in fact strengthening---the telemetry 
+signal that distinguishes the remaining fabrications from knowable responses.

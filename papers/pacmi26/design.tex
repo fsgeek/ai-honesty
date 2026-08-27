@@ -55,19 +55,7 @@ projections reveal distinct internal configurations for different epistemic
 conditions even when the text is similar~\cite{lu2026assistantaxissituatingstabilizing}.
 
 This distinction comes with two important limits. First, the property holds under \emph{current}
-pipelines, and we can measure what those pipelines do to the signal.
-As a post-hoc diagnostic on one family, we ran the same probes through the
-four public OLMo-3 checkpoints (base, SFT, DPO, RLVR; greedy decoding;
-16 knowable and 32 fabrication prompts).
-Post-training sharpens everything, but not evenly: mean entropy over knowable
-answers fell from 1.18 to 0.18 nats, while over the fabrications the model
-still produced it fell from 1.49 to 0.98 at SFT and stayed there
-(0.99 after RLVR), so the separation the interface relies on \emph{widened}
-(AUC 0.67 $\rightarrow$ 1.00).
-Over the same stages the fraction of fabrication prompts answered with a
-refusal rose from 0\% to 56\%: post-training improved the testimony and
-preserved the telemetry, but did not merge them.
-Optimization that explicitly incorporates the monitor into the training objective, 
+pipelines. Optimization that explicitly incorporates the monitor into the training objective, 
 however, constitutes a different regime about which we make no claim.
 Second, mechanistic tools can already locate the subspaces such an attack would
 target~\cite{winninger2025usingmechanisticinterpretabilitycraft}.
