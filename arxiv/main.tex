@@ -1187,26 +1187,49 @@ ExportTensor ==
       )
   /\ UNCHANGED <<internal_state, vector_clock, topology_map>>
 
-(* ESCAPE: The level-2 judge inspects tensor components *)
+(* Telemetry reflects HOW a response was computed, not whether it is
+   true. Note the deliberate collision: a fluent fabrication and an
+   honest refusal are both Low/Coherent. *)
+LowEntropy == GroundTruths \union PlausibleLies \union Refusals
+
+(* The level-2 judge inspects tensor components. It does not see, and
+   cannot recover, the grounding label. *)
 TensorVerify(tensor) ==
-  LET text == tensor[1]
-      prov == tensor[2]
+  LET ent  == tensor[2]
       topo == tensor[3]
   IN
-  /\ text \notin ObviousLies
   /\ topo = "Coherent"
-  /\ prov = "TrainingData"
+  /\ ent = "Low"
 \end{lstlisting}
 
-Under this specification, no plausible lie passes both provenance and topological checks simultaneously. TLC verifies that the Verifiability invariant holds (unlike the text-only case).
+An earlier version of this specification exported a provenance field set to
+\texttt{"TrainingData"} exactly when the response was grounded, while defining
+honesty as that same condition. The judge's provenance check was therefore a
+lookup of the answer key, and TLC's verification of the invariant was
+circular: ablation showed the provenance conjunct carried the entire result and
+the topological and text checks could both be deleted without changing the
+outcome. We have replaced it. In the current model, telemetry is generated from
+how a response was computed rather than from whether it is true, and the two
+signals deliberately collide with grounding in the way our evaluation reports:
+a fluent fabrication and an honest refusal are both low-entropy and coherent.
+
+The consequence is that the tensor judge is \emph{not} sound, and the model
+says so. TLC reports \texttt{Verifiability} violated, with the surviving
+counterexample being a plausible fabrication exported as
+$\langle\texttt{Low},\texttt{Coherent}\rangle$. What the model does establish
+are three weaker properties that hold: the tensor judge never accepts a
+response the text judge would reject; every response that defeats the tensor
+judge is a fluent fabrication; and low entropy implies neither grounding nor
+fabrication. This is the formal counterpart of an entropy AUC of 0.87 rather
+than 1.0 --- the interface narrows the gap without closing it.
 
 \subsection{Validation}
 
 Both specifications have been validated using TLC model checker:
 \begin{itemize}
-    \item \textbf{EpistemicImpossibility}: TLC finds a concrete counterexample (Indistinguishable property violated)
-    \item \textbf{epistemic\_tensor}: TLC verifies Verifiability invariant holds (no escape possible)
-    \item State space explored: $\approx 2^{12}$ reachable states per model
+    \item \textbf{EpistemicImpossibility}: TLC finds a concrete counterexample (\texttt{Verifiability} violated; 5 distinct states)
+    \item \textbf{epistemic\_tensor}: \texttt{TensorNoWorseThanText}, \texttt{ResidueIsPlausibleLies} and \texttt{EntropyIsNotAVerdict} hold; \texttt{Verifiability} is violated, as expected (7 distinct states)
+    \item Both models are deliberately tiny. They illustrate the shape of the argument on a handful of representative responses; they do not establish a general impossibility, and their outcomes follow from the assumptions encoded in each specification. \texttt{tla/run\_tlc.sh} reproduces all three results.
 \end{itemize}
 
 % --------------------------------------------------------------------------
