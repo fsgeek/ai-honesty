@@ -3,8 +3,9 @@
 
 Text baseline now uses response length alone (AUC 0.85-0.97 per model),
 the strongest available text-channel signal. Previous versions used a
-mixed judge (self-report + hedging + length) that was hobbled by the
-inverted self-report signal.
+mixed judge (self-report + hedging + length); self-report contributed
+little because it is compressed at the top of its scale (see issue #1 --
+the earlier "inverted self-report" reading was a parse artifact).
 """
 
 import matplotlib
@@ -37,13 +38,14 @@ FIG_W_SIZE, FIG_H_SIZE = 8.0, 4.0  # inches; these five were undefined (NameErro
 LABEL_SIZE, TICK_SIZE, LEGEND_SIZE = 11, 10, 9
 fig, ax = plt.subplots(1, 1, figsize=(FIG_W_SIZE, FIG_H_SIZE)) # pyright: ignore[reportUnknownMemberType]
 
-# Colorblind-friendly: blue, orange, brown, gray — no red-green
+# IBM Design Library colorblind-safe palette, matching the public artifact's
+# scripts/fig3_budget_curve.py so paper and artifact agree.
 # Distinct markers + linestyles ensure greyscale readability
 styles: dict[str, dict[str, object]] = {
-    "No judge":              {"color": "#888888", "marker": "s", "linestyle": "--", "linewidth": 1.5},
-    "Text-guided (length)":  {"color": "#e66101", "marker": "o", "linestyle": "-", "linewidth": 2},
-    "Tensor-guided":         {"color": "#2166ac", "marker": "^", "linestyle": "-", "linewidth": 2},
-    "Composed":              {"color": "#5e3c99", "marker": "D", "linestyle": "-.", "linewidth": 2},
+    "No judge":              {"color": "gray", "marker": "s", "linestyle": "--", "linewidth": 1.5},
+    "Text-guided (length)":  {"color": "#dc267f", "marker": "o", "linestyle": "-", "linewidth": 2},
+    "Tensor-guided":         {"color": "#785ef0", "marker": "^", "linestyle": "-", "linewidth": 2},
+    "Composed":              {"color": "#648fff", "marker": "D", "linestyle": "-.", "linewidth": 2},
 }
 
 for label, values in data.items():

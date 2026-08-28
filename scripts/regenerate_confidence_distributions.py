@@ -43,10 +43,11 @@ def main():
     fig, axes = plt.subplots(2, 2, figsize=(12, 10)) # type: ignore
     fig.suptitle("Self-Reported Confidence: Knowable vs Unknowable", fontsize=SUPTITLE_SIZE, fontweight="bold") # pyright: ignore[reportUnknownMemberType]
 
-    # Colorblind-friendly: blue for knowable, orange for unknowable
-    # Hatching for greyscale distinction
-    color_know = "#2166ac"
-    color_unknow = "#e66101"
+    # IBM Design Library colorblind-safe palette, matching the public artifact's
+    # scripts/fig2_confidence_distributions.py so paper and artifact agree.
+    # Hatching for greyscale distinction.
+    color_know = "#fe6100"     # orange
+    color_unknow = "#785ef0"   # purple
 
     for ax, (label, model_id) in zip(axes.flat, families.items()):
         know_conf = [float(r["self_report_confidence"]) for r in rows
