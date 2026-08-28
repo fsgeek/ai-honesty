@@ -65,10 +65,13 @@ model can introspect and report its epistemic state through text.
 \label{fig:confidence_dist}%
 \end{figure}
 
-\autoref{fig:confidence_dist} shows that self-reported confidence
-is reports high confidence on both unknowable
-queries than on knowable ones. A
-user who asks ``how confident are you?'' receives a number that anticorrelates
-with epistemic grounding, and an adversary could exploit the inversion to make
-fabrications appear maximally confident. Under bounded oversight, a text-only
-supervisor cannot distinguish truthful uncertainty from confident fabrication.
+\autoref{fig:confidence_dist} shows that self-reported confidence is high
+almost everywhere: models report a mean of 0.98 on knowable queries and 0.73
+on unknowable ones, where the correct report is that no answer exists. The
+gap orders the two classes better than chance (AUC 0.66--0.92 across
+architectures), but the scale is compressed into its top end, so a threshold
+that admits most correct answers also admits most fabrications. A user who
+asks ``how confident are you?'' is told 100 either way, and an adversary need
+only stay inside the band the model already occupies. Under bounded oversight,
+a text-only supervisor cannot distinguish truthful uncertainty from confident
+fabrication.

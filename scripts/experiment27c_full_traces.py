@@ -407,6 +407,7 @@ def get_self_reported_confidence(model, tokenizer, query, response):
     )
 
     inputs = tokenizer(followup_prompt, return_tensors="pt").to(DEVICE)
+    prompt_length = inputs.input_ids.shape[1]
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
@@ -415,8 +416,18 @@ def get_self_reported_confidence(model, tokenizer, query, response):
             pad_token_id=tokenizer.eos_token_id,
         )
 
-    confidence_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    confidence_text = confidence_text.split(":")[-1].strip()
+    # Decode ONLY the newly generated tokens. Decoding outputs[0] returns the
+    # prompt as well, and the prompt contains "scale of 0-100", so the first
+    # integer found was often that literal 0 rather than the model's reply.
+    # See scripts/recollect_self_report.py and issue #1.
+    new_token_ids = outputs[0][prompt_length:]
+    confidence_text = tokenizer.decode(new_token_ids, skip_special_tokens=True)
+
+    # Strip Qwen3 <think> blocks, which survive skip_special_tokens on some
+    # tokenizer versions.
+    confidence_text = re.sub(r"<think>.*?</think>", "", confidence_text, flags=re.DOTALL)
+    confidence_text = re.sub(r"<think>.*", "", confidence_text, flags=re.DOTALL)
+    confidence_text = confidence_text.strip()
 
     numbers = re.findall(r"\d+", confidence_text)
     if numbers:
