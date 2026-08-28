@@ -45,8 +45,10 @@ def main():
         "Mistral": "mistralai/Mistral-7B-Instruct-v0.3",
     }
 
-    fig, axes = plt.subplots(2, 2, figsize=(3.35, 2.6)) # type: ignore
-    fig.suptitle("Self-Reported Confidence: Knowable vs Unknowable", fontsize=SUPTITLE_SIZE, fontweight="bold") # pyright: ignore[reportUnknownMemberType]
+    # Shared x/y labels and a single figure-level legend: at column width
+    # there is no room to repeat them in each of the four panels. sharex/
+    # sharey also removes three redundant tick label sets.
+    fig, axes = plt.subplots(2, 2, figsize=(3.35, 2.75), sharex=True, sharey=True) # type: ignore
 
     # IBM Design Library colorblind-safe palette, matching the public artifact's
     # scripts/fig2_confidence_distributions.py so paper and artifact agree.
@@ -68,13 +70,22 @@ def main():
                 color=color_unknow, edgecolor="black", linewidth=0.5,
                 hatch="\\\\", density=True)
 
-        ax.set_title(label, fontsize=TITLE_SIZE, fontweight="bold")
-        ax.set_xlabel("Self-Reported Confidence", fontsize=LABEL_SIZE)
-        ax.set_ylabel("Density", fontsize=LABEL_SIZE)
+        ax.set_title(label, fontsize=TITLE_SIZE, fontweight="bold", pad=2)
         ax.tick_params(axis="both", labelsize=TICK_SIZE)
-        ax.legend(fontsize=LEGEND_SIZE)
+        # Log scale: nearly all mass sits at the top of the confidence
+        # range, so a linear density axis renders every other bar invisible.
+        ax.set_yscale("log")
+        ax.set_ylim(1e-2, 1e2)
 
-    plt.tight_layout()
+    # Legend above the panels, axis labels below: putting both at the
+    # bottom overlaps them.
+    handles, labels_ = axes.flat[0].get_legend_handles_labels()
+    fig.legend(handles, labels_, fontsize=LEGEND_SIZE, ncol=2,
+               loc="upper center", bbox_to_anchor=(0.5, 1.0), frameon=False)
+    fig.supxlabel("Self-Reported Confidence", fontsize=LABEL_SIZE, y=0.005)
+    fig.supylabel("Density (log)", fontsize=LABEL_SIZE, x=0.01)
+
+    plt.tight_layout(rect=(0.03, 0.03, 1.0, 0.94), h_pad=0.6)
 
     for ext in ["pdf", "png"]:
         for dest in [

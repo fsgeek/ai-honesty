@@ -36,7 +36,7 @@ data = {
 
 budgets = [10, 20, 30]
 
-FIG_W_SIZE, FIG_H_SIZE = 3.35, 2.1  # inches = \columnwidth in acmart sigplan
+FIG_W_SIZE, FIG_H_SIZE = 3.35, 2.25  # inches = \columnwidth in acmart sigplan
 # Sized for the column at scale 1.0; see the note in
 # regenerate_confidence_distributions.py on why bbox_inches="tight" is
 # avoided. eval.tex includes this at width=\columnwidth.
@@ -78,7 +78,11 @@ ax.set_xticks(budgets) # pyright: ignore[reportUnknownMemberType]
 ax.tick_params(axis="both", labelsize=TICK_SIZE) # pyright: ignore[reportUnknownMemberType]
 ax.set_xlim(5, 35)
 ax.set_ylim(73, 97)
-ax.legend(loc="lower right", fontsize=LEGEND_SIZE) # pyright: ignore[reportUnknownMemberType]
+# The "No judge" baseline is flat at 75.8, so an in-axes legend at lower
+# right sits on top of it. Put the legend above the plot instead.
+ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.01), ncol=2, # pyright: ignore[reportUnknownMemberType]
+          fontsize=LEGEND_SIZE, frameon=False, handlelength=1.8,
+          columnspacing=1.2, borderaxespad=0.0)
 ax.grid(True, alpha=0.3) # pyright: ignore[reportUnknownMemberType]
 
 plt.tight_layout()
