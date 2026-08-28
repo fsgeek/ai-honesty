@@ -16,11 +16,12 @@ import numpy as np
 matplotlib.rcParams["pdf.fonttype"] = 42
 matplotlib.rcParams["ps.fonttype"] = 42
 
-TITLE_SIZE = 15
+# Match the public artifact's scripts/fig2_confidence_distributions.py
+TITLE_SIZE = 18
 LABEL_SIZE = 18
 TICK_SIZE = 15
-LEGEND_SIZE = 11
-SUPTITLE_SIZE = 16
+LEGEND_SIZE = 15
+SUPTITLE_SIZE = 18
 
 DATA_FILE = "exp27_bounded_verification_20260206_205725.csv"
 
@@ -40,7 +41,7 @@ def main():
         "Mistral": "mistralai/Mistral-7B-Instruct-v0.3",
     }
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10)) # type: ignore
+    fig, axes = plt.subplots(2, 2, figsize=(16, 8)) # type: ignore
     fig.suptitle("Self-Reported Confidence: Knowable vs Unknowable", fontsize=SUPTITLE_SIZE, fontweight="bold") # pyright: ignore[reportUnknownMemberType]
 
     # IBM Design Library colorblind-safe palette, matching the public artifact's

@@ -37,7 +37,8 @@ data = {
 budgets = [10, 20, 30]
 
 FIG_W_SIZE, FIG_H_SIZE = 8.0, 4.0  # inches; these five were undefined (NameError)
-LABEL_SIZE, TICK_SIZE, LEGEND_SIZE = 11, 10, 9
+# Match the public artifact's scripts/fig3_budget_curve.py
+LABEL_SIZE, TICK_SIZE, LEGEND_SIZE = 18, 15, 15
 fig, ax = plt.subplots(1, 1, figsize=(FIG_W_SIZE, FIG_H_SIZE)) # pyright: ignore[reportUnknownMemberType]
 
 # IBM Design Library colorblind-safe palette, matching the public artifact's
@@ -65,7 +66,7 @@ for i, b in enumerate(budgets):
     gap = tensor_y - length_y
     top_y = max(tensor_y, composed_y)
     ax.annotate(f"+{gap:.1f}pp", # pyright: ignore[reportUnknownMemberType]
-                xy=(b, top_y), fontsize=TICK_SIZE - 3, color="#555555",
+                xy=(b, top_y), fontsize=TICK_SIZE, color="#555555",
                 ha="center", va="bottom",
                 xytext=(b, top_y + 1.6))
 

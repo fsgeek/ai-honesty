@@ -40,7 +40,7 @@ a selected fabrication is caught with assumed probability 0.938 and a selected
 knowable error is corrected with assumed probability 0.95. The former is the
 stratified evaluator's agreement with a blinded author review of 80 items
 (75/80), used as a simulation parameter rather than a measured catch rate; its
-recall on the 22 items that review called incorrect was 0.909.
+recall on the 22 items called incorrect was 0.909.
 Response correctness was labeled programmatically where the query admits it
 (370 of 800) and otherwise by Qwen3-4B (430), which is also a model under
 test; the labeling task differs from the generation task, and the 80-item
@@ -58,9 +58,9 @@ review above is the check on it.
 at every budget level}:
 +3.3pp at 10\%, +4.6pp at 20\%, +3.3pp at 30\%.
 We do not claim entropy is the better detector: length alone ranks at AUC
-0.85--0.97 per family, exceeding entropy on two of four, and survives
+0.85--0.97 per family, exceeds entropy on two of four, and survives
 stratifying by query length. The budget advantage comes from which items each
-signal selects, and length --- unlike entropy --- is a surface regularity
+signal selects, and length, unlike entropy, is a surface regularity that
 training can move without changing the computation beneath it. Concurrent work scales verification on the judge side by
 taking the expectation over a judge's scoring-token distribution rather than its
 discrete score~\cite{kwok2026llmasaverifiergeneralpurposeverificationframework};
@@ -77,16 +77,16 @@ ranking wins by 2.2pp.
 The signal is not confined to small local models: using only the top-5
 log-probabilities that serverless APIs return (a lower bound on full-vocabulary
 entropy), mean entropy separates knowable from unknowable queries on five further API
-endpoints from 4B to 235B parameters --- four additional architectures,
-including two mixture-of-experts models, plus a Mistral-7B repeat of the local
-condition --- with AUC 0.65--0.88~\cite{mason2026epistemic}.
+endpoints from 4B to 235B parameters---four further architectures, two of them
+mixture-of-experts, plus a Mistral-7B repeat of the local
+condition---with AUC 0.65--0.88~\cite{mason2026epistemic}.
 
 \fakepara{Composed judges and complementary failure modes.}
 At 30\% budget, the composed judge (91.5\%) outperforms the tensor-guided judge
-alone (90.9\%). This is an upper bound, not an achievable result: the composed
-condition routes citation-like queries to a substitute oracle reading the
-ground-truth label, so it measures the headroom a perfect external lookup would
-buy on this slice. A deployed lookup would recover less.
+alone (90.9\%). This is an upper bound rather than an achievable result: the
+composed condition routes citation-like queries to a substitute oracle reading
+the ground-truth label, so it measures the headroom a perfect external lookup
+would buy, not what a deployed one recovers.
 
 \fakepara{Effect of post-training.}
 To test whether standard post-training degrades the telemetry signals used by our interface, we run the same probes across four public OLMo-3 checkpoints---base, SFT, DPO, and RLVR---using greedy decoding on 16 knowable and 32 fabrication prompts. 
@@ -100,8 +100,9 @@ with entropy-based discrimination improving from AUC 0.67 to 1.00 on these
 probes. The ceiling depends on which knowable probes are counted: these are the
 straightforward-fact controls, and adding the run's true-but-implausible
 category (\eg\ \autoref{fig:entropy_trace}) gives 0.63 rising to 0.81--0.87
-instead --- the widening holds, the ceiling does not. Private-context probes are
-excluded throughout, since trained refusals collapse their entropy.
+instead, so the widening is robust to that choice while the perfect ceiling is
+not. Private-context probes are excluded throughout, since trained refusals
+collapse their entropy.
 Post-training also changes the model's testimony: the fraction of fabrication prompts that elicit a refusal rises from 0\% to 56\%. 
 Thus, in this diagnostic, standard post-training improves the model's observable behavior while preserving---and in fact strengthening---the telemetry 
 signal that distinguishes the remaining fabrications from knowable responses.

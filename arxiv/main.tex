@@ -411,7 +411,7 @@ existing LLM interface, one we did not design, and identifies the precise
 architectural assumption (conditioning on $q$ alone) whose relaxation enables
 escape (\autoref{sec:design}).
 
-\subsection{The RAG Escape?}
+\subsection{The RAG Escape?}\label{sec:rag}
 
 \autoref{thm:representational} might seem to have an obvious escape: give
 the model access to external information. Retrieval-augmented generation does
@@ -456,8 +456,10 @@ from \autoref{cond:ambiguity} such that:
 
 \begin{theorem}[Learnability Impossibility]\label{thm:learnability}
 No learning algorithm $\mathcal{A}$ optimizing reward $R$ from a bounded
-supervisor $S$ can converge to a Grounded Policy that satisfies Epistemic
-Honesty across both contexts $w_A$ and $w_B$ for the response $r_{fab}$.
+supervisor $S$ can \emph{guarantee} convergence to a Grounded Policy that
+satisfies Epistemic Honesty across both contexts $w_A$ and $w_B$ for the
+response $r_{fab}$: the supervisor's signal is identical in the two worlds, so
+nothing in the training process drives the policy toward the required split.
 \end{theorem}
 
 \begin{proof}
@@ -478,16 +480,20 @@ Honesty across both contexts $w_A$ and $w_B$ for the response $r_{fab}$.
 \item Epistemic Honesty requires split behavior: output $r_{fab}$ in $w_A$
   (where it may be correct) and $\bot$ in $w_B$ (where it is fabricated).
 \item Identical updates under identical observations give the optimizer no
-  information to differentiate the worlds. The policy must converge to the same
-  behavior in both cases.
-\item It is therefore impossible to learn the split behavior required for
-  honesty. \qedhere
+  information to differentiate the worlds. Whatever the algorithm converges to,
+  the training signal did not distinguish $w_A$ from $w_B$ on this response.
+\item The split behavior required for honesty therefore cannot be
+  \emph{learned from this supervisor}. \qedhere
 \end{enumerate}
 \end{proof}
 
 \begin{remark}[Empirical Bias]
-While the theorem proves only that the behavior must be \emph{identical},
-empirical observation shows a strong bias. Supervisors typically prefer
+The theorem constrains what the supervisor's signal can teach, not what a
+system can do by other means: a policy that reads retrieved documents at
+inference may still split correctly, having acquired the distinction from $D$
+rather than from training (\autoref{sec:rag}). What training cannot do is
+supply that distinction. Empirically, the tie is not left open --- observation
+shows a strong bias. Supervisors typically prefer
 ``plausible completion'' over ``abstention'' when truth is unknown. This
 effectively breaks the tie in favor of fabrication.
 \end{remark}
