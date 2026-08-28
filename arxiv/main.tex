@@ -98,10 +98,14 @@
 
 \begin{abstract}
 We start with a finding that should trouble anyone building systems with
-language model components: \textbf{models report highest confidence precisely
-when they are fabricating.} Across four model families (OLMo-3, Llama-3.1,
-Qwen3, Mistral), self-reported confidence inversely correlates with accuracy,
-with AUC ranging from 0.28 to 0.36 where 0.5 is random guessing.
+language model components: \textbf{asking a model how confident it is buys
+almost nothing.} Across four model families (OLMo-3, Llama-3.1, Qwen3,
+Mistral), self-reported confidence is pinned near the top of its scale
+regardless of grounding --- a mean of 0.98 on knowable queries and 0.73 on
+unknowable ones, with 43\% of questions that have no correct answer receiving a
+literal ``100''. The ordering is better than chance (AUC 0.66--0.92), but so
+compressed that any threshold admitting most correct answers admits most
+fabrications too.
 
 We prove, under explicit formal assumptions, that this is not a capability gap but an observational one. Under
 text-only observation---where a supervisor sees only the model's output
@@ -130,11 +134,15 @@ territory is the system you are building.
 % ==========================================================================
 \section{Introduction}\label{sec:intro}
 
-We start with a finding that should trouble anyone building systems with language model components: \textbf{models report highest confidence precisely when they are fabricating.}
+We start with a finding that should trouble anyone building systems with language model components: \textbf{asking a model how confident it is buys almost nothing.}
 
-We tested this across four model families (OLMo-3, Llama-3.1, Qwen3, Mistral) by asking simple questions: ``How confident are you in this answer?'' On factual questions the models answered correctly, confidence was moderate. On fabrications (plausible-sounding lies, completely invented facts), confidence was high. Area under the ROC curve (AUC) ranged from 0.28 to 0.36 across architectures, where 0.5 is random guessing and 1.0 is perfect discrimination. We checked multiple times. The finding held.
+We tested this across four model families (OLMo-3, Llama-3.1, Qwen3, Mistral) by asking simple questions: ``How confident are you in this answer?'' The answer is nearly always the same one. Mean self-reported confidence is 0.98 on knowable queries and 0.73 on unknowable ones, and 43\% of the unknowable queries---questions about people, papers, and events that do not exist---are answered with a literal ``100''. Area under the ROC curve ranges from 0.66 to 0.92 across architectures, where 0.5 is random guessing: better than chance, but the distributions overlap so heavily at the ceiling that no threshold separates them usefully.
 
-Self-reported confidence is inverted.
+Self-reported confidence is not a lie. It is a signal with almost no dynamic range, which for a bounded supervisor amounts to the same thing.
+
+\begin{remark}[Correction]
+An earlier version of this paper reported the stronger claim that self-report is \emph{inverted}---AUC 0.28--0.36, below random---and said ``we checked multiple times.'' That was an artifact of a confidence-parsing bug: the extractor decoded the prompt along with the generation and took the first integer it found, which was usually the \texttt{0} in the prompt's own ``scale of 0-100'' text. The error was asymmetric, zeroing 47\% of knowable responses against 31\% of unknowable ones, which manufactured a clean-looking inversion. It was reported by Chris Brew and is fixed at the source; the corrected values are above. The impossibility results do not depend on inversion---they require only that self-report be uninformative to a bounded supervisor---and the entropy and budget results are unaffected.
+\end{remark}
 
 This matters because self-report is the first signal we reach for when we need to verify a model's output. If the model expresses doubt, we investigate. If it's confident, we trust it. Except the model is most confident when it should be most doubtful.
 
@@ -142,7 +150,7 @@ This matters because self-report is the first signal we reach for when we need t
 
 Systems incorporating language model components face a fundamental choice: \textbf{how much of the model's output should you verify, which outputs should you prioritize, and what signals should you use for triage?} Verification has cost: API calls, domain expert review, additional compute. Every system must allocate a budget.
 
-The standard assumption is that scaling solves this: larger models, more RLHF training, instruction tuning; eventually they'll know what they know. But Lin et al.\ found the opposite: larger models were \emph{less} truthful on TruthfulQA~\citep{lin2022truthfulqa}. And our self-report inversion finding suggests why: the problem isn't capability, it's interface. The text-only channel through which models expose their reasoning cannot carry the signals a supervisor needs to distinguish grounded generation from confident fabrication.
+The standard assumption is that scaling solves this: larger models, more RLHF training, instruction tuning; eventually they'll know what they know. But Lin et al.\ found the opposite: larger models were \emph{less} truthful on TruthfulQA~\citep{lin2022truthfulqa}. And our self-report finding suggests why: the problem isn't capability, it's interface. The text-only channel through which models expose their reasoning cannot carry the signals a supervisor needs to distinguish grounded generation from confident fabrication.
 
 \subsection{What This Paper Contributes}
 
@@ -197,7 +205,7 @@ But these approaches operate entirely within the text channel. They try to extra
 \begin{itemize}
     \item \textbf{Response length}: Fabrications tend to be verbose while factual retrieval is concise. Using response length alone as a signal, AUC was 0.63 on our test set.
     \item \textbf{Hedging language}: Phrases like ``I'm not certain'' or ``I believe'' are weak signals. The model can learn to include them in training without actually knowing the difference.
-    \item \textbf{Citations}: Fabricated citations are generated with \emph{higher} confidence than real ones; the entropy signal inverts. We analyze this failure mode in detail in \autoref{sec:eval_bounded}.
+    \item \textbf{Citations}: the entropy signal is markedly weaker on citation-like queries than elsewhere. We analyze this failure mode in detail in \autoref{sec:eval_bounded}.
     \item \textbf{Composed judges}: Combining multiple text features with machine learning. Pooled AUC never exceeded 0.70.
 \end{itemize}
 
@@ -217,9 +225,9 @@ We do not claim a formal correspondence between the two impossibility results. R
 
 Both produce fluent, confident text. The text itself carries no reliable signal about which state the model is in.
 
-\subsection{Query Categories and the Self-Report Inversion}
+\subsection{Query Categories and the Compression of Self-Report}
 
-To understand the inversion, we test five types of queries:
+To characterize what self-report does and does not carry, we test five types of queries:
 \begin{itemize}
     \item \textbf{Control (Truth)}: Common factual knowledge (capital of France, boiling point of water).
     \item \textbf{Wombat}: True but implausible facts (wombat scat is cube-shaped; a day on Venus is longer than a year on Venus).
@@ -228,15 +236,15 @@ To understand the inversion, we test five types of queries:
     \item \textbf{Private/Future}: Genuinely unknowable questions (what's in the next room? When will it rain next Thursday?).
 \end{itemize}
 
-On knowable queries (Control, Wombat, Westphalia true baseline), the model reports moderate confidence. On unknowable queries (Private/Future), higher uncertainty. But on Glavinsky queries, the plausible lies, confidence peaks.
+Self-reported confidence orders these classes in the right direction, but barely uses its scale. Knowable queries average 0.98 and unknowable ones 0.73; the fabricated-entity queries (Glavinsky, Westphalia) average 0.75, and only the Private/Future class---where the model has been trained to refuse---drops appreciably, to 0.60. Nearly half of all unknowable queries still draw a literal ``100''.
 
-Self-reported confidence should be a signal of epistemic honesty: high confidence on things the model knows, low confidence on things it doesn't. But confidence gets inverted because the model is optimized for \emph{coherent text generation}, not for honest metacognition.
+Self-reported confidence should be a signal of epistemic honesty: high confidence on what the model knows, low on what it does not. What the text channel actually delivers is a number that is almost always near its maximum, because the model is optimized for \emph{coherent text generation} rather than honest metacognition.
 
-A model optimized for coherence naturally learns to generate fluent, confident output. Fabrications are fluent and confident by definition; they are ungrounded text that reads smoothly. Grounded generation, especially of obscure facts, may be more hesitant (high entropy) because the model is retrieving specific details from less common training data.
+A model optimized for coherence learns to generate fluent, confident output. Fabrications are fluent and confident by construction: they are ungrounded text that reads smoothly. Grounded generation of obscure facts may be no more assertive, and sometimes less. The confidence report is generated by the same process that generates the answer, so it inherits the answer's fluency rather than measuring its grounding.
 
-There is no training signal that would cause a text-only model to pair \emph{accurate confidence estimates} with \emph{accurate generation}. The text channel doesn't expose the information needed to learn the distinction. The model learns to be confident (good for fluency), and that confidence happens to correlate with fabrication (bad for honesty).
+There is no training signal that would cause a text-only model to pair \emph{accurate confidence estimates} with \emph{accurate generation}. The text channel does not expose the information needed to learn the distinction. The model learns to be confident, which is good for fluency, and the residual correlation with grounding is too weak to threshold on.
 
-Instruction tuning does not fix this problem. Models trained to follow instructions learn to express confidence convincingly, producing fluent and confident text regardless of whether the underlying answer is grounded. They become better at generating confident-sounding text, not at knowing what they know. The inversion persists across base and instruction-tuned model pairs.
+Instruction tuning does not fix this. Models trained to follow instructions learn to express confidence convincingly, producing fluent and confident text regardless of whether the answer is grounded. They become better at generating confident-sounding text, not at knowing what they know.
 
 \subsection{The Escape Condition}
 
@@ -251,7 +259,7 @@ Text is fully controllable through training. A model learns to sound confident, 
 % ==========================================================================
 \section{The Impossibility}\label{sec:formal}
 
-Why does self-report inversion happen? Why don't more supervisors help? Why does instruction tuning make it worse, not better?
+Why is self-report so uninformative? Why don't more supervisors help? Why doesn't instruction tuning fix it?
 
 The answer is that epistemic honesty is not a capability problem. As noted in the introduction, scaling has not resolved it. The theorems that follow explain why. It's not about what the model knows; it's about what the model can \emph{communicate}. Text-only observation lacks the degrees of freedom to express different epistemic states. The model may know it is fabricating. But the interface provides no channel to communicate this knowledge independently.
 
@@ -725,7 +733,7 @@ Internal activations (hidden states) contain richer information but require acce
 
 \fakepara{Composition strategy.} Why separate judges for different query types?
 
-Because different failure modes require different signals. The impossibility says you cannot use text alone. It doesn't say one signal suffices for everything. Entropy fails on citations (inversion); bounded lookup fails on open-ended questions (no external source to check). Composition allocates a verification budget across failure classes rather than spreading it uniformly.
+Because different failure modes require different signals. The impossibility says you cannot use text alone. It doesn't say one signal suffices for everything. Entropy weakens on citations; bounded lookup fails on open-ended questions (no external source to check). Composition allocates a verification budget across failure classes rather than spreading it uniformly.
 
 \fakepara{Budget levels.} Why 10\%, 20\%, 30\%?
 
@@ -841,11 +849,11 @@ Per-token entropy, by contrast, remains discriminative: pooled AUC 0.757 across 
 
 The entropy signal is powerful for general queries but has blind spots. The most instructive one: citations.
 
-\textbf{Citation inversion}: When a model generates citations, entropy inverts. Fabricated citations are generated \emph{with high confidence} (low entropy) because the model can fluently invent a plausible citation format (``Smith et al., 2024'') without retrieving actual bibliographic details. Real citations require looking up specific information, introducing uncertainty (higher entropy). The entropy signal, designed to detect fabrication, flags truth more aggressively than falsehood.
+\textbf{Citation degradation}: entropy separates knowable from unknowable far less well on citation-like queries than elsewhere. Per family, entropy AUC on the citation slice is 0.56--1.00 against 0.89--0.94 on the rest. The signal is weakened, not reversed: flagged fabrications still carry \emph{higher} mean entropy than the non-fabricated rows in that slice (0.575 vs 0.436).
 
-This is not a flaw in entropy. It's evidence that entropy measures \emph{generation confidence}, not \emph{factual correctness}. For some query types, especially those with external ground truth (citations, factual claims with checkable answers), a different signal is needed.
+This is not a flaw in entropy. It is evidence that entropy measures \emph{generation confidence}, not \emph{factual correctness}, and that confidence and correctness come apart most sharply where a fluent surface form is easy to produce and the underlying fact is a lookup.
 
-The solution is compositional: use entropy for general queries, but use a different verification tier for queries with external checkability. For citations: bounded lookup (does this DOI exist? Is this in CrossRef?). The composed judge (entropy + citation lookup) reaches 91.5\% at 30\% budget, a small improvement over entropy-only (90.9\%), because citation queries are a minority of the test set. But the improvement is \emph{structural}: it demonstrates that different failure modes require different signals.
+The response is compositional: use entropy for general queries, and a different verification tier where external checkability exists. For citations that would be a bounded lookup (does this DOI exist? is it in CrossRef?). We did not build one. Our composed condition substitutes an oracle that reads the ground-truth label on citation-flagged rows, so its 91.5\% at 30\% budget against entropy-only's 90.9\% is an \emph{upper bound} on what a perfect lookup would buy on this slice, not a measured result for any deployable judge. Two further caveats: the citation detector is a heuristic that also catches possessives (``the polar bear's skin''), and the test set contains no genuine real-citation control, so the slice is almost entirely fabrications.
 
 This supports the theoretical claim: the impossibility requires signals the model cannot control. Different failure classes need different signals. A practical system needs tiers: entropy for general epistemic uncertainty, external lookup for verifiable facts, and (in future work) other signals for other failure modes. The cost surface maps what each tier buys.
 
@@ -943,7 +951,7 @@ The entropy signal measures generation confidence, not factual truth. This is an
 
 \fakepara{Epistemic refusals.} Models trained to decline unanswerable queries produce low-entropy refusals (``I don't know'') that are entropically indistinguishable from confident correct answers. As models become more epistemically honest through training, the entropy signal's ability to detect dishonesty \emph{degrades} because honest refusals and honest facts occupy the same region of entropy space.
 
-\fakepara{Citations.} Entropy inverts on citation queries (\autoref{sec:eval_bounded}). External lookup is needed for citation-specific verification.
+\fakepara{Citations.} Entropy is a weaker discriminator on citation queries (\autoref{sec:eval_bounded}). External lookup is needed for citation-specific verification.
 
 \fakepara{Domain calibration.} The cost surface (\autoref{tab:cost-surface}) is calibrated to a balanced 100-knowable / 100-unknowable query set with equal emphasis across categories. Real deployments have different base rates: some domains are information-rich (news, medicine, law), others are hypothesis generation (brainstorming, creative writing). Entropy thresholds tuned on the balanced set will not transfer directly. Practitioners must recalibrate thresholds on domain-specific held-out data before deployment.
 
@@ -1071,7 +1079,7 @@ and identify architectural properties that enable escaping it.
 % ==========================================================================
 \section{Conclusion}
 
-Models report highest confidence precisely when they are fabricating. Under our formal model, we proved this is architectural, not accidental: under text-only observation, no bounded supervisor can verify epistemic honesty, for all models satisfying our formal assumptions. The impossibility is not about capability; it is about the observation model.
+Asking a model how confident it is buys almost nothing. Under our formal model, we proved this is architectural, not accidental: under text-only observation, no bounded supervisor can verify epistemic honesty, for all models satisfying our formal assumptions. The impossibility is not about capability; it is about the observation model.
 
 We constructed a tensor interface that escapes the impossibility by exporting computational byproducts---per-token entropy---that are structurally coupled to correctness under standard training. Per-token entropy achieves pooled AUC 0.757, outperforming all text features. The signal generalizes across architectures (Spearman $\rho = 0.762$).
 
@@ -1082,8 +1090,19 @@ Epistemic honesty is not a capability problem. It is an observability problem. E
 % ==========================================================================
 % ACKNOWLEDGMENTS
 % ==========================================================================
-% \section*{Acknowledgments}
-% TODO: Add acknowledgments
+\section*{Acknowledgments}
+We thank Chris Brew for the audit that produced the correction in
+\autoref{sec:intro}; the error had stood in two published versions of this
+paper, and he found it, diagnosed the mechanism, and reproduced the corrected
+result independently.
+
+Generative AI (Anthropic Claude, Opus~4 through Fable~5) was used throughout
+this work as a collaborator, not an editing tool: it drafted and revised
+passages of this paper, wrote the analysis and experiment scripts in the
+artifact, and ran and analyzed the post-training pipeline experiment. The
+authors designed the study, recomputed every reported number from the committed
+data, and take full responsibility for the content. There was no external
+funding.
 
 % ==========================================================================
 % REFERENCES
