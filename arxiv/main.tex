@@ -121,7 +121,9 @@ procedure, including RLHF and instruction tuning.
 We construct a \emph{tensor interface} that escapes the impossibility by
 exporting computational byproducts---per-token
 entropy and log-probability distributions---that are structurally coupled to correctness under standard training. Per-token
-entropy achieves pooled AUC 0.757, outperforming all text baselines by
+entropy achieves pooled AUC 0.870 on that set, and 0.757 under a
+length-controlled comparison that holds response length fixed; it outperforms
+all text baselines by
 3.3--4.6 percentage points at every budget level tested (10\%, 20\%, 30\%).
 The entropy signal generalizes across architectures (Spearman $\rho = 0.762$).
 
@@ -160,7 +162,7 @@ We make three contributions:
 
 \textbf{2. A tensor interface that escapes the impossibility.} We construct an epistemic observability interface that exports internal signals alongside text: per-token entropy traces and log-probability distributions. These are byproducts of inference, telemetry the model generates during computation. Under standard training, the model cannot separately tune entropy without affecting correctness, which is why entropy generalizes where text features diverge.
 
-\textbf{3. The empirical cost surface.} We map verification effectiveness across four judge strategies (no judge, text-only, tensor-guided, composed) at three budget levels (10\%, 20\%, 30\%). Per-token entropy achieves pooled AUC 0.757 and outperforms text baselines by 3.3--4.6 percentage points at every budget level. The tensor interface works. The cost surface tells system builders what each level of verification investment buys.
+\textbf{3. The empirical cost surface.} We map verification effectiveness across four judge strategies (no judge, text-only, tensor-guided, composed) at three budget levels (10\%, 20\%, 30\%). Per-token entropy achieves pooled AUC 0.870 on this set (0.757 when response length is held fixed in a separate length-controlled study) and outperforms text baselines by 3.3--4.6 percentage points at every budget level. The tensor interface works. The cost surface tells system builders what each level of verification investment buys.
 
 \subsection{Why This Matters}
 
@@ -183,7 +185,7 @@ A language model processes queries through multiple stages:
     \item \textbf{Sampling or argmax} where a specific token is selected
 \end{enumerate}
 
-The model's internal computation---the attention patterns, the per-token entropy, the per-layer logits---contains information that distinguishes grounded generation from fabrication. When a model fabricates, it often does so with high confidence (low entropy); when it retrieves or reasons about less common knowledge, entropy is higher. The computation leaves traces.
+The model's internal computation---the attention patterns, the per-token entropy, the per-layer logits---contains information that distinguishes grounded generation from fabrication. When a model answers from what it reliably represents, generation is comparatively low-entropy; when it constructs a response without such support, entropy is higher (in our data, 0.24 nats against 0.61). The computation leaves traces.
 
 \begin{figure}[t]
     \centering
@@ -716,12 +718,12 @@ In our experiments, we implement a simplified version of these principles:
 
     \item \textbf{Verification Independence}: We do not retrain the models. We measure entropy as an output of inference, not as a training objective. Entropy is independent of any training signal the model received.
 
-    \item \textbf{Provenance Binding}: For citation queries, we add a bounded lookup judge that checks whether cited sources exist. This is a tier of verification orthogonal to entropy-based triage.
+    \item \textbf{Provenance Binding}: For citation queries, a bounded lookup judge would check whether cited sources exist --- a tier of verification orthogonal to entropy-based triage. We model this tier rather than implement it (\autoref{sec:eval_bounded}).
 \end{itemize}
 
 The result: four judge conditions testing different combinations of these principles, evaluated at three budget levels, across four architectures.
 
-\textbf{Scope of empirical evaluation.} Our experiments primarily evaluate Verification Independence (entropy as a triage signal). State Exteriority is present by construction (the query set has known ground truth) but is not independently varied. Provenance Binding is tested only for the citation sub-category via a bounded lookup judge. Independent empirical evaluation of State Exteriority and Provenance Binding across diverse deployment conditions is future work.
+\textbf{Scope of empirical evaluation.} Our experiments primarily evaluate Verification Independence (entropy as a triage signal). State Exteriority is present by construction (the query set has known ground truth) but is not independently varied. Provenance Binding is not implemented; for the citation sub-category we substitute an oracle to bound what such a judge could buy (\autoref{sec:eval_bounded}). Independent empirical evaluation of State Exteriority and Provenance Binding across diverse deployment conditions is future work.
 
 \subsection{Design Decisions and Trade-offs}
 
@@ -797,7 +799,7 @@ For each model, outputs are evaluated under four conditions:
 
     \item \textbf{Composed judge (hybrid)} (81.5--91.5\% depending on budget):
     Uses tensor signals for general queries.
-    Uses bounded lookup (checking if cited sources exist) for citation-specific queries.
+    Substitutes a ground-truth oracle for citation-flagged queries, standing in for a bounded lookup; this row is an upper bound, not a deployable result (\autoref{sec:eval_bounded}).
     Tests whether different judge strategies can handle different failure modes.
 \end{enumerate}
 
@@ -834,14 +836,14 @@ Composed & 81.5\% & 87.1\% & 91.5\% \\
 
 The text-guided judge uses behavioral signals: response length, hedging markers, citation patterns. These are patterns the model can learn through training. On our balanced test set, no single text feature exceeds AUC 0.70.
 
-Per-token entropy, by contrast, remains discriminative: pooled AUC 0.757 across all models, consistent across architectures.
+Per-token entropy, by contrast, remains discriminative: pooled AUC 0.870 across all models (0.894--0.922 per family), consistent across architectures. Response length is also a strong ranker on this set (AUC 0.85--0.97 per family, exceeding entropy on two of four), so we ran a separate length-controlled study in which knowable and unknowable queries are matched for response length; entropy retains AUC 0.757 there, indicating the signal is not merely tracking verbosity.
 
 \textbf{Why?} Text features are trainable behavioral patterns; entropy is a computational byproduct that resists manipulation under standard training (\autoref{sec:design}). Whether adversarial fine-tuning could decouple entropy from correctness is an open empirical question (see \autoref{sec:discussion}).
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.85\textwidth]{exp27_entropy_distributions.pdf}
-    \caption{Per-token entropy distributions for knowable vs.\ unknowable queries. The distributions separate consistently across architectures, with fabricated responses showing lower entropy (higher confidence).}
+    \caption{Per-token entropy distributions for knowable vs.\ unknowable queries. The distributions separate consistently across architectures, with responses to unknowable queries showing \emph{higher} entropy (mean 0.61 nats) than responses to knowable ones (0.24).}
     \label{fig:entropy-dist}
 \end{figure}
 
@@ -849,7 +851,7 @@ Per-token entropy, by contrast, remains discriminative: pooled AUC 0.757 across 
 
 The entropy signal is powerful for general queries but has blind spots. The most instructive one: citations.
 
-\textbf{Citation degradation}: entropy separates knowable from unknowable far less well on citation-like queries than elsewhere. Per family, entropy AUC on the citation slice is 0.56--1.00 against 0.89--0.94 on the rest. The signal is weakened, not reversed: flagged fabrications still carry \emph{higher} mean entropy than the non-fabricated rows in that slice (0.575 vs 0.436).
+\textbf{Citation degradation}: entropy separates knowable from unknowable far less well on citation-like queries than elsewhere. On the citation slice entropy discriminates far more weakly than elsewhere, though we state this with caution: the slice holds 144 responses of which only 8 are knowable (two queries, swept in by an apostrophe heuristic), so per-family AUCs there rest on two positive examples each and we do not quote them. The signal is weakened, not reversed: flagged fabrications still carry \emph{higher} mean entropy than the non-fabricated rows in that slice (0.575 vs 0.436).
 
 This is not a flaw in entropy. It is evidence that entropy measures \emph{generation confidence}, not \emph{factual correctness}, and that confidence and correctness come apart most sharply where a fluent surface form is easy to produce and the underlying fact is a lookup.
 
@@ -869,7 +871,7 @@ We corrected using a stratified evaluator: programmatic verification for facts w
 
 \subsection{What the Cost Surface Tells Us}
 
-A system builder can read \autoref{tab:cost-surface} as: ``If I invest in 30\% verification with text-only signals, I buy 87.6\% accuracy. If I instead export entropy and use that for triage, I buy 90.9\% for a bit more overhead. If I compose tensor with bounded lookup, I buy 91.5\%.'' Text-guided triage hits a ceiling around 87--88\% because length is a weak signal under fair comparison; the tensor advantage (+3--5pp) is consistent and architecturally driven. The composed judge's additional lift comes from handling failure modes that entropy alone cannot catch.
+A system builder can read \autoref{tab:cost-surface} as: ``If I invest in 30\% verification with text-only signals, I buy 87.6\% accuracy. If I instead export entropy and use that for triage, I buy 90.9\% for a bit more overhead. If I could add a perfect citation lookup, 91.5\% is the ceiling that would buy me --- our composed row substitutes an oracle for that lookup, so it bounds the gain rather than measuring it.'' Text-guided triage hits a ceiling around 87--88\% because length is a weak signal under fair comparison; the tensor advantage (+3--5pp) is consistent and architecturally driven. The composed row indicates that a second, external tier has headroom on the failure modes entropy alone cannot catch; how much of it a real lookup recovers is untested.
 
 \subsection{Cross-Architecture Generalization}
 
@@ -1081,7 +1083,7 @@ and identify architectural properties that enable escaping it.
 
 Asking a model how confident it is buys almost nothing. Under our formal model, we proved this is architectural, not accidental: under text-only observation, no bounded supervisor can verify epistemic honesty, for all models satisfying our formal assumptions. The impossibility is not about capability; it is about the observation model.
 
-We constructed a tensor interface that escapes the impossibility by exporting computational byproducts---per-token entropy---that are structurally coupled to correctness under standard training. Per-token entropy achieves pooled AUC 0.757, outperforming all text features. The signal generalizes across architectures (Spearman $\rho = 0.762$).
+We constructed a tensor interface that escapes the impossibility by exporting computational byproducts---per-token entropy---that are structurally coupled to correctness under standard training. Per-token entropy achieves pooled AUC 0.870, and 0.757 when response length is held fixed. The signal generalizes across architectures (Spearman $\rho = 0.762$).
 
 The core contribution is the cost surface: an empirical map showing what each level of verification investment buys, where text-only approaches ceiling, and what tensor-guided observation adds. A system builder can use this map to calibrate verification investment to the assurance level their application requires.
 
@@ -1489,7 +1491,7 @@ For each query, compute per-model entropy and test correlation:
 \rho_{\text{Spearman}} = \text{corr}(\text{entropy}_{\text{Model A}}, \text{entropy}_{\text{Model B}})
 \end{equation}
 
-Result: $\rho \geq 0.76$ across all model pairs (mean 0.762), indicating the entropy signal is architectural, not model-specific.
+Result: pairwise $\rho$ ranges 0.739--0.798 (mean 0.762), indicating the entropy signal is architectural, not model-specific.
 
 % --------------------------------------------------------------------------
 % APPENDIX D: TDA Methodology
