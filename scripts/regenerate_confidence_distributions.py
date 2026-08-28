@@ -16,12 +16,16 @@ import numpy as np
 matplotlib.rcParams["pdf.fonttype"] = 42
 matplotlib.rcParams["ps.fonttype"] = 42
 
-# Match the public artifact's scripts/fig2_confidence_distributions.py
-TITLE_SIZE = 18
-LABEL_SIZE = 18
-TICK_SIZE = 15
-LEGEND_SIZE = 15
-SUPTITLE_SIZE = 18
+# Sized for a two-column figure at \columnwidth = 241pt = 3.35in.
+# bbox_inches="tight" is deliberately NOT used: it resizes the canvas in
+# response to the font sizes, so compensating for the scale factor becomes
+# a moving target. With figsize fixed at 3.35in the scale factor is 1.0 and
+# these sizes are the rendered sizes. Body text is 10pt.
+TITLE_SIZE = 8
+LABEL_SIZE = 8
+TICK_SIZE = 7
+LEGEND_SIZE = 7
+SUPTITLE_SIZE = 9
 
 DATA_FILE = "exp27_bounded_verification_20260206_205725.csv"
 
@@ -41,7 +45,7 @@ def main():
         "Mistral": "mistralai/Mistral-7B-Instruct-v0.3",
     }
 
-    fig, axes = plt.subplots(2, 2, figsize=(16, 8)) # type: ignore
+    fig, axes = plt.subplots(2, 2, figsize=(3.35, 2.6)) # type: ignore
     fig.suptitle("Self-Reported Confidence: Knowable vs Unknowable", fontsize=SUPTITLE_SIZE, fontweight="bold") # pyright: ignore[reportUnknownMemberType]
 
     # IBM Design Library colorblind-safe palette, matching the public artifact's
@@ -79,7 +83,7 @@ def main():
             f"arxiv/exp27_confidence_distributions.{ext}",
             f"exp27_confidence_distributions.{ext}",
         ]:
-            fig.savefig(dest, bbox_inches="tight", dpi=150) # pyright: ignore[reportUnknownMemberType]
+            fig.savefig(dest, dpi=150) # pyright: ignore[reportUnknownMemberType]
             print(f"Saved: {dest}")
 
     plt.close(fig)

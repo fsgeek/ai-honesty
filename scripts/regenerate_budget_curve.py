@@ -36,9 +36,11 @@ data = {
 
 budgets = [10, 20, 30]
 
-FIG_W_SIZE, FIG_H_SIZE = 8.0, 4.0  # inches; these five were undefined (NameError)
-# Match the public artifact's scripts/fig3_budget_curve.py
-LABEL_SIZE, TICK_SIZE, LEGEND_SIZE = 18, 15, 15
+FIG_W_SIZE, FIG_H_SIZE = 3.35, 2.1  # inches = \columnwidth in acmart sigplan
+# Sized for the column at scale 1.0; see the note in
+# regenerate_confidence_distributions.py on why bbox_inches="tight" is
+# avoided. eval.tex includes this at width=\columnwidth.
+LABEL_SIZE, TICK_SIZE, LEGEND_SIZE = 8, 7, 7
 fig, ax = plt.subplots(1, 1, figsize=(FIG_W_SIZE, FIG_H_SIZE)) # pyright: ignore[reportUnknownMemberType]
 
 # IBM Design Library colorblind-safe palette, matching the public artifact's
@@ -94,5 +96,5 @@ for ext in ["pdf", "png"]:
         f"arxiv/exp27_aggregate_budget_curve.{ext}",
         f"exp27_aggregate_budget_curve.{ext}",
     ]:
-        fig.savefig(dest, bbox_inches="tight", dpi=150) # pyright: ignore[reportUnknownMemberType]
+        fig.savefig(dest, dpi=150) # pyright: ignore[reportUnknownMemberType]
         print(f"Saved: {dest}")
