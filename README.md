@@ -11,14 +11,29 @@ systems can do about it when they cannot.
 - *Using Epistemic Observability in Agentic Systems for Combating
   Hallucinations* — position paper, PACMI '26 (`papers/pacmi26/`)
 
-**Core finding:** self-reported confidence is *inverted* — every model family
-we tested (OLMo-3, Llama 3.1, Qwen3, Mistral) reports higher confidence on
-fabrications than on knowable facts (AUC 0.28–0.36, below random). Internal
-telemetry (per-token entropy, attention summaries) discriminates reliably
-(AUC 0.72–1.00) and cannot be separately controlled by the model under
-current training objectives. The systems consequence: expose that telemetry
-through the generation interface and spend verification budgets where they
-buy the most reliability.
+**Core finding:** self-reported confidence is close to useless as a
+verification signal, because it is compressed at the top of its scale. Across
+four model families (OLMo-3, Llama 3.1, Qwen3, Mistral) models report a mean
+of 0.98 on knowable queries and 0.73 on unknowable ones, and 43% of
+unknowable queries — questions with no correct answer — receive a literal
+"100". Internal telemetry (per-token entropy, attention summaries)
+discriminates reliably (AUC 0.87–0.92 pooled and per family) and cannot be
+separately controlled by the model under current training objectives. The
+systems consequence: expose that telemetry through the generation interface
+and spend verification budgets where they buy the most reliability.
+
+> **Correction (2026-08-28).** Earlier versions of this README, and
+> [arXiv:2603.20531](https://arxiv.org/abs/2603.20531) v2, reported that
+> self-report was *inverted* (AUC 0.28–0.36, below random). That was an
+> artifact of a confidence-parse bug: the extractor decoded the prompt along
+> with the generation and took the first integer, which was usually the `0`
+> in the prompt's own "scale of 0-100" text. Reported by Chris Brew in
+> [issue #1](https://github.com/fsgeek/ai-honesty/issues/1) and fixed at the
+> source in 3488f83. Corrected, every family scores *above* chance (AUC
+> 0.66–0.92). The impossibility argument does not depend on the inversion —
+> it needs only that self-report be uninformative to a bounded supervisor —
+> and the entropy, budget-curve, and post-training results are unaffected. An
+> arXiv v3 carrying the correction is in preparation.
 
 ## Reference implementation
 

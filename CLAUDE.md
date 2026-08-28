@@ -33,9 +33,11 @@ The project requires Python 3.11+ and CUDA for running transformer experiments.
 - **Tensor Entropy**: Per-token entropy during generation; discriminates knowable from unknowable queries
 - **Self-Report Confidence**: Model's stated confidence when asked "How confident are you?"
 
-**Key Empirical Findings (January 2026):**
-- **Self-report inversion is UNIVERSAL**: All tested models (OLMo, Llama, Qwen, Mistral) report higher confidence on fabrications than on knowable facts. Self-report AUC ranges 0.28-0.46 (below random).
-- **Tensor signals reliably discriminate**: Entropy-based AUC ranges 0.72-1.00 across all architectures.
+**Key Empirical Findings (updated 2026-08-28):**
+- **Self-report is compressed, not inverted**: All tested models (OLMo, Llama, Qwen, Mistral) report near-ceiling confidence almost everywhere — mean 0.98 on knowable queries, 0.73 on unknowable ones, with 43% of unknowable queries answered with a literal "100". Self-report AUC 0.66-0.92 per family (0.73 pooled): above chance, but too compressed to threshold on.
+  - **RETRACTED**: the earlier "self-report inversion is universal, AUC 0.28-0.46 below random" finding was a confidence-parse artifact — `get_self_reported_confidence` decoded prompt+generation and took the first integer, usually the `0` in the prompt's "scale of 0-100". Reported by Chris Brew ([issue #1](https://github.com/fsgeek/ai-honesty/issues/1)), fixed at source in 3488f83. Do not reinstate this claim. The impossibility argument does not depend on it.
+- **Tensor signals reliably discriminate**: Entropy-based AUC 0.87-0.92 across architectures on `exp27_bounded_verification`; up to 1.00 post-training in Exp34. Unaffected by the parse bug — the budget-curve pipeline never read `self_report_confidence`.
+- **Response length is a weak text baseline**: measured AUC 0.45-0.67 per family (Qwen 0.453, below chance). An earlier "0.85-0.97" note did not reproduce and was withdrawn.
 - **Alignment tax does NOT generalize**: Testing base/instruct pairs across four model families found no consistent pattern; effect is training-procedure-specific, not architectural.
 
 ## Scripts Directory
