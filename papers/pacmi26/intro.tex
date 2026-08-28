@@ -24,7 +24,7 @@ inevitable for LLMs over the class of computable functions.
 % we prove an observational limit on what a supervisor can verify.
 % [moved to telemetry paragraph below]
 
-%Verification has a cost. 
+%Verification has a cost.
 Consequently, every system that
 deploys a language model component must allocate a budget: how much of the output to verify,
 which outputs to prioritize, and what signals to use for triage.
@@ -32,14 +32,14 @@ Verification cost varies by mechanism: a citation lookup costs latency,
 a second model as judge costs compute, human-in-the-loop validation
 costs both latency and automation flexibility.
 
-The fundamental source of these costs is the interface through which language models are observed. 
+The fundamental source of these costs is the interface through which language models are observed.
 Today's systems expose only the generated text while hiding the model's internal computation,
-which contains signals that may distinguish grounded generation from fabrication. 
-Because these signals are discarded before reaching the supervisor, they cannot be recovered from the output alone. 
-Under bounded supervision, 
-grounded and fabricated internal states can be observationally equivalent through the text channel alone, 
+which contains signals that may distinguish grounded generation from fabrication.
+Because these signals are discarded before reaching the supervisor, they cannot be recovered from the output alone.
+Under bounded supervision,
+grounded and fabricated internal states can be observationally equivalent through the text channel alone,
 independent of model scale or training procedure~\cite{mason2026epistemic}.
-This mismatch between what the model internally observes during generation 
+This mismatch between what the model internally observes during generation
 and what the supervisor can observe afterward creates a fundamental observability gap.
 
 This observability gap has direct consequences for verification cost:
@@ -51,16 +51,16 @@ This paper therefore asks the systems question: if language models exposed
 richer observational interfaces, how would that change the cost,
 effectiveness, and return on investment of verification?
 
-Our key insight is that the information needed to enrich this interface already exists during inference. 
-During inference, language models naturally produce auxiliary information that reflects their internal computation. 
-We refer to these signals as \emph{telemetry}: byproducts of inference that the model does not explicitly choose to communicate. 
-This distinguishes telemetry from the model's \emph{testimony}---the generated text itself. 
-Whereas testimony is optimized to satisfy the prompting objective and can therefore be misleading, 
-telemetry arises as a consequence of computation: under current training objectives the model 
-cannot alter it without altering the computation itself. 
+Our key insight: information needed to enrich this interface already exists during inference.
+During inference, language models naturally produce auxiliary information that reflects their internal computation.
+We refer to these signals as \emph{telemetry}: byproducts of inference that the model does not explicitly choose to communicate.
+This distinguishes telemetry from the model's \emph{testimony}---the generated text itself.
+Whereas testimony is optimized to satisfy the prompting objective and can therefore be misleading,
+telemetry arises as a consequence of computation: under current training objectives the model
+cannot alter it without altering the computation itself.
 
 % VA: We don't need this sentence in the intro -- better to introduce this later.
-%This is an empirical property of 
+%This is an empirical property of
 %today's training pipelines, not an architectural guarantee, and we treat it as such (\autoref{sec:threat}).
 
 We introduce \emph{epistemic observability}: an interface that exposes this

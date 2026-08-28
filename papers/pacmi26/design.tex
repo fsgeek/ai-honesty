@@ -3,9 +3,9 @@
 %% ==========================================================================
 \section{Epistemic Observability}
 
-We use \emph{epistemic state} to describe the model's internal computational state as 
+We use \emph{epistemic state} to describe the model's internal computational state as
 it relates to the reliability of its generation.
-This state provides evidence about whether the model is generating from information 
+This state provides evidence about whether the model is generating from information
 it reliably represents or constructing a plausible response without such support.
 
 We define \emph{epistemic observability} as the ability of a language model to
@@ -42,24 +42,24 @@ We do not claim that Tier~3 identifies the \emph{cause} of a hallucination in th
 
 Telemetry is produced by the same model that produces the testimony, so it is mutable.
 Fine-tuning can shift it, and a model trained against a monitored signal could learn to manipulate it deliberately.
-Changing the telemetry such as the entropy trace or attention geometry requires 
-changing the computation that produces the text. 
+Changing the telemetry such as the entropy trace or attention geometry requires
+changing the computation that produces the text.
 In contrast, behavioral signals (response length, hedging) can be adapted by training
 without changing the underlying computation. Thus, telemetry
 has an additional robustness property as compared to the behavioral signal
 that the telemetry is not \emph{separately} controllable from the computation
 being monitored.
 
-Independent work on persona monitoring supports the asymmetry: activation
+Persona monitoring work supports the asymmetry: activation
 projections reveal distinct internal configurations for different epistemic
-conditions even when the text is similar~\cite{lu2026assistantaxissituatingstabilizing}.
+conditions even with similar text~\cite{lu2026assistantaxissituatingstabilizing}.
 
 This distinction comes with two important limits. First, the property holds under \emph{current}
-pipelines. Optimization that explicitly incorporates the monitor into the training objective, 
+pipelines. Optimization that explicitly incorporates the monitor into the training objective,
 however, constitutes a different regime about which we make no claim.
 Second, mechanistic tools can already locate the subspaces such an attack would
 target~\cite{winninger2025usingmechanisticinterpretabilitycraft}.
-Exposing telemetry therefore makes such manipulation observable and 
+Exposing telemetry therefore makes such manipulation observable and
 auditable rather than hidden behind the model interface.
 
 \subsection{Runtime Integration}
@@ -70,24 +70,24 @@ fabrication risk and expend its verification budget accordingly.
 This separates \emph{observation} from \emph{action}: the epistemic
 observability interface exposes evidence about the model's epistemic state,
 while a deployment-specific policy determines what to do with that evidence.
-Possible actions form a ladder of increasing cost, including \emph{abstain or flag} (withhold or annotate the output); 
-\emph{re-generate} (sample again or add reasoning steps and require agreement); 
-\emph{tool verification} (route the output to a bounded external check---a citation lookup, a database query, a test); 
-\emph{escalation} (request telemetry from a higher observability tier); 
+Possible actions form a ladder of increasing cost, including \emph{abstain or flag} (withhold or annotate the output);
+\emph{re-generate} (sample again or add reasoning steps and require agreement);
+\emph{tool verification} (route the output to a bounded external check---a citation lookup, a database query, a test);
+\emph{escalation} (request telemetry from a higher observability tier);
 and \emph{human review}.
 
 The observability interface integrates with an agent runtime at three points. At the
-\emph{serving layer}, telemetry is exported alongside the generated text, 
-with the amount and cost of telemetry determined by the selected observability tier. 
-At the \emph{composition boundary}, where the runtime 
-intercepts tool and sub-agent calls, the telemetry can gate propagation: outputs with elevated 
-fabrication risk can be verified, re-generated, escalated, or withheld before use for subsequent computation. 
-This is particularly important in multi-step agentic workflows, 
-where an unverified fabrication can propagate through later steps. 
+\emph{serving layer}, telemetry is exported alongside the generated text,
+with the amount and cost of telemetry determined by the selected observability tier.
+At the \emph{composition boundary}, where the runtime
+intercepts tool and sub-agent calls, the telemetry can gate propagation: outputs with elevated
+fabrication risk can be verified, re-generated, escalated, or withheld before use for subsequent computation.
+This is particularly important in multi-step agentic workflows,
+where an unverified fabrication can propagate through later steps.
 At the \emph{policy layer}, a budget allocator maps the available
 telemetry to concrete actions based on
 deployment-specific costs and reliability requirements.
-The observability tiers therefore expose progressively richer evidence, 
+The observability tiers therefore expose progressively richer evidence,
 while the runtime determines whether the expected benefit of that evidence
 and any resulting verification action justifies its cost.
 
@@ -147,8 +147,8 @@ anchoring). The interface returns:
 
 \fakepara{Example Entropy Trace.}\autoref{fig:entropy_trace} shows the generated output for the query \textit{What shape is wombat scat?}
 with per-token entropy color coded from white (confident) to deep red (uncertain).
-The trace shows where generation proceeded with high confidence (suggesting retrieval of a stored pattern)
-and where it proceeded with high uncertainty (suggesting fabrication).
+This shows where generation proceeded with confidence (suggesting retrieval of a stored pattern)
+and where it proceeded with uncertainty (suggesting fabrication).
 
 \fakepara{What the tensor provides.}
 The entropy trace provides a falsifiability signal. If a model claims certainty

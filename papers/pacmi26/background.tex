@@ -17,8 +17,8 @@ A model trained on this corpus inherits its mixed regularities: base models
 fabricate substantially on factual benchmarks, yet also encode internal
 representations of correctness that can be elicited under the right
 conditions~\cite{burns2023discovering}. Consequently, the model is neither reliably honest
-nor uniformly deceptive. 
-This uncertainty makes verification necessary: 
+nor uniformly deceptive.
+This uncertainty makes verification necessary:
 the challenge is determining which outputs require scrutiny and at what cost.
 
 \subsection{Testimony \& Telemetry}
@@ -51,7 +51,7 @@ answer (e.g., national capitals, well-documented scientific facts), whereas
 \emph{unknowable} queries have no correct answer for any model, because the
 entity does not exist, the event has not happened, or the information is
 private. ``Knowable'' is a property of the query, not a claim about a
-particular model's weights; a model may still fail a knowable query. 
+particular model's weights; a model may still fail a knowable query.
 We report each model's self-confidence
 score for the self-reported confidence baseline, the cheapest verification strategy
 available to a bounded supervisor. In this baseline, the supervisor
@@ -61,7 +61,7 @@ model can introspect and report its epistemic state through text.
 \begin{figure}[t]%
 \centering%
 \includegraphics[width=\columnwidth]{figures/exp27_confidence_distributions.pdf}%
-\caption{All four models report high confidence on unknowable queries}
+\caption{Model confidence on unknowable queries}
 \label{fig:confidence_dist}%
 \end{figure}
 
@@ -73,5 +73,4 @@ architectures), but the scale is compressed into its top end, so a threshold
 that admits most correct answers also admits most fabrications. A user who
 asks ``how confident are you?'' is told 100 either way, and an adversary need
 only stay inside the band the model already occupies. Under bounded oversight,
-a text-only supervisor cannot distinguish truthful uncertainty from confident
-fabrication.
+a text-only supervisor cannot distinguish uncertainty from fabrication.
