@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Regenerate the budget curve figure with the length-only text baseline.
 
-Text baseline now uses response length alone (AUC 0.85-0.97 per model),
-the strongest available text-channel signal. Previous versions used a
+Text baseline now uses response length alone, the strongest available
+text-channel signal (measured AUC 0.45-0.67 per model on
+exp27_bounded_verification; an earlier "0.85-0.97" note here did not
+reproduce and is withdrawn). Previous versions used a
 mixed judge (self-report + hedging + length); self-report contributed
 little because it is compressed at the top of its scale (see issue #1 --
 the earlier "inverted self-report" reading was a parse artifact).
