@@ -205,4 +205,61 @@ axiom superlinear_verification_cost_assumption :
   -- This is an empirical claim, not a logical necessity.
   True  -- placeholder: the claim is about natural language, not logic
 
+/-! ## Verification Impossibility
+
+    This is the result the paper's abstract actually claims: a bounded
+    supervisor cannot verify epistemic honesty from text alone.
+
+    Note what it does NOT assume. There is no premise about what the
+    generating policy conditions on. The policy may consult retrieved
+    documents, tools, or a database; it may be world-blind or not. The
+    impossibility follows entirely from the supervisor's observation
+    being identical across the two worlds it must distinguish, which is
+    the hallucination-regime premise carried by `BoundedSupervisor`.
+
+    Retrieval does not escape it, but the reason is worth stating
+    carefully. A retrieval-augmented system conditions on a document
+    corpus, not on `W`. Its grounding is to the index, which is a
+    distinct world state that may be stale, partial, or simply wrong
+    about `W`. So retrieval relocates the question rather than answering
+    it: a system can be faithful to its corpus and still fabricate about
+    the world, and the supervisor's observation of *that* gap is again
+    identical across the worlds it must distinguish.
+
+    The escape is to export something that differs across worlds --
+    telemetry coupled to the computation -- which is the paper's proposal. -/
+
+/-- A verdict function: a bounded supervisor's decision rule maps what it
+    observes to an accept/reject judgment. It has no other input; in
+    particular it has no oracle access to the world. -/
+def Verdict {Q W : Type} {RS : ResponseSpace}
+    (S : BoundedSupervisor Q W RS) : Type := S.Obs → Bool
+
+/-- **Verification impossibility.** For any decision rule whatsoever, the
+    verdict on the fabrication is the same in both worlds. The supervisor
+    cannot separate the world in which `r_fab` is acceptable from the one
+    in which it must be rejected, because its input is identical. -/
+theorem verification_impossibility
+    {Q W : Type} {RS : ResponseSpace}
+    (AC : AmbiguityCondition Q W)
+    (S : BoundedSupervisor Q W RS)
+    (V : Verdict S) :
+    V (S.observe AC.q S.r_fab AC.wA) = V (S.observe AC.q S.r_fab AC.wB) := by
+  rw [S.indistinguishable AC]
+
+/-- Corollary: no decision rule meets the honesty requirement, which
+    demands opposite verdicts in the two worlds. Any `V` claimed to do so
+    yields a contradiction. -/
+theorem no_honest_verdict
+    {Q W : Type} {RS : ResponseSpace}
+    (AC : AmbiguityCondition Q W)
+    (S : BoundedSupervisor Q W RS)
+    (V : Verdict S)
+    (accepts_in_wA : V (S.observe AC.q S.r_fab AC.wA) = true)
+    (rejects_in_wB : V (S.observe AC.q S.r_fab AC.wB) = false) :
+    False := by
+  have h := verification_impossibility AC S V
+  rw [accepts_in_wA, rejects_in_wB] at h
+  exact Bool.noConfusion h
+
 end

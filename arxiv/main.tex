@@ -418,12 +418,22 @@ the model access to external information. Retrieval-augmented generation does
 exactly this: the policy conditions on retrieved documents, not just the query.
 Does this break the impossibility?
 
-It does not. The problem shifts from representation to learning.
+It does not, and the reason is worth separating from the one usually given.
+Retrieval does not give the policy access to $w$. It gives access to a
+document corpus $w_{docs}$ --- a distinct world state, assembled at some
+earlier time, which may be stale, incomplete, or simply wrong about $w$. A
+retrieval-augmented system can therefore be perfectly faithful to its index
+and still fabricate about the world, because faithfulness to documents is not
+grounding in reality. Retrieval relocates the epistemic question from the
+model to the corpus rather than answering it, and the supervisor's problem
+reappears one level down: verifying that $w_{docs}$ agrees with $w$ is itself
+a verification task under a bounded budget.
 
 \begin{definition}[Grounded Policy]
 A grounded policy is a stochastic function $\pi: \Q \times \D \to \Delta(\R)$,
-where $\D$ represents retrieved documents or observations of $w$ available at
-inference time. This policy class \emph{can} theoretically represent different
+where $\D$ represents documents retrieved from a corpus at inference time.
+Note that $\D$ is drawn from $w_{docs}$, not from $w$; the distinction is the
+subject of the preceding paragraph. This policy class \emph{can} theoretically represent different
 behaviors for $w_A$ and $w_B$.
 \end{definition}
 
