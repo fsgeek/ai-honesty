@@ -61,15 +61,13 @@ model can introspect and report its epistemic state through text.
 \begin{figure}[t]%
 \centering%
 \includegraphics[width=\columnwidth]{figures/exp27_confidence_distributions.pdf}%
-\caption{Self-reported confidence is inverted: all four models report higher
-  confidence on unknowable queries}
+\caption{All four models report high confidence on unknowable queries}
 \label{fig:confidence_dist}%
 \end{figure}
 
 \autoref{fig:confidence_dist} shows that self-reported confidence
-is \emph{inverted}: all four models report higher confidence on unknowable
-queries than on knowable ones, yielding AUC 0.28--0.36 across architectures
-(all below random). A
+is reports high confidence on both unknowable
+queries than on knowable ones. A
 user who asks ``how confident are you?'' receives a number that anticorrelates
 with epistemic grounding, and an adversary could exploit the inversion to make
 fabrications appear maximally confident. Under bounded oversight, a text-only
