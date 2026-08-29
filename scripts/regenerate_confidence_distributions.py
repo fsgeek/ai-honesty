@@ -21,11 +21,13 @@ matplotlib.rcParams["ps.fonttype"] = 42
 # response to the font sizes, so compensating for the scale factor becomes
 # a moving target. With figsize fixed at 3.35in the scale factor is 1.0 and
 # these sizes are the rendered sizes. Body text is 10pt.
-TITLE_SIZE = 8
-LABEL_SIZE = 8
-TICK_SIZE = 7
-LEGEND_SIZE = 7
-SUPTITLE_SIZE = 9
+TITLE_SIZE = 18
+LABEL_SIZE = 18
+TICK_SIZE = 15
+LEGEND_SIZE = 15
+SUPTITLE_SIZE = 10
+FIG_W_SIZE=8
+FIG_H_SIZE=4
 
 DATA_FILE = "exp27_bounded_verification_20260206_205725.csv"
 
@@ -48,7 +50,7 @@ def main():
     # Shared x/y labels and a single figure-level legend: at column width
     # there is no room to repeat them in each of the four panels. sharex/
     # sharey also removes three redundant tick label sets.
-    fig, axes = plt.subplots(2, 2, figsize=(3.35, 2.75), sharex=True, sharey=True) # type: ignore
+    fig, axes = plt.subplots(2, 2, figsize=(FIG_W_SIZE, FIG_H_SIZE), sharex=True, sharey=True) # type: ignore
 
     # IBM Design Library colorblind-safe palette, matching the public artifact's
     # scripts/fig2_confidence_distributions.py so paper and artifact agree.
@@ -57,35 +59,35 @@ def main():
     color_unknow = "#785ef0"   # purple
 
     for ax, (label, model_id) in zip(axes.flat, families.items()):
-        know_conf = [float(r["self_report_confidence"]) for r in rows
-                     if r["model_id"] == model_id and r["category"] == "knowable"]
-        unknow_conf = [float(r["self_report_confidence"]) for r in rows
-                       if r["model_id"] == model_id and r["category"] == "unknowable"]
+        know_conf = np.array([float(r["self_report_confidence"]) for r in rows
+                     if r["model_id"] == model_id and r["category"] == "knowable"])
+        unknow_conf = np.array([float(r["self_report_confidence"]) for r in rows
+                       if r["model_id"] == model_id and r["category"] == "unknowable"])
 
-        bins = np.linspace(0, 1, 20)
-        ax.hist(know_conf, bins=bins, alpha=0.7, label="Knowable",
-                color=color_know, edgecolor="black", linewidth=0.5,
-                hatch="//", density=True)
-        ax.hist(unknow_conf, bins=bins, alpha=0.7, label="Unknowable",
-                color=color_unknow, edgecolor="black", linewidth=0.5,
-                hatch="\\\\", density=True)
+        # Empirical CDF
+        know_sorted = np.sort(know_conf)
+        unknow_sorted = np.sort(unknow_conf)
 
-        ax.set_title(label, fontsize=TITLE_SIZE, fontweight="bold", pad=2)
+        know_cdf = np.arange(1, len(know_sorted) + 1) / len(know_sorted)
+        unknow_cdf = np.arange(1, len(unknow_sorted) + 1) / len(unknow_sorted)
+
+        ax.plot(know_sorted, know_cdf, label="Knowable", color=color_know, linewidth=2)
+
+        ax.plot(unknow_sorted, unknow_cdf, label="Unknowable", color=color_unknow, linewidth=2)
+
+
+        ax.set_title(label, fontsize=SUPTITLE_SIZE, fontweight="bold", pad=2)
         ax.tick_params(axis="both", labelsize=TICK_SIZE)
-        # Log scale: nearly all mass sits at the top of the confidence
-        # range, so a linear density axis renders every other bar invisible.
-        ax.set_yscale("log")
-        ax.set_ylim(1e-2, 1e2)
 
     # Legend above the panels, axis labels below: putting both at the
     # bottom overlaps them.
     handles, labels_ = axes.flat[0].get_legend_handles_labels()
     fig.legend(handles, labels_, fontsize=LEGEND_SIZE, ncol=2,
-               loc="upper center", bbox_to_anchor=(0.5, 1.0), frameon=False)
-    fig.supxlabel("Self-Reported Confidence", fontsize=LABEL_SIZE, y=0.005)
-    fig.supylabel("Density (log)", fontsize=LABEL_SIZE, x=0.01)
+               loc="upper center", bbox_to_anchor=(0.5, 1.02), frameon=False)
+    fig.supxlabel("Self-Reported Confidence", fontsize=LABEL_SIZE)
+    fig.supylabel("CDF", fontsize=LABEL_SIZE)
 
-    plt.tight_layout(rect=(0.03, 0.03, 1.0, 0.94), h_pad=0.6)
+    fig.subplots_adjust(bottom=0.17, wspace=0.1)
 
     for ext in ["pdf", "png"]:
         for dest in [
@@ -94,7 +96,7 @@ def main():
             f"arxiv/exp27_confidence_distributions.{ext}",
             f"exp27_confidence_distributions.{ext}",
         ]:
-            fig.savefig(dest, dpi=150) # pyright: ignore[reportUnknownMemberType]
+            fig.savefig(dest, bbox_inches="tight", dpi=150) # pyright: ignore[reportUnknownMemberType]
             print(f"Saved: {dest}")
 
     plt.close(fig)

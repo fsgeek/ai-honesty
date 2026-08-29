@@ -36,28 +36,32 @@ data = {
 
 budgets = [10, 20, 30]
 
-FIG_W_SIZE, FIG_H_SIZE = 3.35, 2.25  # inches = \columnwidth in acmart sigplan
+#FIG_W_SIZE, FIG_H_SIZE = 3.35, 2.25  # inches = \columnwidth in acmart sigplan
 # Sized for the column at scale 1.0; see the note in
 # regenerate_confidence_distributions.py on why bbox_inches="tight" is
 # avoided. eval.tex includes this at width=\columnwidth.
-LABEL_SIZE, TICK_SIZE, LEGEND_SIZE = 8, 7, 7
+FIG_W_SIZE=8
+FIG_H_SIZE=4
+LABEL_SIZE, TICK_SIZE, LEGEND_SIZE = 18, 15, 15
+LINEWIDTH=1.5
+MARKER_SIZE=5
 fig, ax = plt.subplots(1, 1, figsize=(FIG_W_SIZE, FIG_H_SIZE)) # pyright: ignore[reportUnknownMemberType]
 
 # IBM Design Library colorblind-safe palette, matching the public artifact's
 # scripts/fig3_budget_curve.py so paper and artifact agree.
 # Distinct markers + linestyles ensure greyscale readability
 styles: dict[str, dict[str, object]] = {
-    "No judge":              {"color": "gray", "marker": "s", "linestyle": "--", "linewidth": 1.5},
-    "Text-guided (length)":  {"color": "#dc267f", "marker": "o", "linestyle": "-", "linewidth": 2},
-    "Tensor-guided":         {"color": "#785ef0", "marker": "^", "linestyle": "-", "linewidth": 2},
-    "Composed":              {"color": "#648fff", "marker": "D", "linestyle": "-.", "linewidth": 2},
+    "No judge":              {"color": "gray", "marker": "s", "linestyle": "--", "linewidth": LINEWIDTH},
+    "Text-guided (length)":  {"color": "#dc267f", "marker": "o", "linestyle": "-", "linewidth": LINEWIDTH},
+    "Tensor-guided":         {"color": "#785ef0", "marker": "^", "linestyle": "-", "linewidth": LINEWIDTH},
+    "Composed":              {"color": "#648fff", "marker": "D", "linestyle": "-.", "linewidth": LINEWIDTH},
 }
 
 for label, values in data.items():
     s = styles[label]
     ax.plot(budgets, values, label=label, marker=s["marker"], # pyright: ignore[reportUnknownMemberType]
             linestyle=s["linestyle"], linewidth=s["linewidth"],
-            color=s["color"], markersize=8)
+            color=s["color"], markersize=MARKER_SIZE)
 
 # Annotate the growing gap at each budget level, offset above the higher
 # line so the label doesn't collide with the Composed curve.
