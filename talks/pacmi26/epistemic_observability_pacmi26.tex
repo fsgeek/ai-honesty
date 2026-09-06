@@ -265,66 +265,61 @@ worth per unit of verification budget.}
 %------------------------------------------------------------------------------
 \begin{frame}{Tensor-guided verification wins at every budget}
   \begin{columns}[T]
-    \begin{column}{0.54\textwidth}
+    \begin{column}{0.58\textwidth}
       \includegraphics[width=\textwidth]{exp27_aggregate_budget_curve.pdf}
-      \footnotesize
-      Per family at 10\%, over no judge: OLMo 69.5\,$\to$\,75.1, Llama
-      82.5\,$\to$\,88.1, Qwen 87.0\,$\to$\,91.7, Mistral 64.0\,$\to$\,72.0.
     \end{column}
-    \begin{column}{0.46\textwidth}
-      \small
-      800 responses pooled under one budget: \pp{+3.3}, \pp{+4.6}, \pp{+3.3}
-      over the length judge at 10/20/30\%.
+    \begin{column}{0.42\textwidth}
+      800 responses, four families, one budget.
 
       \vspace{0.4em}
-      \textbf{What we do not claim.}
-      \begin{itemize}
-        \item That entropy is the better \emph{detector}. Length ranks at AUC
-          0.85--0.97 and beats entropy on two of four families.
-        \item The gain comes from \emph{which items} each signal selects.
-          Mistral at 30\%: length wins by 2.2\,pp.
-        \item The composed judge reads the ground-truth label for citation
-          queries: the headroom a perfect lookup would buy, not a result.
-      \end{itemize}
+      \pp{+3.3}, \pp{+4.6}, \pp{+3.3} over the best text signal at
+      10, 20, and 30\% verification.
+
+      \vspace{0.4em}
+      Every family improves over no judge. At 10\%: OLMo
+      69.5\,$\to$\,75.1, Llama 82.5\,$\to$\,88.1, Qwen 87.0\,$\to$\,91.7,
+      Mistral 64.0\,$\to$\,72.0.
+
+      \vspace{0.4em}
+      The entropy trace costs 2--7\% latency and no change to the model.
     \end{column}
   \end{columns}
-  \note{9:30. Give the caveats the same time as the headline. A reviewer who
-  hears "entropy beats length" will check and find otherwise. The honest
-  version is: two signals, different items, and one of them the model can be
-  trained to move without touching the computation. That is the next slide.}
+  \note{9:30. Headline, then the per-family line. Do not recite the
+  non-claims here; they are in the paper. If asked about length as a
+  detector, the next slide is the answer.}
 \end{frame}
 
 %------------------------------------------------------------------------------
-\begin{frame}{Why prefer telemetry when a text signal is this good?}
+\begin{frame}{Two signals, different items}
   \begin{columns}[T]
     \begin{column}{0.5\textwidth}
-      \textbf{Coupling.} Length and hedging are surface regularities; training
-      can move them without touching the computation beneath. The entropy
-      trace moves only if the computation does. It is not \emph{separately}
-      controllable from the thing being monitored.
+      \textbf{Word count is a strong text signal.} It ranks knowable
+      against unknowable at AUC 0.85--0.97 per family. The tensor's
+      budget advantage is not a better detector. It comes from
+      \emph{which items} each signal selects for verification.
 
-      \vspace{0.4em}
-      \small
-      Holds under current pipelines. A monitor inside the training objective
-      is a different regime; we claim nothing about it. Exporting the telemetry
-      at least makes that manipulation auditable.
+      \vspace{0.5em}
+      \textbf{And it is a signal training can move.} Length and hedging are
+      surface regularities; a model can be trained to change them without
+      changing the computation beneath. The entropy trace moves only when
+      the computation does.
     \end{column}
     \begin{column}{0.5\textwidth}
-      \textbf{Does post-training erase it?} Four public OLMo-3 checkpoints:
-      base, SFT, DPO, RLVR.
+      \textbf{Post-training does not erase it.} Four public OLMo-3
+      checkpoints: base, SFT, DPO, RLVR.
       \begin{itemize}
-        \item Knowable-query entropy: 1.18\,$\to$\,0.18 nats.
-        \item Surviving fabrications: 1.49\,$\to$\,0.98, holding through RLVR.
-        \item Separation \emph{widens}: AUC 0.67\,$\to$\,1.00 on 48 probes;
-          0.63\,$\to$\,0.81--0.87 with the true-but-implausible category counted.
-        \item Refusals on fabrication prompts: 0\%\,$\to$\,56\%.
+        \item Knowable-query entropy falls 1.18\,$\to$\,0.18 nats.
+        \item Fabrications that survive stay high: 1.49\,$\to$\,0.98.
+        \item The separation \emph{widens} through every stage.
+        \item Refusals on fabrication prompts rise 0\%\,$\to$\,56\%.
       \end{itemize}
-      \small The widening is robust. The perfect ceiling is not.
+      \vspace{0.3em}
+      Post-training improves the testimony and leaves the telemetry usable.
     \end{column}
   \end{columns}
-  \note{10:45. The wombat in the trace slide belongs to the excluded category,
-  so say the 0.81--0.87 figure, not just the 1.00. Post-training makes the
-  testimony better and leaves the telemetry usable; that is the finding.}
+  \note{10:45. This is the reason to want the telemetry when text is this
+  good: different items, and a signal the model cannot move separately from
+  its computation. AUC figures and the probe-set caveat are in backup.}
 \end{frame}
 
 %------------------------------------------------------------------------------
@@ -358,36 +353,33 @@ worth per unit of verification budget.}
 \end{frame}
 
 %------------------------------------------------------------------------------
-\begin{frame}{What this is, and the ask}
+\begin{frame}{The ask}
   \begin{columns}[T]
     \begin{column}{0.5\textwidth}
-      \textbf{Not claimed}
-      \begin{itemize}
-        \item Unfakeable under adversarial training.
-        \item That tensor signals survive composition in recursive pipelines.
-        \item Optimality. We show existence.
-        \item Closed-weight models: five further API endpoints (4B--235B,
-          top-5 logprobs only) give AUC 0.65--0.88, but providers that export
-          no logprobs remain untested.
-      \end{itemize}
+      \textbf{Signal access is a provider choice, and it is eroding.}
+      Log-probabilities were on early completion endpoints. They are absent
+      from the newest reasoning models, the systems whose output is hardest
+      to verify.
+
+      \vspace{0.5em}
+      When only the provider can see the telemetry, only the provider can
+      verify. Everyone downstream pays to reconstruct what the model already
+      computed.
     \end{column}
     \begin{column}{0.5\textwidth}
-      \textbf{Signal access is a provider choice, and it is eroding.}
-      Log-probabilities were on early completion endpoints and are absent from
-      the newest reasoning models, the systems whose output is hardest to verify.
+      \textbf{It works through an API, too.} Top-5 log-probabilities from
+      five serverless endpoints, 4B to 235B parameters including two
+      mixture-of-experts models, separate knowable from unknowable at AUC
+      0.65--0.88.
 
-      \vspace{0.4em}
-      When only the provider can see the telemetry, only the provider can
-      verify. Everyone downstream pays to reconstruct it.
-
-      \vspace{0.4em}
-      \begin{block}{The ask}
-        Export the telemetry. It already exists; the interface is the only
+      \vspace{0.5em}
+      \begin{block}{}
+        Export the telemetry. It already exists. The interface is the only
         thing discarding it.
       \end{block}
     \end{column}
   \end{columns}
-  \note{12:00. End on the ask. If short on time, drop the runtime slide, not
+  \note{12:00. End here. If short on time, drop the runtime slide, not
   this one.}
 \end{frame}
 
@@ -477,6 +469,26 @@ worth per unit of verification budget.}
       Peak entropy helps the MoE models; exploratory, not held-out.
     \end{column}
   \end{columns}
+\end{frame}
+
+\begin{frame}{Backup: what the paper does not claim}
+  \small
+  \begin{itemize}
+    \item That entropy is the better \emph{detector}: length ranks at AUC
+      0.85--0.97 and beats entropy (0.87--0.92) on Llama and Mistral. On
+      Mistral at 30\% budget the length judge wins by 2.2\,pp.
+    \item That the composed judge is achievable: it reads the ground-truth
+      label for citation queries, so its 91.5\% is the headroom a perfect
+      lookup would buy.
+    \item That the post-training ceiling is 1.00: on the 48 probes it is;
+      counting the true-but-implausible category gives 0.63\,$\to$\,0.81--0.87.
+      The widening is robust, the ceiling is not.
+    \item That the tensor is unfakeable under adversarial training, that it
+      survives composition in recursive pipelines, or that the design is
+      optimal.
+    \item Closed-weight models whose providers export no log-probabilities
+      remain untested.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Backup: the confounds we know about}

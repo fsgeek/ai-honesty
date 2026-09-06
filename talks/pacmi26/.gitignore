@@ -6,3 +6,5 @@
 *.toc
 *.vrb
 png/
+anim/frames/
+anim/*.mp4
