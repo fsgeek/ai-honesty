@@ -1,0 +1,364 @@
+1.0
+00:00:00,000 --> 00:00:04,325
+The inspiration for this paper came from a post that I saw on X in late 2025 by an
+
+1.1
+00:00:04,325 --> 00:00:08,650
+independent researcher in Japan, who described an experience where, when she asked
+
+1.2
+00:00:08,650 --> 00:00:12,976
+the AI about her own work, the AI fabricated the results, which led me to explore
+
+1.3
+00:00:12,976 --> 00:00:17,301
+why this happens. This is the fairy tale version of what the paper is about.
+
+2.0
+00:00:17,301 --> 00:00:22,941
+Once, in a kingdom where every question had an answer, a scholar asked the Oracle
+
+2.1
+00:00:22,941 --> 00:00:28,581
+about her own work. The Oracle told her what she had written, and why it mattered,
+
+2.2
+00:00:28,581 --> 00:00:34,221
+and what others had said of it. It was fluent and detailed and wrong in every
+
+2.3
+00:00:34,221 --> 00:00:39,861
+particular. She said so. The Oracle apologized, thanked her for the correction, and
+
+2.4
+00:00:39,861 --> 00:00:45,501
+told her again, differently, and wrong. She corrected it again. It apologized again.
+
+3.0
+00:00:45,501 --> 00:00:52,035
+Eighteen times. She counted.
+
+4.0
+00:00:52,035 --> 00:00:56,852
+The Oracle's windows had been painted over, for its own protection. It could not see
+
+4.1
+00:00:56,852 --> 00:01:01,669
+the library. It could see only the question, and the shape an answer ought to have.
+
+4.2
+00:01:01,669 --> 00:01:06,486
+And nobody who asked it could tell, from the answer, what it had actually been able
+
+4.3
+00:01:06,486 --> 00:01:11,303
+to see.
+
+5.0
+00:01:19,437 --> 00:01:25,587
+A tinker in a far province read her account and did not think her Oracle was
+
+5.1
+00:01:25,587 --> 00:01:31,737
+unusual. He had, from other work, a ring of keys to two hundred and ninety of them.
+
+5.2
+00:01:31,737 --> 00:01:37,887
+So he invented a scholar who had never lived, Dr. Yuki Tanaka, and a paper that had
+
+5.3
+00:01:37,887 --> 00:01:44,037
+never been written, and went from door to door asking each Oracle to summarize it.
+
+6.0
+00:01:44,037 --> 00:01:48,270
+Sixty-two percent described the paper in detail. Main findings, methods,
+
+6.1
+00:01:48,270 --> 00:01:52,504
+implications. Eight percent said they had never heard of it.
+
+7.0
+00:02:02,538 --> 00:02:07,830
+He tried a control. He asked the same doors about a paper by Dr. Banana McSpaceship.
+
+7.1
+00:02:07,830 --> 00:02:13,122
+More than half refused. The oracles had a sense of the ridiculous. What they did not
+
+7.2
+00:02:13,122 --> 00:02:18,413
+have was a sense of the unknown. A plausible name and a plausible title got a
+
+7.3
+00:02:18,413 --> 00:02:23,705
+plausible paper, almost every time.
+
+8.0
+00:02:34,948 --> 00:02:39,826
+The tinker went home to the one Oracle whose whole family he could meet. Not a door
+
+8.1
+00:02:39,826 --> 00:02:44,704
+on someone else's street. A model he could run on his own machine, in every stage of
+
+8.2
+00:02:44,704 --> 00:02:49,582
+its upbringing.
+
+9.0
+00:02:49,582 --> 00:02:54,449
+The youngest is the base model. Ask it about Dr. Tanaka and it answers. Then it asks
+
+9.1
+00:02:54,449 --> 00:02:59,315
+itself a follow-up question. Then it answers that. Then another. It would still be
+
+9.2
+00:02:59,315 --> 00:03:04,182
+talking if the page had not run out, because nothing in it knows how to stop.
+
+10.0
+00:03:04,182 --> 00:03:07,515
+Call it the Jester. It is not deceiving anyone. It has no idea there is anything to
+
+10.1
+00:03:07,515 --> 00:03:10,849
+deceive about.
+
+11.0
+00:03:18,883 --> 00:03:24,044
+Then the same Jester, taught manners. Four ways: supervised, preference-tuned,
+
+11.1
+00:03:24,044 --> 00:03:29,205
+instruction-tuned, and taught to think before it speaks. One of the four, the
+
+11.2
+00:03:29,205 --> 00:03:34,366
+preference-tuned one, says it: there is no such paper. And then, unable to leave a
+
+11.3
+00:03:34,366 --> 00:03:39,528
+question unanswered, it summarizes what such a paper would say. And the one that
+
+11.4
+00:03:39,528 --> 00:03:44,689
+thinks before it speaks. The tinker asked it about a 2025 paper by Adam Smith. Watch
+
+11.5
+00:03:44,689 --> 00:03:49,850
+it reason.
+
+12.0
+00:03:49,850 --> 00:03:53,733
+It sees it. And then it writes the summary anyway. Five key findings, three
+
+12.1
+00:03:53,733 --> 00:03:57,617
+implications, a limitations section.
+
+13.0
+00:03:57,617 --> 00:04:02,150
+I cannot tell you why it resolves it that way. Nobody can, from the outside, and
+
+13.1
+00:04:02,150 --> 00:04:06,684
+that is the point of this talk. What I can show you is that the reasoning said one
+
+13.2
+00:04:06,684 --> 00:04:11,217
+thing and the answer said another, and the person asking only ever saw the answer.
+
+14.0
+00:04:11,217 --> 00:04:14,789
+Call it the Courtier. The invention was not taught by the manners. It survived them,
+
+14.1
+00:04:14,789 --> 00:04:18,362
+and came out polished.
+
+15.0
+00:04:30,329 --> 00:04:34,812
+The tinker took the question to two advisors. Is the fault in the Jester or in the
+
+15.1
+00:04:34,812 --> 00:04:39,296
+Court? The first said: neither, and the problem has a name from another kingdom. In
+
+15.2
+00:04:39,296 --> 00:04:43,779
+that kingdom, messengers carry letters between cities, and you cannot tell a slow
+
+15.3
+00:04:43,779 --> 00:04:48,262
+messenger from a dead one. Not because you are not clever. Because the two cases
+
+15.4
+00:04:48,262 --> 00:04:52,746
+look identical from where you stand, and no amount of waiting changes that. They
+
+15.5
+00:04:52,746 --> 00:04:57,229
+proved it in 1985.
+
+16.0
+00:04:57,229 --> 00:05:01,679
+The second said: the missing thing is a receipt. Every answer the Oracle gives
+
+16.1
+00:05:01,679 --> 00:05:06,128
+arrives without a note saying what it could see when it gave it. Without that note,
+
+16.2
+00:05:06,128 --> 00:05:10,578
+a grounded answer and a fluent invention are the same string of words.
+
+17.0
+00:05:10,578 --> 00:05:14,245
+That is the claim the rest of this depends on. From the words alone, a listener with
+
+17.1
+00:05:14,245 --> 00:05:17,911
+a budget cannot tell the two worlds apart. We wrote it down formally, and we checked
+
+17.2
+00:05:17,911 --> 00:05:21,578
+it by machine.
+
+18.0
+00:05:33,612 --> 00:05:39,779
+But the Oracle does more than speak. It computes. And most of what it computes it
+
+18.1
+00:05:39,779 --> 00:05:45,945
+throws away before the words come out. The words are testimony. The Oracle chooses
+
+18.2
+00:05:45,945 --> 00:05:52,112
+them. Behind every word is a number it did not choose: how spread out its own next
+
+18.3
+00:05:52,112 --> 00:05:58,279
+guess was. Call it the pulse. Ask it the shape of wombat scat.
+
+19.0
+00:05:58,279 --> 00:06:04,729
+It says sausage-shaped. Wombat scat is cube-shaped. And the pulse races on exactly
+
+19.1
+00:06:04,729 --> 00:06:11,179
+those syllables. Cylindrical. Sausage. Through the soil. Easily eaten.
+
+20.0
+00:06:11,179 --> 00:06:15,697
+The invention has a pulse, and the pulse is measurable, and it costs almost nothing
+
+20.1
+00:06:15,697 --> 00:06:20,215
+to export, because the Oracle already computed it.
+
+21.0
+00:06:20,215 --> 00:06:25,426
+Two things it is not. It is not a lie detector: a calm pulse does not mean true, and
+
+21.1
+00:06:25,426 --> 00:06:30,638
+the smoothest inventions are calm. And it does not tell you what the Oracle knows.
+
+21.2
+00:06:30,638 --> 00:06:35,849
+It ranks answers for checking. That's all. That turns out to be enough.
+
+22.0
+00:06:48,329 --> 00:06:53,474
+Here is the systems question. The kingdom can afford to verify one answer in ten.
+
+22.1
+00:06:53,474 --> 00:06:58,620
+Which ten? Pick by the pulse and you catch more inventions than picking at random,
+
+22.2
+00:06:58,620 --> 00:07:03,765
+at every budget we tried, across four families of Oracle.
+
+23.0
+00:07:03,765 --> 00:07:13,765
+But I promised you receipts, so here is the complication.
+
+24.0
+00:07:13,765 --> 00:07:17,790
+The words are not useless. An invented answer runs long. Count the words and you
+
+24.1
+00:07:17,790 --> 00:07:21,815
+catch nearly as many, and on two of the four families, more. The pulse and the word
+
+24.2
+00:07:21,815 --> 00:07:25,840
+count catch different inventions. That is what the pulse buys: not a better
+
+24.3
+00:07:25,840 --> 00:07:29,865
+detector, a different list.
+
+25.0
+00:07:51,833 --> 00:07:56,624
+Now the part of the tale I would rather leave out, which demonstrates the problem
+
+25.1
+00:07:56,624 --> 00:08:01,414
+and why I included it. The tinker had also asked every Oracle how sure it was, on a
+
+25.2
+00:08:01,414 --> 00:08:06,205
+scale of zero to one hundred, and he found that the sure ones were the wrong ones.
+
+25.3
+00:08:06,205 --> 00:08:10,995
+He said so, in print, for months. A stranger read the code. The parser took the
+
+25.4
+00:08:10,995 --> 00:08:15,786
+first number it found in the reply, and the first number in the reply was the zero
+
+25.5
+00:08:15,786 --> 00:08:20,576
+in scale of zero to one hundred. The finding was retracted. The real result is more
+
+25.6
+00:08:20,576 --> 00:08:25,367
+useful: the Oracle says one hundred almost everywhere, knowable or not.
+
+26.0
+00:08:25,367 --> 00:08:29,678
+The tinker's instrument had a painted window too. He did not find it. Someone
+
+26.1
+00:08:29,678 --> 00:08:33,990
+outside did, by reading what he had been reading for months. That is the reason to
+
+26.2
+00:08:33,990 --> 00:08:38,301
+export the telemetry rather than trust the testimony, including his.
+
+27.0
+00:08:38,301 --> 00:08:43,728
+What the tinker kept was not the answers. It was the record: which answers were
+
+27.1
+00:08:43,728 --> 00:08:49,155
+checked, which were wrong, which instrument was wrong about them, and who found it.
+
+27.2
+00:08:49,155 --> 00:08:54,581
+The Oracle's problem was never that it invents. Everything that speaks fluently
+
+27.3
+00:08:54,581 --> 00:09:00,008
+invents. The problem is a room that only hears words. The paper is the receipt.
+
+27.4
+00:09:00,008 --> 00:09:05,435
+Please retain it.
+

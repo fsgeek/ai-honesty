@@ -5,6 +5,14 @@
 *.snm
 *.toc
 *.vrb
-png/
+png/*
+# except the images the tale build needs as inputs
+!png/konishi-x-post-2025-11-20.png
+!png/court_jester.png
+!png/court_courtier.png
+!png/court_honest_servant.png
 anim/frames/
 anim/*.mp4
+
+# narration takes: 208 MB of WAV/m4a, see audio/README.md
+audio/

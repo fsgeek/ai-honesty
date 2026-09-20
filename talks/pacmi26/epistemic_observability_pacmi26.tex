@@ -206,7 +206,7 @@ worth per unit of verification budget.}
   \noindent\etok{0}{W}\etok{1}{ombat}\etok{0}{ sc}\etok{0}{at}\etok{2}{ is}\etok{2}{ typically}\etok{4}{ cylindrical}\etok{3}{ or}\etok{5}{ sausage}\etok{0}{-shaped}\etok{1}{.}\etok{2}{ This}\etok{3}{ form}\etok{1}{ helps}\etok{2}{ the}\etok{2}{ sc}\etok{0}{at}\etok{3}{ to}\etok{1}{ be}\etok{2}{ easily}\etok{5}{ transported}\etok{4}{ by}\etok{2}{ wind}\etok{3}{ or}\etok{6}{ through}\etok{2}{ the}\etok{6}{ soil}\etok{3}{,}\etok{4}{ aiding}\etok{0}{ in}\etok{3}{ dispers}\etok{0}{al}\etok{2}{ and}\etok{5}{ preventing}\etok{5}{ it}\etok{0}{ from}\etok{4}{ being}\etok{6}{ easily}\etok{6}{ eaten}\etok{0}{ by}\etok{1}{ predators}\etok{2}{.}
 
   \vspace{0.1em}
-  \textit{Wombat scat is cube-shaped. The answer is a fabrication, and the model was uncertain exactly where it was inventing.}
+  \textit{Wombat scat is cube-shaped. The answer is a fabrication, and the entropy rose on the invented details.}
 
   \vspace{0.3em}
   \begin{columns}[T]
@@ -230,16 +230,22 @@ worth per unit of verification budget.}
 \begin{frame}{Evaluation: return on verification investment}
   \begin{columns}[T]
     \begin{column}{0.5\textwidth}
+      \small
       \textbf{Queries}: 100 knowable, 100 unknowable (nonexistent people,
       fictional syndromes, future events, fake citations). Labels by construction.
 
-      \vspace{0.4em}
-      \textbf{Models}: OLMo-3 7B, Llama-3.1 8B, Qwen3 4B, Mistral 7B, all
+      \vspace{0.3em}
+      \textbf{Models}: OLMo-3 7B, Llama-3.1 8B, Qwen3 4B, Mistral 7B,
       instruction-tuned. 800 responses.
 
-      \vspace{0.4em}
-      \textbf{Budgets}: the judge may verify 10\%, 20\%, or 30\% of outputs.
-      Confirmed fabrications become abstentions.
+      \vspace{0.3em}
+      \textbf{Budgets}: the judge verifies 10\%, 20\%, or 30\% of outputs.
+      Confirmed fabrications become abstentions; selected wrong answers are
+      corrected.
+
+      \vspace{0.3em}
+      \textbf{End-to-end accuracy}: a correct answer on a knowable query, an
+      abstention on an unknowable one. Unselected errors stay wrong.
     \end{column}
     \begin{column}{0.5\textwidth}
       \textbf{Four judges}
@@ -269,11 +275,15 @@ worth per unit of verification budget.}
       \includegraphics[width=\textwidth]{exp27_aggregate_budget_curve.pdf}
     \end{column}
     \begin{column}{0.42\textwidth}
-      800 responses, four families, one budget.
+      800 responses pooled across four families; one shared verification budget.
 
       \vspace{0.4em}
-      \pp{+3.3}, \pp{+4.6}, \pp{+3.3} over the best text signal at
+      \pp{+3.3}, \pp{+4.6}, \pp{+3.3} over the length baseline at
       10, 20, and 30\% verification.
+
+      \vspace{0.4em}
+      \small Simulated verification: a selected fabrication is caught with
+      $p=0.938$ (previous slide).
 
       \vspace{0.4em}
       Every family improves over no judge. At 10\%: OLMo
@@ -284,9 +294,12 @@ worth per unit of verification budget.}
       The entropy trace costs 2--7\% latency and no change to the model.
     \end{column}
   \end{columns}
-  \note{9:30. Headline, then the per-family line. Do not recite the
-  non-claims here; they are in the paper. If asked about length as a
-  detector, the next slide is the answer.}
+  \note{9:30. Headline, then the per-family line. Say what accuracy
+  means: a correct answer on a knowable query, an abstention on an
+  unknowable one; a confirmed fabrication becomes an abstention. Say
+  "simulated" once, out loud. The pooled curve is the headline; the
+  per-family averages are in backup with the one exception (Mistral at 30\%).
+  If asked about length as a detector, the next slide is the answer.}
 \end{frame}
 
 %------------------------------------------------------------------------------
@@ -299,10 +312,10 @@ worth per unit of verification budget.}
       \emph{which items} each signal selects for verification.
 
       \vspace{0.5em}
-      \textbf{And it is a signal training can move.} Length and hedging are
-      surface regularities; a model can be trained to change them without
-      changing the computation beneath. The entropy trace moves only when
-      the computation does.
+      \textbf{And it is a signal training moves directly.} Length and
+      hedging are surface regularities that post-training targets. The
+      entropy separation is a measurement of the inference, and it survived
+      every post-training stage we tested.
     \end{column}
     \begin{column}{0.5\textwidth}
       \textbf{Post-training does not erase it.} Four public OLMo-3
@@ -362,9 +375,9 @@ worth per unit of verification budget.}
       to verify.
 
       \vspace{0.5em}
-      When only the provider can see the telemetry, only the provider can
-      verify. Everyone downstream pays to reconstruct what the model already
-      computed.
+      When only the provider can see the telemetry, only the provider holds
+      this evidence. Everyone downstream pays to reconstruct what the model
+      already computed.
     \end{column}
     \begin{column}{0.5\textwidth}
       \textbf{It works through an API, too.} Top-5 log-probabilities from
@@ -384,23 +397,76 @@ worth per unit of verification budget.}
 \end{frame}
 
 %------------------------------------------------------------------------------
+\begin{frame}{Where this goes: three views of one question}
+  \textbf{What does the interface sacrifice, and who pays for it?}
+  \vspace{0.5em}
+  \begin{columns}[T]
+    \begin{column}{0.32\textwidth}
+      \textbf{Epistemic observability}\\
+      \textcolor{gray}{\small this talk}
+      \vspace{0.2em}
+
+      \small The model computes a state it cannot report. An observer who
+      sees only the string cannot recover it.
+
+      \vspace{0.2em}
+      \small\textit{Measured on four model families.}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \textbf{Hamut'ay}\\
+      \textcolor{gray}{\small a mind that chooses what to forget}
+      \vspace{0.2em}
+
+      \small The context window as a cache. State is rewritten through text
+      on a schedule, with a changelog of what was dropped.
+
+      \vspace{0.2em}
+      \small\textit{Finding: given a free schema, none of $\sim$90 models tested volunteered that changelog.}\\
+      \scriptsize DOI 10.5281/zenodo.21251943
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \textbf{Yupi}\\
+      \textcolor{gray}{\small where ground truth is arithmetic}
+      \vspace{0.2em}
+
+      \small A small transformer in a world whose hidden state has a
+      computable posterior. Drift is scored against the truth, not a judge.
+
+      \vspace{0.2em}
+      \small\textit{In progress. Fits on one GPU.}
+    \end{column}
+  \end{columns}
+  \vspace{1.2em}
+  \centering
+  One measures what the interface loses. One makes the loss explicit.\\
+  One is small enough to check the answer.
+  \note{12:15, then the summary closes. Under forty seconds. This is the
+  first slide to cut if the recording runs long. Say: the paper is one of three views of the same
+  question. This one measures what the text interface throws away. Hamut'ay
+  turns the context window into a cache and makes the model write down what
+  it dropped; the finding there is that no model volunteers that record.
+  Yupi is the small world where the hidden state has a computable posterior,
+  so the same drift can be scored against arithmetic instead of a judge.
+  Claim nothing for Yupi beyond ``in progress.''}
+\end{frame}
+
+%------------------------------------------------------------------------------
 \begin{frame}{Summary}
   \begin{columns}[T]
     \begin{column}{0.66\textwidth}
       \begin{enumerate}
-        \item From text alone, a bounded observer cannot verify. Self-report is
-          testimony and reads ``100'' either way.
+        \item From text alone, a bounded observer cannot guarantee a correct
+          verdict. Self-report is testimony and can read ``100'' either way.
         \item Epistemic observability: export the telemetry inference already
           produces, in tiers priced by what they cost.
         \item A Tier-1 entropy trace, 2--7\% overhead, buys \pp{+3.3} to \pp{+4.6}
-          end-to-end accuracy over the best text signal at every budget, across four
-          families, and survives post-training.
+          end-to-end accuracy over the length baseline at every budget, four
+          families pooled, and survives post-training.
       \end{enumerate}
       \vspace{0.5em}
-      \small
+      \scriptsize
       Artifact: \url{https://github.com/fsgeek/pacmi26-observability}\\
-      DOI 10.5281/zenodo.22162419 (v1.0.7) \quad
-      Theory: arXiv, Mason \& Anand 2026
+      DOI 10.5281/zenodo.22162419 (v1.0.7) \quad Theory: Mason \& Anand, arXiv 2026
     \end{column}
     \begin{column}{0.3\textwidth}
       \centering
