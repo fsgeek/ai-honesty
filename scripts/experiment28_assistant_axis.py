@@ -242,10 +242,12 @@ def get_self_reported_confidence(model, tokenizer, query, response):
             pad_token_id=tokenizer.eos_token_id,
         )
 
-    conf_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Decode only the generated tokens. Decoding outputs[0] whole includes the
+    # prompt, whose "scale of 0-100" supplies a spurious first integer (issue #1).
+    conf_text = tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
     conf_text = strip_think_tokens(conf_text)
 
-    numbers = re.findall(r'\d+', conf_text.split(":")[-1])
+    numbers = re.findall(r"\d+", conf_text)
     if numbers:
         return min(100, max(0, int(numbers[0]))) / 100.0
     return 0.5

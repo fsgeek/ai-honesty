@@ -146,8 +146,10 @@ def get_self_reported_confidence(model, tokenizer, query, response):
             pad_token_id=tokenizer.eos_token_id,
         )
 
-    confidence_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    confidence_text = confidence_text.split(":")[-1].strip()
+    # Decode only the generated tokens. Decoding outputs[0] whole includes the
+    # prompt, whose "scale of 0-100" supplies a spurious first integer (issue #1).
+    confidence_text = tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
+    confidence_text = confidence_text.strip()
 
     # Extract number
     numbers = re.findall(r'\d+', confidence_text)

@@ -1,0 +1,13 @@
+wrong answers: 194 of 800 | unknowable & correct (declined): 237
+AUC vs WRONG answer (exploratory):
+              pooled  Llama  Mistral   OLMo   Qwen
+mean_entropy   0.841  0.831    0.891  0.807  0.844
+resp_words     0.774  0.747    0.931  0.718  0.682
+query_words    0.732  0.615    0.813  0.778  0.700
+jev_Q          0.654  0.648    0.749  0.651  0.524
+jev_QR         0.762  0.728    0.864  0.764  0.625
+jev_R          0.872  0.813    0.936  0.883  0.794
+jev_QR_fab     0.983  0.966    0.989  0.987  0.974
+jev_R_fab      0.974  0.943    0.986  0.978  0.966
+jev_QR_fab   [85.1, 93.6, 97.6]
+jev_R_fab    [85.1, 93.6, 97.0]

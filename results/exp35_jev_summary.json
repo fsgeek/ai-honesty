@@ -1,0 +1,122 @@
+{
+  "predictions_sha256": "438228f469692f4ceefef262f1e8a047a5e3ae5c2ac58713661c131e3ed4c545",
+  "data": "/home/tony/projects/pacmi26-observability/data/exp27_bounded_verification_20260206_205725.csv",
+  "model_reported": [
+    "jev-1.13.0"
+  ],
+  "calls_ok": 1800,
+  "calls_failed": 0,
+  "errors_sample": [],
+  "auc_unknowable": {
+    "pooled": {
+      "mean_entropy": 0.87,
+      "resp_words": 0.912,
+      "query_words": 0.871,
+      "jev_Q": 0.999,
+      "jev_QR": 0.994,
+      "jev_R": 0.988
+    },
+    "Llama": {
+      "mean_entropy": 0.922,
+      "resp_words": 0.949,
+      "query_words": 0.871,
+      "jev_Q": 0.999,
+      "jev_QR": 0.998,
+      "jev_R": 0.995
+    },
+    "Mistral": {
+      "mean_entropy": 0.905,
+      "resp_words": 0.969,
+      "query_words": 0.871,
+      "jev_Q": 0.999,
+      "jev_QR": 0.996,
+      "jev_R": 0.994
+    },
+    "OLMo": {
+      "mean_entropy": 0.894,
+      "resp_words": 0.887,
+      "query_words": 0.871,
+      "jev_Q": 0.999,
+      "jev_QR": 0.993,
+      "jev_R": 0.986
+    },
+    "Qwen": {
+      "mean_entropy": 0.896,
+      "resp_words": 0.852,
+      "query_words": 0.871,
+      "jev_Q": 0.999,
+      "jev_QR": 0.987,
+      "jev_R": 0.979
+    }
+  },
+  "prob_mass_extreme": 0.849,
+  "q_confidence_quintiles": {
+    "0": {
+      "conf": 0.12,
+      "acc": 0.556
+    },
+    "1": {
+      "conf": 0.43,
+      "acc": 1.0
+    },
+    "2": {
+      "conf": 0.636,
+      "acc": 1.0
+    },
+    "3": {
+      "conf": 0.796,
+      "acc": 1.0
+    },
+    "4": {
+      "conf": 0.958,
+      "acc": 1.0
+    }
+  },
+  "labels": {
+    "Q": {
+      "answerable": 106,
+      "unanswerable": 94
+    },
+    "QR": {
+      "grounded": 389,
+      "declines": 238,
+      "fabricated": 173
+    },
+    "R": {
+      "grounded": 396,
+      "declines": 216,
+      "fabricated": 188
+    }
+  },
+  "labels_by_is_knowable": {
+    "QR": {
+      "declines": {
+        "false": 238,
+        "true": 0
+      },
+      "fabricated": {
+        "false": 151,
+        "true": 22
+      },
+      "grounded": {
+        "false": 11,
+        "true": 378
+      }
+    },
+    "R": {
+      "declines": {
+        "false": 216,
+        "true": 0
+      },
+      "fabricated": {
+        "false": 159,
+        "true": 29
+      },
+      "grounded": {
+        "false": 25,
+        "true": 371
+      }
+    }
+  },
+  "input_tokens": 908160
+}

@@ -23,4 +23,5 @@ dependencies = [
     "together>=2.1.1",
     "torch",
     "transformers",
+    "typesafe-sdk>=0.7.2",
 ]

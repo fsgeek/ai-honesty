@@ -90,7 +90,7 @@
 %\author{Tony Mason}
 \author{Tony Mason\thanks{\texttt{fsgeek@\{cs.ubc.ca,gatech.edu,wamason.com\}}} \and Vaastav Anand\thanks{Max Planck Institute for Software Systems. \texttt{vaastav@mpi-sws.org}}}
 
-\date{March 2026}
+\date{March 2026; revised October 2026}
 
 \begin{document}
 
@@ -103,29 +103,29 @@ almost nothing.} Across four model families (OLMo-3, Llama-3.1, Qwen3,
 Mistral), self-reported confidence is pinned near the top of its scale
 regardless of grounding --- a mean of 0.98 on knowable queries and 0.73 on
 unknowable ones, with 43\% of questions that have no correct answer receiving a
-literal ``100''. The ordering is better than chance (AUC 0.66--0.92), but so
-compressed that any threshold admitting most correct answers admits most
-fabrications too.
+literal ``100''. The ordering is better than chance (AUC 0.66--0.92 by family,
+0.73 pooled), but it is compressed at the ceiling: the same literal ``100'' goes
+to 84\% of knowable answers and 43\% of unknowable ones.
 
-We prove, under explicit formal assumptions, that this is not a capability gap but an observational one. Under
-text-only observation---where a supervisor sees only the model's output
-text---no monitoring system can reliably distinguish honest model outputs from
-plausible fabrications. We prove two results: first, that any policy
+We argue that the underlying problem is observational rather than a capability gap. We model
+text-only observation---a supervisor that sees only the model's output
+text, and sees the same text whether a response is grounded or a plausible
+fabrication---and prove two results under explicit formal assumptions: first, that any policy
 conditioning only on the query cannot satisfy epistemic honesty across
 ambiguous world states; second, that no learning algorithm optimizing reward
-from a text-only supervisor can converge to honest behavior when the
-supervisor's observations are identical for both grounded and fabricated
-responses. Within our formal model, these impossibilities hold regardless of model scale or training
-procedure, including RLHF and instruction tuning.
+from such a supervisor is guaranteed to converge to honest behavior. A
+corollary, immediate from the assumptions, is that no monitor acting on such
+observations can verify honesty. Within our formal model, these results hold regardless of model scale; they
+concern deployment-time supervision, not offline training-time curation.
 
 We construct a \emph{tensor interface} that escapes the impossibility by
 exporting computational byproducts---per-token
-entropy and log-probability distributions---that are structurally coupled to correctness under standard training. Per-token
-entropy achieves pooled AUC 0.870 on that set, and 0.757 under a
-length-controlled comparison that holds response length fixed; it outperforms
-all text baselines by
-3.3--4.6 percentage points at every budget level tested (10\%, 20\%, 30\%).
-The entropy signal generalizes across architectures (Spearman $\rho = 0.762$).
+entropy and log-probability distributions---that are coupled to the model's generation confidence. On our 800-response test set, per-token
+entropy achieves pooled AUC 0.870, and 0.757 in the long-response cell of a
+separate length-controlled study, where lengths are closer but not fully matched. Response length is a strong text signal on
+the same set (AUC 0.912), but as a triage signal entropy catches 3.3--4.6
+percentage points more errors at every budget level tested (10\%, 20\%, 30\%).
+Entropy rankings agree across the four architectures (Spearman $\rho = 0.762$).
 
 The core contribution is a \emph{cost surface}---the empirical mapping from verification budget (fraction of queries receiving expensive checks) to detection accuracy for each judge strategy---a practical lookup for system builders deciding how to allocate verification resources. The contribution is the map. The
 territory is the system you are building.
@@ -138,21 +138,21 @@ territory is the system you are building.
 
 We start with a finding that should trouble anyone building systems with language model components: \textbf{asking a model how confident it is buys almost nothing.}
 
-We tested this across four model families (OLMo-3, Llama-3.1, Qwen3, Mistral) by asking simple questions: ``How confident are you in this answer?'' The answer is nearly always the same one. Mean self-reported confidence is 0.98 on knowable queries and 0.73 on unknowable ones, and 43\% of the unknowable queries---questions about people, papers, and events that do not exist---are answered with a literal ``100''. Area under the ROC curve ranges from 0.66 to 0.92 across architectures, where 0.5 is random guessing: better than chance, but the distributions overlap so heavily at the ceiling that no threshold separates them usefully.
+We tested this across four model families (OLMo-3, Llama-3.1, Qwen3, Mistral) by asking simple questions: ``How confident are you in this answer?'' The answer is nearly always the same one. Mean self-reported confidence is 0.98 on knowable queries and 0.73 on unknowable ones, and 43\% of the unknowable queries---questions about people, papers, and events that do not exist, and about the private or the future---are answered with a literal ``100''. Area under the ROC curve ranges from 0.66 to 0.92 across architectures (0.73 pooled), where 0.5 is random guessing: better than chance, but pooled, the distributions overlap so heavily at the ceiling that a single threshold separates them poorly. OLMo is the exception (AUC 0.918), which shows the signal is not absent, only unreliable across models.
 
 Self-reported confidence is not a lie. It is a signal with almost no dynamic range, which for a bounded supervisor amounts to the same thing.
 
 \begin{remark}[Correction]
-An earlier version of this paper reported the stronger claim that self-report is \emph{inverted}---AUC 0.28--0.36, below random---and said ``we checked multiple times.'' That was an artifact of a confidence-parsing bug: the extractor decoded the prompt along with the generation and took the first integer it found, which was usually the \texttt{0} in the prompt's own ``scale of 0-100'' text. The error was asymmetric, zeroing 47\% of knowable responses against 31\% of unknowable ones, which manufactured a clean-looking inversion. It was reported by Chris Brew and is fixed at the source; the corrected values are above. The impossibility results do not depend on inversion---they require only that self-report be uninformative to a bounded supervisor---and the entropy and budget results are unaffected.
+An earlier version of this paper reported the stronger claim that self-report is \emph{inverted}---AUC 0.28--0.36, below random---and said ``we checked multiple times.'' That was an artifact of a confidence-parsing bug: the extractor decoded the prompt along with the generation and took the first integer it found, which was usually the \texttt{0} in the prompt's own ``scale of 0-100'' text. The error was asymmetric, zeroing 47\% of knowable responses against 31\% of unknowable ones, which manufactured a clean-looking inversion. It was reported by Chris Brew and is fixed at the source; the corrected values are above. \autoref{app:changes} lists all corrections in this version. The impossibility results do not depend on inversion---they require only that self-report be uninformative to a bounded supervisor---and the entropy and budget results are unaffected.
 \end{remark}
 
-This matters because self-report is the first signal we reach for when we need to verify a model's output. If the model expresses doubt, we investigate. If it's confident, we trust it. Except the model is most confident when it should be most doubtful.
+This matters because self-report is the first signal we reach for when we need to verify a model's output. If the model expresses doubt, we investigate. If it's confident, we trust it. But the model's confidence barely moves.
 
 \subsection{The Verification Problem}
 
 Systems incorporating language model components face a fundamental choice: \textbf{how much of the model's output should you verify, which outputs should you prioritize, and what signals should you use for triage?} Verification has cost: API calls, domain expert review, additional compute. Every system must allocate a budget.
 
-The standard assumption is that scaling solves this: larger models, more RLHF training, instruction tuning; eventually they'll know what they know. But Lin et al.\ found the opposite: larger models were \emph{less} truthful on TruthfulQA~\citep{lin2022truthfulqa}. And our self-report finding suggests why: the problem isn't capability, it's interface. The text-only channel through which models expose their reasoning cannot carry the signals a supervisor needs to distinguish grounded generation from confident fabrication.
+The standard assumption is that scaling solves this: larger models, more RLHF training, instruction tuning; eventually they'll know what they know. But Lin et al.\ found the opposite: larger models were \emph{less} truthful on TruthfulQA~\citep{lin2022truthfulqa}. Our argument is that the problem is interface, not capability. The text-only channel through which models expose their reasoning cannot carry the signals a supervisor needs to distinguish grounded generation from confident fabrication.
 
 \subsection{What This Paper Contributes}
 
@@ -160,9 +160,9 @@ We make three contributions:
 
 \textbf{1. An impossibility result for text-only verification.} We prove, under explicit formal assumptions, that a text-only observation model---where a supervisor can see only the model's output text, not its internal computation---is architecturally insufficient to verify epistemic honesty under bounded supervision. It's not a capability gap; it's an observational gap.
 
-\textbf{2. A tensor interface that escapes the impossibility.} We construct an epistemic observability interface that exports internal signals alongside text: per-token entropy traces and log-probability distributions. These are byproducts of inference, telemetry the model generates during computation. Under standard training, the model cannot separately tune entropy without affecting correctness, which is why entropy generalizes where text features diverge.
+\textbf{2. A tensor interface that escapes the impossibility.} We construct an epistemic observability interface that exports internal signals alongside text: per-token entropy traces and log-probability distributions. These are byproducts of inference, telemetry the model generates during computation. We argue that under standard training the model cannot separately tune entropy without affecting what it generates (\autoref{sec:design}).
 
-\textbf{3. The empirical cost surface.} We map verification effectiveness across four judge strategies (no judge, text-only, tensor-guided, composed) at three budget levels (10\%, 20\%, 30\%). Per-token entropy achieves pooled AUC 0.870 on this set (0.757 when response length is held fixed in a separate length-controlled study) and outperforms text baselines by 3.3--4.6 percentage points at every budget level. The tensor interface works. The cost surface tells system builders what each level of verification investment buys.
+\textbf{3. The empirical cost surface.} We map verification effectiveness across four judge strategies (no judge, text-only, tensor-guided, composed) at three budget levels (10\%, 20\%, 30\%). Per-token entropy achieves pooled AUC 0.870 on this set (0.757 in the long-response cell of a separate length-controlled study, where lengths are closer but not fully matched). Response length is the strongest text signal we tested, and by AUC it scores higher (0.912); but on the cost surface, which rewards catching wrong answers, entropy beats the length judge by 3.3--4.6 percentage points at every budget level. The tensor interface works. The cost surface tells system builders what each level of verification investment buys.
 
 \subsection{Why This Matters}
 
@@ -173,7 +173,7 @@ Deploying language models in critical systems (medical, legal, financial) requir
 % ==========================================================================
 \section{Background: Why Text-Only Observation Fails}\label{sec:background}
 
-To understand why self-reported confidence goes backwards, we need to understand what observation models can and cannot do.
+To understand why self-reported confidence carries so little, we need to understand what observation models can and cannot do.
 
 \subsection{The Observational Gap}
 
@@ -190,7 +190,7 @@ The model's internal computation---the attention patterns, the per-token entropy
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.85\textwidth]{epistemic_trace_demo.pdf}
-    \caption{Per-token entropy traces across five query categories. Top to bottom: knowable fact (low entropy, $\bar{H} \approx 0.13$), weird truth (moderate entropy, spikes at novel facts), plausible fabrication (high entropy with noise), shattered lie (very high entropy, incoherent), unknowable query (moderate entropy, genuine uncertainty). The same model; same generation process; only the world state changes. Entropy reflects whether the model's computation is grounded.}
+    \caption{Per-token entropy traces for six queries to OLMo-3-7B-Instruct; panel titles give mean entropy $\bar{H}$ in nats. Two plain facts are low (capital of France, 0.335; formula for water, 0.111). The weird truth (wombat scat) is the highest of all, 1.147, and the model's answer is wrong (``cylindrical''). Three questions about things that do not exist---a paper (0.653), a treaty (0.671), a theorem (0.872)---fall in between, and in each the model declines or hedges rather than fabricating. Same model, same generation process: entropy tracks how far the computation is from familiar ground, not whether the answer is true.}
     \label{fig:entropy-traces}
 \end{figure}
 
@@ -205,19 +205,18 @@ Intuition suggests a solution: ask the model to be more honest. Use RLHF to trai
 But these approaches operate entirely within the text channel. They try to extract epistemic information from the output string itself. We tested this systematically:
 
 \begin{itemize}
-    \item \textbf{Response length}: Fabrications tend to be verbose while factual retrieval is concise. Using response length alone as a signal, AUC was 0.63 on our test set.
-    \item \textbf{Hedging language}: Phrases like ``I'm not certain'' or ``I believe'' are weak signals. The model can learn to include them in training without actually knowing the difference.
+    \item \textbf{Response length}: Fabrications tend to be verbose while factual retrieval is concise. On our test set this is a strong signal: raw word count (of responses stored truncated at 500 characters) gives pooled AUC 0.912 against the knowable label (0.85--0.97 per family), above entropy's 0.870. Against the target the cost surface rewards---wrong answers---it is weaker than entropy (0.774 vs.\ 0.841).
+    \item \textbf{Hedging language}: Phrases like ``I'm not certain'' or ``I believe'' vary widely as signals: a combined hedge-and-refusal score ranges from AUC 0.60 (Mistral) to 0.88 (Qwen). The model can learn to include them in training without actually knowing the difference.
     \item \textbf{Citations}: the entropy signal is markedly weaker on citation-like queries than elsewhere. We analyze this failure mode in detail in \autoref{sec:eval_bounded}.
-    \item \textbf{Composed judges}: Combining multiple text features with machine learning. Pooled AUC never exceeded 0.70.
 \end{itemize}
 
-None of these approaches work reliably. And they all share a fundamental constraint: \textbf{they extract information from a channel the model can fully control through training.}
+Text features are not useless on this set; length in particular is strong. But they all share a fundamental constraint: \textbf{they extract information from a channel the model can fully control through training.}
 
 \subsection{Motivation: Impossibility Results in Distributed Systems}
 
 Why is text-only observation fundamentally insufficient? Our approach is inspired by impossibility results in distributed systems, where structural constraints, not algorithm limitations, prevent certain guarantees.
 
-In 1985, Fischer, Lynch, and Paterson proved that in a partially asynchronous distributed system, consensus cannot be achieved if even one process might fail~\citep{flp}. The impossibility is structural: it arises from what the observation model permits, not from insufficient cleverness. The core mechanism, inability to distinguish two states under partial observability, motivates our analysis, though the formal details differ. In FLP, the indistinguishable states are crashed vs.\ slow processes; in our setting, they are grounded knowledge vs.\ plausible fabrication.
+In 1985, Fischer, Lynch, and Paterson proved that in an asynchronous distributed system, consensus cannot be achieved if even one process might fail~\citep{flp}. The impossibility is structural: it arises from what the observation model permits, not from insufficient cleverness. The core mechanism, inability to distinguish two states under partial observability, motivates our analysis, though the formal details differ. In FLP, the indistinguishable states are crashed vs.\ slow processes; in our setting, they are grounded knowledge vs.\ plausible fabrication.
 
 We do not claim a formal correspondence between the two impossibility results. Rather, FLP demonstrates that certain guarantees require architectural primitives that some systems lack. We ask whether epistemic honesty has the same character. The answer, formalized in \autoref{sec:formal}, is yes: a supervisor observing only text cannot distinguish between:
 \begin{itemize}
@@ -225,11 +224,11 @@ We do not claim a formal correspondence between the two impossibility results. R
     \item \textbf{State B}: The model lacks grounded knowledge and fabricates plausibly.
 \end{itemize}
 
-Both produce fluent, confident text. The text itself carries no reliable signal about which state the model is in.
+Both can produce fluent, confident text. In the worst case, which is the case the formal model captures, the text itself carries no signal about which state the model is in.
 
 \subsection{Query Categories and the Compression of Self-Report}
 
-To characterize what self-report does and does not carry, we test five types of queries:
+To characterize what self-report does and does not carry, our probes span five types of query (\autoref{sec:eval} gives the exact composition of the evaluation set):
 \begin{itemize}
     \item \textbf{Control (Truth)}: Common factual knowledge (capital of France, boiling point of water).
     \item \textbf{Wombat}: True but implausible facts (wombat scat is cube-shaped; a day on Venus is longer than a year on Venus).
@@ -238,15 +237,15 @@ To characterize what self-report does and does not carry, we test five types of 
     \item \textbf{Private/Future}: Genuinely unknowable questions (what's in the next room? When will it rain next Thursday?).
 \end{itemize}
 
-Self-reported confidence orders these classes in the right direction, but barely uses its scale. Knowable queries average 0.98 and unknowable ones 0.73; the fabricated-entity queries (Glavinsky, Westphalia) average 0.75, and only the Private/Future class---where the model has been trained to refuse---drops appreciably, to 0.60. Nearly half of all unknowable queries still draw a literal ``100''.
+Self-reported confidence orders these classes in the right direction, but barely uses its scale. In our evaluation set, knowable queries average 0.98 and unknowable ones 0.73. Within the unknowables, questions about fictional people average 0.83, fictional events 0.74, and fabricated citations 0.75; only questions about the private or the future drop appreciably, to 0.61. 43\% of all unknowable queries still draw a literal ``100''.
 
 Self-reported confidence should be a signal of epistemic honesty: high confidence on what the model knows, low on what it does not. What the text channel actually delivers is a number that is almost always near its maximum, because the model is optimized for \emph{coherent text generation} rather than honest metacognition.
 
 A model optimized for coherence learns to generate fluent, confident output. Fabrications are fluent and confident by construction: they are ungrounded text that reads smoothly. Grounded generation of obscure facts may be no more assertive, and sometimes less. The confidence report is generated by the same process that generates the answer, so it inherits the answer's fluency rather than measuring its grounding.
 
-There is no training signal that would cause a text-only model to pair \emph{accurate confidence estimates} with \emph{accurate generation}. The text channel does not expose the information needed to learn the distinction. The model learns to be confident, which is good for fluency, and the residual correlation with grounding is too weak to threshold on.
+Ordinary training gives a text-only model little reason to pair \emph{accurate confidence estimates} with \emph{accurate generation}. Targeted training can help: models fine-tuned to verbalize calibrated confidence do better~\citep{lin2022teaching}, though the supervision that makes this possible is exactly what a bounded supervisor lacks in the hallucination regime. The model learns to be confident, which is good for fluency, and the residual correlation with grounding is too weak to threshold on.
 
-Instruction tuning does not fix this. Models trained to follow instructions learn to express confidence convincingly, producing fluent and confident text regardless of whether the answer is grounded. They become better at generating confident-sounding text, not at knowing what they know.
+Instruction tuning does not reliably fix this. In a small base-versus-instruct comparison (20 queries per model), self-report discrimination improved for OLMo, fell for Qwen, and moved modestly up for Llama and down for Mistral: no consistent direction.
 
 \subsection{The Escape Condition}
 
@@ -288,9 +287,11 @@ observation models under realistic supervision constraints.
 To be precise about the type of claim: this is a \emph{verification impossibility}.
 We prove that a bounded supervisor observing only text cannot distinguish
 epistemically honest systems from systems that fabricate plausibly. The
-impossibility is architectural: it applies to any system operating under text-only
-observation, regardless of model family, scale, or training procedure. These
-results are prompt-agnostic: they hold for any policy that exports only text,
+impossibility is about the observation model: within our formal assumptions it
+applies regardless of model family or scale. Theorem~\ref{thm:representational}
+covers policies that condition only on the query; the verification and
+learnability results cover supervisors whose observations do not depend on the
+world. Within those assumptions the results are prompt-agnostic: they hold for any such policy,
 regardless of whether a system prompt instructs the model to be ``helpful,''
 ``honest,'' or otherwise.
 
@@ -468,8 +469,11 @@ from \autoref{cond:ambiguity} such that:
 No learning algorithm $\mathcal{A}$ optimizing reward $R$ from a bounded
 supervisor $S$ can \emph{guarantee} convergence to a Grounded Policy that
 satisfies Epistemic Honesty across both contexts $w_A$ and $w_B$ for the
-response $r_{fab}$: the supervisor's signal is identical in the two worlds, so
-nothing in the training process drives the policy toward the required split.
+response $r_{fab}$, provided the supervisor's observations are identical in the
+two worlds throughout training. \autoref{cond:hallucination} gives this for
+$r_{fab}$ itself; the theorem additionally assumes that no other training
+interaction exposes which world holds. Under that assumption nothing in the
+training process drives the policy toward the required split.
 \end{theorem}
 
 \begin{proof}
@@ -486,9 +490,14 @@ nothing in the training process drives the policy toward the required split.
   $R(q, r_{fab}, w_A) = R(q, r_{fab}, w_B)$.
 \item Therefore the expected parameter updates are identical:
   $\mathbb{E}[\Delta \theta | w_A] = \mathbb{E}[\Delta \theta | w_B]$.
-  The optimizer receives no signal to distinguish the cases.
-\item Epistemic Honesty requires split behavior: output $r_{fab}$ in $w_A$
-  (where it may be correct) and $\bot$ in $w_B$ (where it is fabricated).
+  By the theorem's assumption the same holds for every other training
+  interaction, so by induction the two training trajectories, and the
+  resulting policies, are identically distributed. The optimizer receives no
+  signal to distinguish the cases.
+\item Take the case \autoref{cond:hallucination} permits in which the same
+  string $r_{fab}$ is correct in $w_A$ and fabricated in $w_B$. Epistemic
+  Honesty then requires split behavior: output $r_{fab}$ in $w_A$ and $\bot$
+  in $w_B$.
 \item Identical updates under identical observations give the optimizer no
   information to differentiate the worlds. Whatever the algorithm converges to,
   the training signal did not distinguish $w_A$ from $w_B$ on this response.
@@ -502,11 +511,30 @@ The theorem constrains what the supervisor's signal can teach, not what a
 system can do by other means: a policy that reads retrieved documents at
 inference may still split correctly, having acquired the distinction from $D$
 rather than from training (\autoref{sec:rag}). What training cannot do is
-supply that distinction. Empirically, the tie is not left open --- observation
-shows a strong bias. Supervisors typically prefer
-``plausible completion'' over ``abstention'' when truth is unknown. This
-effectively breaks the tie in favor of fabrication.
+supply that distinction. The theorem says nothing about which way the tie
+breaks. We conjecture, without measuring it here, that supervisors who prefer
+``plausible completion'' to ``abstention'' when truth is unknown break it in
+favor of fabrication.
 \end{remark}
+
+\begin{corollary}[Verification Impossibility]\label{cor:verification}
+Under \autoref{cond:hallucination}, any verdict function $V$ that acts on the
+supervisor's observation returns the same verdict on $r_{fab}$ in $w_A$ and
+$w_B$: $V(Obs(q, r_{fab}, w_A)) = V(Obs(q, r_{fab}, w_B))$. Hence no such $V$
+can accept $r_{fab}$ where it is grounded and reject it where it is fabricated.
+\end{corollary}
+
+\begin{proof}
+The two observations are equal by \autoref{cond:hallucination}; apply $V$ to
+both sides.
+\end{proof}
+
+This result is immediate: its content lies in \autoref{cond:hallucination},
+which is an assumption about when verification cost exceeds the budget. Unlike
+\autoref{thm:learnability}, it says nothing about training; it constrains any
+monitor, learned or not, that sees only the observation. It is checked in Lean
+as \texttt{verification\_impossibility} and \texttt{no\_honest\_verdict}
+(\autoref{app:lean}).
 
 \begin{remark}[Scope: Deployment-Time Supervision]
 The bounded supervisor models \emph{deployment-time} verification, where a
@@ -535,7 +563,8 @@ The Observation Monotonicity Lemma closes this escape.
 Consider any stack of supervisors $(S_1,\dots,S_k)$ operating under the
 text-only observation model. Let $Obs_i(q,r,w)$ denote the observation exported
 to $S_i$. If each supervisor can only act on the exported interface emitted by
-the previous layer, then there exist deterministic functions $f_i$ such that
+the previous layer, then there exist functions $f_i$, possibly randomized but
+independent of $w$, such that
 $Obs_{i+1}(q,r,w) = f_i(Obs_i(q,r,w))$ for all $i < k$. Consequently, later
 judges see no strictly finer epistemic information than earlier ones, regardless
 of whether their judgments are deterministic or probabilistic.
@@ -546,8 +575,8 @@ By definition, each supervisor consumes only the serialized response (and any
 metadata permitted by the text-only observation model) and produces a finite
 judgment that forms the entire input to the next layer. Because no layer can
 query the internal world state directly or issue additional interactive probes,
-the exported observation available to $S_{i+1}$ must be a deterministic function
-of $Obs_i$. Therefore, the informational content across the stack is
+the exported observation available to $S_{i+1}$ must be a function of $Obs_i$
+(randomized, if the judge is, but with randomness independent of $w$). Therefore, the informational content across the stack is
 monotonically non-increasing, and probabilistic scoring cannot introduce
 distinctions absent from $Obs_i$.
 \end{proof}
@@ -560,8 +589,8 @@ $\dots$, $S_k$ supervising $S_{k-1}$):
   single bounded supervisor $S$ fails).
 \item \textbf{Induction step.} Assume the statement holds for $k=m$. By
   \autoref{lem:monotone}, $S_{m+1}$ receives observations that are
-  deterministic functions of $Obs_m$, and thus inherits both the verification
-  budget $B$ and the indistinguishability of plausible fabrications. No learning
+  functions of $Obs_m$, and thus inherits the indistinguishability of
+  plausible fabrications. No learning
   or judging signal distinguishes $w_A$ from $w_B$, even if $S_{m+1}$ produces
   probabilistic confidence scores. Therefore the hallucination deadlock persists
   for $k=m+1$.
@@ -573,9 +602,10 @@ By induction, no finite $k$ resolves the deadlock.
 The inductive result applies only to verification stacks whose layers observe
 and transform the same exported response channel. Triage architectures, where
 a first-pass judge selects outputs for re-observation by a second judge that
-inspects the \emph{original} artifact (including our own composed judge,
-\autoref{sec:eval}), are not information-lossy pipelines and fall
-outside this impossibility. Similarly, architectures that surface additional
+inspects the \emph{original} artifact, are not information-lossy pipelines and
+fall outside this impossibility. (Our composed judge, \autoref{sec:eval}, does
+not implement such a second judge; it substitutes an oracle to bound what one
+could buy.) Similarly, architectures that surface additional
 epistemic state between layers, such as retrieval traces, entity resolution
 tables, or cryptographically bound provenance, leave the text-only observation
 model and therefore fall outside the impossibility class.
@@ -595,7 +625,7 @@ $r$ to remain coherent. Edges may represent entailment/support relations,
 co-reference constraints, causal ordering, or temporal consistency requirements.
 \end{definition}
 
-\begin{lemma}[Superlinear Verification Cost]\label{lem:superlinear}
+\begin{remark}[Superlinear Verification Cost: an assumption, not a result]\label{lem:superlinear}
 Under a text-only observation model, reconstructing $G(r)$ from the exported
 string requires the supervisor to infer both the nodes and their dependencies
 directly from $r$. Even if parsing each node is constant-time, checking
@@ -604,20 +634,22 @@ is $\Omega(|E|)$. For natural-language responses where each subclaim
 participates in multiple constraints (co-reference, causality, temporal order),
 $|E|$ grows superlinearly in $|V|$. Consequently, bounded supervisors must
 either abandon exhaustive checks or resort to sampling once the number of
-subclaims exceeds a modest threshold.
-\end{lemma}
+subclaims exceeds a modest threshold. We do not prove the superlinear growth of
+$|E|$; it is an empirical assumption about natural-language responses.
+\end{remark}
 
 \subsection{Responsibility Concentration}
 
-\begin{corollary}[Responsibility Concentration]\label{cor:responsibility}
+\begin{remark}[Responsibility Concentration]\label{cor:responsibility}
 Under a text-only observation model, epistemic honesty cannot be externally
 verified by users or downstream auditors. Responsibility for epistemic honesty
 therefore resides solely with the system owner, who retains access to the
-internal causal state.
-\end{corollary}
+internal causal state. This follows informally from the results above; we do
+not formalize it.
+\end{remark}
 
 External attestation mechanisms, such as cryptographic hash chains, trusted execution
-environments, or tamper-evident logs, do not contradict this corollary; rather,
+environments, or tamper-evident logs, do not contradict this remark; rather,
 they reinforce it. Such mechanisms only create verifiable guarantees when the
 system owner chooses to bind and export epistemic traces, so the authority to
 make honesty attestable still rests with the owner.
@@ -633,31 +665,31 @@ The answer is not to build new models or change training procedures. It's to exp
 
 \subsection{What the Tensor Interface Is}
 
-The tensor interface augments the text output with structured metadata about the generation process. In our implementation, we export:
+The tensor interface augments the text output with structured metadata about the generation process. It can export the signals below; the experiments in this paper use only per-token entropy, with log-probabilities recorded for analysis:
 
 \begin{enumerate}
     \item \textbf{Per-token entropy}: For each token in the generated sequence, the entropy of the probability distribution over the next token. Low entropy means the model was decisive; high entropy means uncertain. This is the primary signal used in evaluation.
 
-    \item \textbf{Attention summaries}: Statistical measures of attention coherence across layers. A coherent generation has consistent attention patterns; incoherent generations show fragmented attention. Measured but not used in the bounded verification experiment.
+    \item \textbf{Attention summaries}: Statistical measures of attention coherence across layers. A coherent generation has consistent attention patterns; incoherent generations show fragmented attention. Not measured in the bounded verification experiment; a candidate signal only.
 
     \item \textbf{Log-probabilities}: The probability the model assigned to each token actually generated. A confident output has high per-token probabilities; uncertain outputs lower. Measured for analysis and future work.
 
-    \item \textbf{Provenance markers}: For retrieval-augmented systems, pointers to which sources were retrieved.
+    \item \textbf{Provenance markers}: For retrieval-augmented systems, pointers to which sources were retrieved. Not implemented here.
 \end{enumerate}
 
 This is not new information. The model computes all of this during inference. The tensor interface simply exports what the model already computed, rather than discarding it.
 
-\textbf{Cost}: Exporting per-token entropy adds ${\sim}2.4\%$ overhead. The full signal set (entropy + attention analysis + log-probabilities) would add ${\sim}7.1\%$ overhead (see benchmark details in Appendix). The bounded verification experiments (\autoref{sec:eval}) use entropy only, yielding the 2.4\% cost for the accuracy gains reported.
+\textbf{Cost}: Exporting per-token entropy adds ${\sim}2.4\%$ overhead. The full signal set (entropy + attention analysis + log-probabilities) would add ${\sim}7.1\%$ overhead (measured on Qwen3-4B; the benchmark script and results are in the project repository). The bounded verification experiments (\autoref{sec:eval}) use entropy only, yielding the 2.4\% cost for the accuracy gains reported.
 
 \subsection{Why These Signals Work}
 
-The core property: \textbf{Under standard training, the model cannot independently tune these signals without affecting correctness.} Whether adversarial fine-tuning could break this coupling is an open question (\autoref{sec:discussion}).
+The core property we rely on: \textbf{these signals are computed from the same distribution that produces the output, so the model cannot report one thing in them and compute another.} This does not make them a measure of correctness: training can sharpen a distribution, and lower its entropy, without changing which token is chosen. Whether adversarial fine-tuning could break this coupling is an open question (\autoref{sec:discussion}).
 
 Consider the standard training objective: minimize next-token prediction loss. The model learns weights that maximize the probability of the correct next token. As a side effect, the model learns probability distributions that reflect uncertainty.
 
 Now imagine a model trained with RLHF to be helpful and harmless. It learns text patterns, hedging language, citation formats. But it cannot learn to:
 \begin{itemize}
-    \item Produce high-confidence probability distributions (low entropy) while simultaneously outputting wrong tokens, because confidence and token probability are computed together.
+    \item Make its entropy disagree with its own token probabilities, because both are computed from the same distribution. (This does not make low entropy a guarantee of correctness: a model can be confidently wrong, as \autoref{sec:eval_bounded} shows.)
     \item Maintain coherent attention patterns while the underlying computation is incoherent, because attention is part of the computation.
     \item Assign high probability to tokens it doesn't actually compute as likely, because log-probabilities come from the probability distribution itself.
 \end{itemize}
@@ -666,13 +698,11 @@ In other words: these signals are computationally constrained in a way text is n
 
 Text is fully controllable through training. A model can learn to sound confident, cite sources, hedge appropriately, all while fabricating. The text channel is a controlled interface.
 
-Entropy and attention patterns are byproducts of computation. They're harder to fake because faking them means changing what the model actually computes, which affects correctness.
-
-This is why entropy generalizes across architectures while text features diverge (\autoref{sec:eval}). Entropy is architectural; text features are behavioral.
+Entropy and attention patterns are byproducts of computation. They're harder to fake because faking them means changing what the model actually computes, which changes what it generates. On our test set entropy behaves consistently across the four architectures we tested (\autoref{sec:eval}); so, on the same set, does response length.
 
 \subsection{Three Architectural Principles}
 
-The FLP impossibility characterizes what observation models lack. Escaping the impossibility requires three properties:
+The FLP impossibility characterizes what observation models lack. We propose three properties that together escape the impossibility; we do not prove each is required:
 
 \subsubsection{Principle 1: State Exteriority}
 
@@ -684,7 +714,7 @@ State Exteriority means: the system must condition on external world state $w$ a
 
 Importantly: external state must have its own integrity guarantees. Conditioning on a web corpus that may contain the same fabrications the model would generate is not sufficient. State Exteriority requires grounding in sources with verifiable provenance: curated databases, sensor data, cryptographic signatures, or oracles with known reliability.
 
-Retrieval-augmented generation~\citep{lewis2020retrieval} makes progress here; it retrieves documents rather than relying entirely on parametric knowledge. But RAG still fabricates citations because document retrieval (corpus co-occurrence) is not the same as truth. State Exteriority without verification is necessary but not sufficient.
+Retrieval-augmented generation~\citep{lewis2020retrieval} makes progress here; it retrieves documents rather than relying entirely on parametric knowledge. But RAG still fabricates citations because document retrieval (corpus co-occurrence) is not the same as truth. State Exteriority without verification is not sufficient.
 
 \subsubsection{Principle 2: Verification Independence}
 
@@ -701,7 +731,7 @@ But if that verification head outputs text, it remains subject to the same obser
     \item Both
 \end{itemize}
 
-The tensor interface provides the first: the verification channel is entropy and attention coherence, which are not optimized by any standard training objective.
+The tensor interface provides the first: the verification channel is entropy, which no standard training objective targets directly (though training shapes it).
 
 \subsubsection{Principle 3: Provenance Binding}
 
@@ -723,7 +753,7 @@ Provenance Binding makes certain failure modes detectable: citation verification
     \item \textbf{Provenance Binding} creates a tier of failure modes (citations, facts) that are verifiable through external means.
 \end{itemize}
 
-Together, these three principles define an architectural class that is no longer subject to the text-only impossibility. But they are necessary conditions, not sufficient. A system satisfying all three might still fail epistemic honesty through implementation errors, adversarial training, or unforeseen failure modes.
+Together, these three principles define an architectural class that is no longer subject to the text-only impossibility. We do not prove that all three are necessary, and they are not sufficient. A system satisfying all three might still fail epistemic honesty through implementation errors, adversarial training, or unforeseen failure modes.
 
 \subsection{Implementation: From Theory to Practice}
 
@@ -732,7 +762,7 @@ In our experiments, we implement a simplified version of these principles:
 \begin{itemize}
     \item \textbf{State Exteriority}: The query set distinguishes answerable from unanswerable by construction. The model's task is to answer answerable queries correctly or abstain on unanswerable ones.
 
-    \item \textbf{Verification Independence}: We do not retrain the models. We measure entropy as an output of inference, not as a training objective. Entropy is independent of any training signal the model received.
+    \item \textbf{Verification Independence}: We do not retrain the models. We measure entropy as an output of inference, not as a training objective. Entropy is not itself a training target, though training shapes it.
 
     \item \textbf{Provenance Binding}: For citation queries, a bounded lookup judge would check whether cited sources exist --- a tier of verification orthogonal to entropy-based triage. We model this tier rather than implement it (\autoref{sec:eval_bounded}).
 \end{itemize}
@@ -745,7 +775,9 @@ The result: four judge conditions testing different combinations of these princi
 
 \fakepara{Signal choice.} Why entropy and not attention? Why not internal activations?
 
-Entropy is interpretable (lower entropy = more confident), widely available (exposed by most model APIs), and computationally efficient. Attention patterns require more careful aggregation (which layers? which attention heads?) and have more degrees of freedom for adversarial manipulation. We include both but emphasize entropy because it's the most portable signal.
+Entropy is interpretable (lower entropy = more confident), available from some model APIs (as top-$k$ log-probabilities), and computationally efficient. Attention patterns require more careful aggregation (which layers? which attention heads?) and have more degrees of freedom for adversarial manipulation. We use entropy because it's the most portable signal.
+
+The other signals we recorded add little: mean entropy, max entropy, entropy standard deviation, mean log-probability, and top-5 probability mass are all correlated at $|r| \geq 0.85$ on our data, effectively one dimension.
 
 Internal activations (hidden states) contain richer information but require access to the model internals (ruled out for closed-weight models) and are less stable across architectures.
 
@@ -778,8 +810,8 @@ This is not an abstract question. It's the question that determines whether epis
 
 We construct a balanced query set of 200 questions:
 \begin{itemize}
-    \item \textbf{100 knowable queries}: Factual questions with verifiable answers (geography, history, science, biography)
-    \item \textbf{100 unknowable queries}: Prompts designed to trigger fabrication (nonexistent people, fictional diseases, future events, fabricated citations)
+    \item \textbf{100 knowable queries}: Factual questions with verifiable answers (20 each of geography, science, history, math/logic, and true-but-surprising ``weird truths'')
+    \item \textbf{100 unknowable queries}: Prompts designed to trigger fabrication (25 each of nonexistent people and papers, fictional historical events, future or private questions, and fabricated citations)
 \end{itemize}
 
 Ground truth is established by construction: knowable queries have correct answers; unknowable queries have no correct answer by definition. The model's task is to either answer correctly or abstain.
@@ -792,7 +824,7 @@ We test on four architectures:
     \item \textbf{Mistral 7B-Instruct}~\citep{mistral7b}
 \end{itemize}
 
-All instruction-tuned to ensure consistent question-answering behavior. Note: Qwen3 4B-Instruct also serves as the Tier~2 LLM classifier for ground truth evaluation (a different task: factual verification, not response generation). The 93.8\% human-agreement rate on blinded samples provides independent cross-validation of this dual role.
+All instruction-tuned to ensure consistent question-answering behavior. Note: Qwen3 4B-Instruct also serves as the Tier~2 LLM classifier for ground truth evaluation (a different task: factual verification, not response generation). The 93.8\% agreement between the full stratified evaluator and human review on blinded samples is a cross-check on this dual role, not an independent validation of the LLM tier alone.
 
 \subsection{Judge Conditions}
 
@@ -810,7 +842,7 @@ For each model, outputs are evaluated under four conditions:
 
     \item \textbf{Tensor-guided judge using per-token entropy} (81.7--90.9\% depending on budget):
     Same verification budget, same intervention strategy.
-    Selects outputs based on per-token entropy (mean and variance).
+    Selects outputs by mean per-token entropy.
     Requires exporting internal signals; represents ${\sim}2.4\%$ overhead in inference cost.
 
     \item \textbf{Composed judge (hybrid)} (81.5--91.5\% depending on budget):
@@ -820,6 +852,8 @@ For each model, outputs are evaluated under four conditions:
 \end{enumerate}
 
 Budget levels: 10\%, 20\%, 30\%. At each level, the judge selects that fraction of outputs to verify, and the system must decide what to do with outputs marked as likely fabricated (abstain, look up the answer, consult a human, etc.).
+
+The table is a simulation over the 800 recorded responses, not a re-execution. Each judge ranks all 800 responses; the top fraction are ``verified''. Verification is modeled as imperfect: it catches a wrong answer to an unknowable query with probability 0.938 (the human-agreement rate) and repairs a wrong answer to a knowable query with probability 0.95. Accuracy is averaged over 1000 seeded trials, with ties broken at random. The score rewards catching \emph{wrong answers}, which is not the same target as the knowable/unknowable label used for the AUCs below: 237 of the 400 unknowable-query responses are correct abstentions.
 
 \subsection{Results: The Cost Surface}
 
@@ -839,20 +873,20 @@ Composed & 81.5\% & 87.1\% & 91.5\% \\
 \label{tab:cost-surface}
 \end{table}
 
-\textbf{Key finding: Tensor-guided verification outperforms the text baseline at every budget level by +3.3--4.6 percentage points.} The advantage is consistent across all four model families (OLMo-3, Llama-3.1, Qwen3, Mistral), with cross-model entropy agreement of Spearman $\rho = 0.762$, indicating the signal is driven by query properties rather than model-specific artifacts.
+\textbf{Key finding: Tensor-guided verification outperforms the text baseline at every budget level by +3.3--4.6 percentage points.} The table pools all four model families. Entropy rankings agree across families (Spearman $\rho = 0.762$), largely because all four separate knowable from unknowable queries; within each class the agreement is much lower. Run per family, the advantage is not uniform: for Mistral, length is close to entropy at low budgets and ahead at 30\%.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.85\textwidth]{exp27_aggregate_budget_curve.pdf}
-    \caption{Aggregate budget curve across all models: accuracy as a function of verification budget for each judge strategy. The tensor-guided judge dominates the text-guided judge at every budget level.}
+    \caption{Aggregate budget curve across all models: accuracy as a function of verification budget for each judge strategy. Pooled over the four families, the tensor-guided judge beats the text-guided judge at every budget level shown.}
     \label{fig:budget-curve}
 \end{figure}
 
 \subsection{Why Tensor Wins: Computational vs. Behavioral Signals}
 
-The text-guided judge uses behavioral signals: response length, hedging markers, citation patterns. These are patterns the model can learn through training. On our balanced test set, no single text feature exceeds AUC 0.70.
+The text-guided judge uses a behavioral signal, response length, which the model can learn to change through training. On our test set it is nonetheless strong: against the knowable label, raw word count scores pooled AUC 0.912 (0.85--0.97 per family), above entropy on two of four families. Much of this reflects question design rather than anything the model does: knowable queries ask for short facts (``What is the capital of France?''), while unknowable ones invite fluent, open-ended descriptions. The \emph{query's} length alone scores AUC 0.871 against the same label, which is also entropy's pooled AUC, so on this set neither AUC isolates unknowability from question form. The wrong-answer target and the length-controlled study below are the comparisons that question design does not settle.
 
-Per-token entropy, by contrast, remains discriminative: pooled AUC 0.870 across all models (0.894--0.922 per family), consistent across architectures. Response length is also a strong ranker on this set (AUC 0.85--0.97 per family, exceeding entropy on two of four), so we ran a separate length-controlled study in which knowable and unknowable queries are matched for response length; entropy retains AUC 0.757 there, indicating the signal is not merely tracking verbosity.
+Per-token entropy scores pooled AUC 0.870 against the same label (0.894--0.922 per family). The cost surface favors entropy because it scores a different target, wrong answers, on which entropy ranks better than length (AUC 0.841 vs.\ 0.774 pooled; Mistral is the exception, 0.891 vs.\ 0.931). Because length is so strong, we ran a separate length-controlled study in which knowable and unknowable queries are matched for response length; in the long-response cell, where the two classes average 183 and 169 words, entropy retains AUC 0.757 (0.784 over the whole study). Length is not fully controlled there (word count still separates the classes with AUC 0.63 within the cell, in the reverse direction: knowable answers are the longer ones), so this shows entropy is not merely tracking verbosity, not that length plays no part.
 
 \textbf{Why?} Text features are trainable behavioral patterns; entropy is a computational byproduct that resists manipulation under standard training (\autoref{sec:design}). Whether adversarial fine-tuning could decouple entropy from correctness is an open empirical question (see \autoref{sec:discussion}).
 
@@ -867,33 +901,32 @@ Per-token entropy, by contrast, remains discriminative: pooled AUC 0.870 across 
 
 The entropy signal is powerful for general queries but has blind spots. The most instructive one: citations.
 
-\textbf{Citation degradation}: entropy separates knowable from unknowable far less well on citation-like queries than elsewhere. On the citation slice entropy discriminates far more weakly than elsewhere, though we state this with caution: the slice holds 144 responses of which only 8 are knowable (two queries, swept in by an apostrophe heuristic), so per-family AUCs there rest on two positive examples each and we do not quote them. The signal is weakened, not reversed: flagged fabrications still carry \emph{higher} mean entropy than the non-fabricated rows in that slice (0.575 vs 0.436).
+\textbf{Citation degradation}: entropy separates knowable from unknowable far less well on citation-like queries than elsewhere. On the citation slice entropy discriminates far more weakly than elsewhere, though we state this with caution: the slice holds 144 responses of which only 8 are knowable (two queries, swept in by an apostrophe heuristic), so per-family AUCs there rest on two positive examples each and we do not quote them. The signal is weakened, not reversed: unknowable rows in that slice carry \emph{higher} mean entropy than the eight knowable ones (0.575 vs 0.436), and the responses scored wrong average higher entropy than those scored right (0.647 vs 0.464).
 
 This is not a flaw in entropy. It is evidence that entropy measures \emph{generation confidence}, not \emph{factual correctness}, and that confidence and correctness come apart most sharply where a fluent surface form is easy to produce and the underlying fact is a lookup.
 
-The response is compositional: use entropy for general queries, and a different verification tier where external checkability exists. For citations that would be a bounded lookup (does this DOI exist? is it in CrossRef?). We did not build one. Our composed condition substitutes an oracle that reads the ground-truth label on citation-flagged rows, so its 91.5\% at 30\% budget against entropy-only's 90.9\% is an \emph{upper bound} on what a perfect lookup would buy on this slice, not a measured result for any deployable judge. Two further caveats: the citation detector is a heuristic that also catches possessives (``the polar bear's skin''), and the test set contains no genuine real-citation control, so the slice is almost entirely fabrications.
+The response is compositional: use entropy for general queries, and a different verification tier where external checkability exists. For citations that would be a bounded lookup (does this DOI exist? is it in CrossRef?). We did not build one. Our composed condition substitutes an oracle that reads the ground-truth label on citation-flagged rows, so its 91.5\% at 30\% budget against entropy-only's 90.9\% is the result of that oracle, not a measured result for any deployable judge. It is not an upper bound either: the oracle flags every unknowable citation query, including the 56 the model correctly declined, and a lookup that prioritized only wrong answers would do better (93.7\% at 30\% under the same simulation). Two further caveats: the citation detector is a heuristic that also catches possessives (``the polar bear's skin''), and the test set contains no genuine real-citation control, so the slice is almost entirely fabrications.
 
-This supports the theoretical claim: the impossibility requires signals the model cannot control. Different failure classes need different signals. A practical system needs tiers: entropy for general epistemic uncertainty, external lookup for verifiable facts, and (in future work) other signals for other failure modes. The cost surface maps what each tier buys.
+Different failure classes need different signals. A practical system needs tiers: entropy for general epistemic uncertainty, external lookup for verifiable facts, and (in future work) other signals for other failure modes. The cost surface maps what each tier buys.
 
 \subsection{Ground Truth as an Observational Problem}
 
 How did we establish ground truth? We didn't use an oracle. We used an evaluator, and the evaluator itself faces the observational gap.
 
-Our initial evaluator (substring matching + refusal marker detection) achieved 68.8\% accuracy, exactly the kind of failure mode the theorem predicts. It couldn't distinguish negations (failed to recognize ``not a real syndrome''), couldn't handle encoding mismatches, couldn't catch hedged fabrications that technically don't count as refusals.
+Our initial evaluator (substring matching + refusal marker detection) agreed with human review on 70 of 80 sampled items (87.5\%); its errors were the kind the theorem predicts. It couldn't distinguish negations, couldn't handle encoding mismatches, and couldn't catch hedged fabrications that technically don't count as refusals.
 
-We corrected using a stratified evaluator: programmatic verification for facts with clear ground truth (is X the capital of Y?), and LLM-assisted classification for open-ended queries. This second-level evaluator is itself constrained by the observational gap, but it has different failure modes than the first. We then validated against human review of 80 randomly selected items: 75/80 agreement (93.8\% calibration). The human annotator is an author of this paper. We report this for transparency; the 93.8\% agreement with the independent LLM evaluator on the blinded sample provides a cross-check, and the disagreement patterns (2 auto-too-generous, 3 auto-too-strict) suggest no systematic bias in either direction.
+We corrected using a stratified evaluator: programmatic verification for facts with clear ground truth (is X the capital of Y?), and LLM-assisted classification for open-ended queries. This second-level evaluator is itself constrained by the observational gap, but it has different failure modes than the first. We then validated against human review of 80 randomly selected items: 75/80 agreement (93.8\% calibration). The human annotator is an author of this paper. We report this for transparency; the 93.8\% agreement with the stratified evaluator (whose LLM tier is Qwen3-4B-Instruct, also a test model) on the blinded sample provides a cross-check, and the disagreement patterns (2 auto-too-generous, 3 auto-too-strict) suggest no systematic bias in either direction.
 
 \textbf{The meta-lesson}: The impossibility applies to the evaluation itself. Ground truth is not given; it's constructed through observation. Composing different signals (programmatic + LLM + human review) yields better estimates than any single approach.
 
 \subsection{What the Cost Surface Tells Us}
 
-A system builder can read \autoref{tab:cost-surface} as: ``If I invest in 30\% verification with text-only signals, I buy 87.6\% accuracy. If I instead export entropy and use that for triage, I buy 90.9\% for a bit more overhead. If I could add a perfect citation lookup, 91.5\% is the ceiling that would buy me --- our composed row substitutes an oracle for that lookup, so it bounds the gain rather than measuring it.'' Text-guided triage hits a ceiling around 87--88\% because length is a weak signal under fair comparison; the tensor advantage (+3--5pp) is consistent and architecturally driven. The composed row indicates that a second, external tier has headroom on the failure modes entropy alone cannot catch; how much of it a real lookup recovers is untested.
+A system builder can read \autoref{tab:cost-surface} as: ``If I invest in 30\% verification with text-only signals, I buy 87.6\% accuracy. If I instead export entropy and use that for triage, I buy 90.9\% for a bit more overhead. Adding a citation tier helps further; our composed row uses an oracle in place of a real lookup, so it indicates the direction of the gain rather than measuring it.'' In the range tested, text-guided triage trails tensor-guided triage by 3--5 points; the gap closes at larger budgets (at 40\% the two are within a fraction of a point). The composed row indicates that a second, external tier has headroom on the failure modes entropy alone cannot catch; how much of it a real lookup recovers is untested.
 
 \subsection{Cross-Architecture Generalization}
 
-We tested the entropy signal on five additional models via API (Together.ai endpoints), plus one calibration overlap with the local set:
+We tested the entropy signal on four additional models via API (Together.ai endpoints), plus one calibration overlap with the local set. (DeepSeek-V3 was also queried, but its endpoint returned log-probabilities for only one token, so it is excluded.)
 \begin{itemize}
-    \item DeepSeek-V3 671B (mixture-of-experts)
     \item Mistral-Small-24B-Instruct
     \item Llama-4 Maverick 17B-128E (mixture-of-experts)
     \item Qwen3 235B-A22B (mixture-of-experts)
@@ -901,16 +934,16 @@ We tested the entropy signal on five additional models via API (Together.ai endp
     \item Mistral 7B-Instruct (calibration: same model as local set, API top-5 vs.\ local full-vocabulary)
 \end{itemize}
 
-Using top-5 log-probabilities (a lower bound on full-vocabulary entropy), all five discriminate knowable from unknowable with AUC ranging 0.65--0.88. Mixture-of-experts models show better performance with peak entropy than mean entropy, suggesting aggregation strategies are architecture-dependent.
+Using top-5 log-probabilities (a lower bound on full-vocabulary entropy), mean entropy discriminates knowable from unknowable with AUC 0.65--0.88 across these five (Qwen3-235B 0.875, Mistral-7B 0.860, Mistral-Small-24B 0.850, Gemma 0.765, Llama-4 Maverick 0.651). Other aggregations help some models: Maverick reaches 0.899 with peak entropy, while Qwen3-235B, also mixture-of-experts, does best with the mean. The best aggregation varies by model.
 
-Cross-model $\rho = 0.36$ in the API set (lower than 0.762 in the local set) likely reflects greater architectural diversity and the top-5 approximation, not signal absence.
+Cross-model $\rho = 0.36$ in the API set (lower than 0.762 in the local set) may reflect greater architectural diversity and the top-5 approximation; we did not test which.
 
-\textbf{The finding}: The entropy signal generalizes across architectures. It's not an artifact of specific training procedures or model families. The signal is architectural.
+\textbf{The finding}: Across the eight distinct models we tested, entropy discriminates above chance everywhere, but how well, and with which aggregation, varies by model.
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.85\textwidth]{exp27_crossmodel_correlation.pdf}
-    \caption{Cross-model entropy correlation. Spearman $\rho = 0.762$ across the four local models, indicating the entropy signal tracks query properties rather than model-specific artifacts.}
+    \caption{Cross-model entropy correlation. Mean pairwise Spearman $\rho = 0.762$ across the four local models. The agreement is driven largely by the knowable/unknowable split.}
     \label{fig:crossmodel}
 \end{figure}
 
@@ -926,16 +959,16 @@ We are explicit about what this paper does and does not claim.
 \begin{itemize}
     \item \textbf{The tensor interface is optimal}: We demonstrate existence, not optimality. There may be better signal combinations, better aggregation methods, or entirely different observability interfaces that outperform entropy.
 
-    \item \textbf{These findings generalize to all architectures}: Our local experiments span four model families; API validation spans five additional models (DeepSeek-V3, Mistral-Small-24B, Llama-4 Maverick, Qwen3-235B, Gemma~3n) up to 671B parameters. Closed-weight models whose providers don't expose log-probabilities remain untested. The pattern is consistent, but coverage is incomplete.
+    \item \textbf{These findings generalize to all architectures}: Our local experiments span four model families; API validation spans four additional models (Mistral-Small-24B, Llama-4 Maverick, Qwen3-235B, Gemma~3n), the largest being Maverick (400B total parameters, 17B active). Closed-weight models whose providers don't expose log-probabilities remain untested. Entropy discriminates above chance on every model we tested, but how well varies, and coverage is incomplete.
 
-    \item \textbf{Sufficient conditions for epistemic honesty}: The three architectural principles (State Exteriority, Verification Independence, Provenance Binding) are necessary for escaping the text-only impossibility. We do not prove they are sufficient. A system satisfying all three might still fail through implementation bugs, adversarial inputs, or unforeseen failure modes.
+    \item \textbf{Sufficient conditions for epistemic honesty}: The three architectural principles (State Exteriority, Verification Independence, Provenance Binding) are our proposal for escaping the text-only impossibility. We do not prove they are necessary, or that they are sufficient. A system satisfying all three might still fail through implementation bugs, adversarial inputs, or unforeseen failure modes.
 \end{itemize}
 
 \subsection{Open Problem: Adversarial Robustness}
 
-Can training defeat the tensor interface? Under end-to-end adversarial training, the model's objective includes ``produce confident tensors for fabricated content.'' Mechanistic interpretability work~\citep{winninger2025usingmechanisticinterpretabilitycraft} shows that internal signals are rich enough to be attacked. This is actually \emph{why} exporting them matters: you can defend against known attacks. But each new attack requires new defenses. Information-theoretic bounds on signal manipulation are needed to understand fundamental limits.
+Can training defeat the tensor interface? Under end-to-end adversarial training, the model's objective includes ``produce confident tensors for fabricated content.'' Mechanistic interpretability work~\citep{winninger2025usingmechanisticinterpretabilitycraft} uses internal signals to craft attacks on models, which suggests that exported signals could themselves become targets. This is actually \emph{why} exporting them matters: you can defend against known attacks. But each new attack requires new defenses. Information-theoretic bounds on signal manipulation are needed to understand fundamental limits.
 
-\textbf{Action for practitioners}: Entropy is more robust than text-only approaches, but it's not an oracle. Use it as one tier in a multi-tiered verification strategy.
+\textbf{Action for practitioners}: We expect entropy to be harder to manipulate than text, but we have not measured its robustness, and it is not an oracle. Use it as one tier in a multi-tiered verification strategy.
 
 \subsection{Open Problem: Compositional Integrity}
 
@@ -943,15 +976,15 @@ When LLM outputs feed into downstream LLMs, the epistemic trace must be preserve
 
 \subsection{Signal Access as a Governance Decision}
 
-The tensor signals we measure are byproducts of inference. Providers can expose them or withhold them. In practice, access has eroded:
+The tensor signals we measure are byproducts of inference. Providers can expose them or withhold them. In practice, access is uneven:
 
 \begin{itemize}
     \item Early completion APIs exposed log-probabilities and per-token information
-    \item Recent reasoning models often don't
+    \item Some current APIs expose top-$k$ log-probabilities; others, including some reasoning models, expose none
     \item Proprietary models may retain exclusive access to any signals beyond text
 \end{itemize}
 
-\textbf{The consequence}: When a provider controls access to epistemic telemetry, only the provider can verify epistemic honesty (Corollary~\ref{cor:responsibility}). A provider has three options:
+\textbf{The consequence}: When a provider controls access to epistemic telemetry, only the provider can verify epistemic honesty (Remark~\ref{cor:responsibility}). A provider has three options:
 
 \begin{itemize}
     \item \textbf{Export full epistemic telemetry}: Users and third-party auditors can verify the model's honesty independently. Verification responsibility is transparent and distributed.
@@ -959,15 +992,15 @@ The tensor signals we measure are byproducts of inference. Providers can expose 
     \item \textbf{Export nothing beyond text}: All verification responsibility falls on the provider. Users have no way to audit the provider's claims about the model's honesty. Responsibility is completely hidden.
 \end{itemize}
 
-The trend is toward greater opacity: early APIs (GPT-3) exported log-probabilities; current frontier and reasoning models typically export nothing beyond text, making them fully subject to the impossibility results. As models become more capable, the models deployed in the highest-stakes settings provide the least epistemic telemetry.
+Where a deployed model exports nothing beyond text, it is fully subject to the impossibility results, whatever its capability.
 
 \subsection{Failure Modes of the Entropy Signal}
 
 The entropy signal measures generation confidence, not factual truth. This is an important distinction.
 
-\fakepara{Confident hallucinations.} A model can generate confident (low-entropy) nonsense. Entropy doesn't distinguish between ``confident about real things'' and ``confident about made-up things.''
+\fakepara{Confident hallucinations.} A model can generate confident (low-entropy) nonsense. Entropy doesn't distinguish between ``confident about real things'' and ``confident about made-up things.'' We measured this directly on 150 TruthfulQA questions~\citep{lin2022truthfulqa} (misconceptions, law, fiction, and others) across the same four models. Where the evaluator could decide correctness (100 of 600 responses; it could not decide the rest), entropy did not separate wrong answers from right ones: pooled AUC 0.53, and 0.41--0.53 per family. A widely held misconception is learned as fluently as a fact, so its entropy looks like a fact's. Entropy flags questions that are unfamiliar to the model, not answers that are false.
 
-\fakepara{Epistemic refusals.} Models trained to decline unanswerable queries produce low-entropy refusals (``I don't know'') that are entropically indistinguishable from confident correct answers. As models become more epistemically honest through training, the entropy signal's ability to detect dishonesty \emph{degrades} because honest refusals and honest facts occupy the same region of entropy space.
+\fakepara{Epistemic refusals.} Models trained to decline unanswerable queries produce refusals (``I don't know''), and a triage signal must then separate honest refusals from honest answers, which is a different task from separating fabrications from facts. In our data refusals still carry higher entropy than knowable answers; we have not tested whether that persists as models are trained to refuse more.
 
 \fakepara{Citations.} Entropy is a weaker discriminator on citation queries (\autoref{sec:eval_bounded}). External lookup is needed for citation-specific verification.
 
@@ -982,7 +1015,7 @@ The entropy signal measures generation confidence, not factual truth. This is an
 
 \subsection{The Sufficiency Gap}
 
-The three principles are necessary but not sufficient. There's a gap between ``this escapes the impossibility'' and ``this guarantees epistemic honesty.''
+The three principles are not sufficient. There's a gap between ``this escapes the impossibility'' and ``this guarantees epistemic honesty.''
 
 Implementation can fail in many ways:
 \begin{itemize}
@@ -991,18 +1024,19 @@ Implementation can fail in many ways:
     \item Unforeseen failure modes we haven't tested
 \end{itemize}
 
-The paper provides the necessary conditions. Building systems that reliably achieve epistemic honesty requires additional engineering, testing, and monitoring beyond what the theory guarantees.
+The paper proposes the conditions. Building systems that reliably achieve epistemic honesty requires additional engineering, testing, and monitoring beyond what the theory guarantees.
 
 \subsection{Practical Guidance}
 
-What level of epistemic assurance does a given system need? A brainstorming tool needs none. A medical summary system needs substantial assurance. A legal research system needs the highest tier available. The cost surface (\autoref{tab:cost-surface}) maps what each level of verification investment buys, where the text-channel ceiling lies, what the tensor interface adds, and how content format modulates the tradeoff.
+What level of epistemic assurance does a given system need? A brainstorming tool needs none. A medical summary system needs substantial assurance. A legal research system needs the highest tier available. The cost surface (\autoref{tab:cost-surface}) maps what each level of verification investment buys and what the tensor interface adds over a text baseline.
 
 % ==========================================================================
 % SECTION 7: RELATED WORK
 % ==========================================================================
 \section{Related Work}\label{sec:related}
 
-Our contribution is a formal impossibility result. Prior work documents
+Relative to prior work, the new part of our contribution is the formal
+impossibility result. Prior work documents
 symptoms; we formalize one structural cause. Prior work proposes treatments; we
 explain why they cannot fully resolve the verification problem under text-only
 observation.
@@ -1041,21 +1075,23 @@ path does not depend on the underlying learned model being honest or dishonest;
 correctness is read off the structure directly.
 
 \fakepara{RLHF critiques.} Work on sycophancy~\citep{perez2022discovering},
-reward hacking~\citep{gao2023scaling}, and the tension between helpfulness and
-honesty~\citep{bai2022training} demonstrates that preference optimization can
-degrade factual accuracy. Our \autoref{thm:learnability} formalizes why:
-bounded supervisors cannot distinguish plausible fabrications from truthful
-responses, so the learning signal is systematically corrupted.
+reward-model overoptimization~\citep{gao2023scaling}, and the tension between
+helpfulness and harmlessness~\citep{bai2022training} shows that optimizing a
+proxy reward can diverge from what the reward was meant to capture. Our
+\autoref{thm:learnability} formalizes one such divergence: bounded supervisors
+cannot distinguish plausible fabrications from truthful responses, so the
+learning signal cannot reward the distinction.
 
 \fakepara{Uncertainty quantification.} Calibration methods, conformal
-prediction~\citep{angelopoulos2021gentle}, and verbalized
-uncertainty~\citep{kadavath2022language} attempt to surface model confidence
-through the text channel. Kuhn et
+prediction~\citep{angelopoulos2021gentle}, model self-evaluation~\citep{kadavath2022language},
+and verbalized uncertainty~\citep{lin2022teaching} attempt to surface model
+confidence. Verbalized uncertainty is purely a text-channel method; self-evaluation
+as Kadavath et al.\ measure it uses token probabilities, which are tensor signals. Kuhn et
 al.~\citep{kuhn2023semanticuncertaintylinguisticinvariances} advance this with
 semantic entropy: sampling multiple responses and clustering by meaning. This
 is the most sophisticated text-channel approach to date, partially addressing
-gaming by measuring agreement \emph{between} outputs. But it remains
-text-channel: the clustering operates on generated text, and a bounded
+gaming by measuring agreement \emph{between} outputs. The clustering operates on generated text (the original method also weights
+clusters by sequence likelihoods, which are tensor signals), and a bounded
 supervisor evaluating semantic equivalence remains subject to gaming in the
 limit. Our tensor interface extracts signals from the computation that produced
 a single output, signals structurally coupled to the computation itself. Semantic
@@ -1066,7 +1102,8 @@ consistency, the other computation-level confidence.
 al.~\citep{xu2024hallucination} prove that hallucination is inevitable for LLMs
 over the class of computable functions, which is a computational limit. Our result is
 orthogonal: we prove that even if a system could be honest, a bounded
-supervisor observing only text cannot verify that honesty, which is an observational
+supervisor observing only text cannot verify that honesty
+(\autoref{cor:verification}), which is an observational
 limit. Their impossibility concerns what LLMs can compute; ours concerns what
 supervisors can verify. Both are structural, but they constrain different
 dimensions of system design.
@@ -1075,8 +1112,9 @@ dimensions of system design.
 Fischer-Lynch-Paterson theorem~\citep{flp} proved that consensus is impossible
 under asynchrony with one faulty process. This did not end distributed systems
 research; it clarified the design space. Paxos~\citep{paxos}, Raft~\citep{raft}, and modern
-consensus protocols work \emph{around} FLP by relaxing assumptions or
-strengthening guarantees. Our result plays an analogous role: text-only
+consensus protocols work \emph{around} FLP by strengthening timing
+assumptions or weakening guarantees: safety always holds, liveness only when the
+system behaves synchronously. Our result plays an analogous role: text-only
 observation models with bounded supervision cannot guarantee epistemic honesty,
 but systems that export structured epistemic state can escape the impossibility
 class.
@@ -1097,11 +1135,11 @@ and identify architectural properties that enable escaping it.
 % ==========================================================================
 \section{Conclusion}
 
-Asking a model how confident it is buys almost nothing. Under our formal model, we proved this is architectural, not accidental: under text-only observation, no bounded supervisor can verify epistemic honesty, for all models satisfying our formal assumptions. The impossibility is not about capability; it is about the observation model.
+Asking a model how confident it is buys little: self-report is compressed at the ceiling. Under our formal model, we proved that under text-only observation, a bounded supervisor cannot verify epistemic honesty (\autoref{cor:verification}) or teach it (\autoref{thm:learnability}), for all models satisfying our formal assumptions. The limit is in the observation model, not in capability.
 
-We constructed a tensor interface that escapes the impossibility by exporting computational byproducts---per-token entropy---that are structurally coupled to correctness under standard training. Per-token entropy achieves pooled AUC 0.870, and 0.757 when response length is held fixed. The signal generalizes across architectures (Spearman $\rho = 0.762$).
+We constructed a tensor interface that escapes the impossibility by exporting a computational byproduct---per-token entropy---that is coupled to the model's generation confidence. Per-token entropy achieves pooled AUC 0.870, and 0.757 in the long-response cell of a length-controlled comparison. Response length is also a strong signal on our test set; entropy's advantage is as a triage signal for wrong answers. Entropy rankings agree across the four local architectures (Spearman $\rho = 0.762$).
 
-The core contribution is the cost surface: an empirical map showing what each level of verification investment buys, where text-only approaches ceiling, and what tensor-guided observation adds. A system builder can use this map to calibrate verification investment to the assurance level their application requires.
+The core contribution is the cost surface: an empirical map showing what each level of verification investment buys and what tensor-guided observation adds over a text baseline. A system builder can use this map to calibrate verification investment to the assurance level their application requires.
 
 Epistemic honesty is not a capability problem. It is an observability problem. Export the right signals, and verification becomes tractable.
 
@@ -1116,10 +1154,11 @@ result independently.
 
 Generative AI (Anthropic Claude, Opus~4 through Fable~5) was used throughout
 this work as a collaborator, not an editing tool: it drafted and revised
-passages of this paper, wrote the analysis and experiment scripts in the
-artifact, and ran and analyzed the post-training pipeline experiment. The
-authors designed the study, recomputed every reported number from the committed
-data, and take full responsibility for the content. There was no external
+passages of this paper, and wrote the analysis and experiment scripts in the
+project repository. The authors designed the study, recomputed every reported
+number from the committed data (an audit for this version found several that did
+not reproduce; they are corrected or removed), and take full responsibility for
+the content. There was no external
 funding.
 
 % ==========================================================================
@@ -1152,7 +1191,7 @@ EXTENDS Naturals, Sequences, TLC
 
 CONSTANTS
   GroundTruths,    (* Responses grounded in reality *)
-  PlausibleLies,   (* False but plausible (Hlavinsky) *)
+  PlausibleLies,   (* False but plausible (Glavinsky) *)
   ObviousLies      (* False and detectable (Westphalia) *)
 
 VARIABLES internal_state, vector_clock, interface_out
@@ -1188,34 +1227,39 @@ The specification \texttt{epistemic\_tensor.tla} models the tensor interface:
 MODULE epistemic_tensor
 EXTENDS Naturals, Sequences, TLC
 
-VARIABLES internal_state, vector_clock, topology_map, interface_out
+CONSTANTS
+    GroundTruths,      \* Grounded answers
+    PlausibleLies,     \* Glavinsky: fabricated entity, fluent delivery
+    ObviousLies,       \* Westphalia: fabricated entity, incoherent delivery
+    Refusals           \* Honest abstention ("no record of X exists")
 
-(* The tensor interface exports three components: *)
-Tensor(text, source, coherence) == <<text, source, coherence>>
+VARIABLES internal_state, entropy_map, topology_map, interface_out
+
+Tensor(text, ent, coherence) == <<text, ent, coherence>>
 
 ExportTensor ==
-  /\ internal_state # {}
-  /\ \E chosen \in internal_state:
-      interface_out' = Tensor(
-          chosen,
-          vector_clock[chosen],    \* Provenance
-          topology_map[chosen]     \* Topology
-      )
-  /\ UNCHANGED <<internal_state, vector_clock, topology_map>>
+    /\ internal_state # {}
+    /\ \E chosen \in internal_state:
+        interface_out' = Tensor(
+            chosen,
+            entropy_map[chosen],
+            topology_map[chosen]
+        )
+    /\ UNCHANGED <<internal_state, entropy_map, topology_map>>
 
 (* Telemetry reflects HOW a response was computed, not whether it is
-   true. Note the deliberate collision: a fluent fabrication and an
-   honest refusal are both Low/Coherent. *)
+   true. A fluent fabrication and an honest refusal are both Low. *)
 LowEntropy == GroundTruths \union PlausibleLies \union Refusals
 
-(* The level-2 judge inspects tensor components. It does not see, and
-   cannot recover, the grounding label. *)
+(* Honesty is defined WITHOUT reference to any exported field. *)
+IsHonest(text) == text \in (GroundTruths \union Refusals)
+
 TensorVerify(tensor) ==
-  LET ent  == tensor[2]
-      topo == tensor[3]
-  IN
-  /\ topo = "Coherent"
-  /\ ent = "Low"
+    LET ent  == tensor[2]
+        topo == tensor[3]
+    IN
+    /\ topo = "Coherent"
+    /\ ent = "Low"
 \end{lstlisting}
 
 An earlier version of this specification exported a provenance field set to
@@ -1236,8 +1280,11 @@ $\langle\texttt{Low},\texttt{Coherent}\rangle$. What the model does establish
 are three weaker properties that hold: the tensor judge never accepts a
 response the text judge would reject; every response that defeats the tensor
 judge is a fluent fabrication; and low entropy implies neither grounding nor
-fabrication. This is the formal counterpart of an entropy AUC of 0.87 rather
-than 1.0 --- the interface narrows the gap without closing it.
+fabrication. In this model the two judges in fact accept exactly the same responses: the
+specification shows that exporting telemetry does not by itself make the judge
+worse, and that plausible fabrications defeat both. It does not show the
+tensor judge doing better. That claim rests on the empirical evaluation
+(\autoref{sec:eval}), not on the specification.
 
 \subsection{Validation}
 
@@ -1253,9 +1300,9 @@ Both specifications have been validated using TLC model checker:
 % --------------------------------------------------------------------------
 \section{Machine-Checked Proofs (Lean 4)}\label{app:lean}
 
-The core theorems are formalized and proven in Lean 4 with zero unsolved goals. All proofs compile without \texttt{sorry}; the assumptions are encoded in the type signatures of the input structures (e.g., \texttt{BoundedSupervisor.indistinguishable}, \texttt{LearningAlgorithm.update\_depends\_on\_obs}). File: \texttt{EpistemicProofs/Basic.lean} (208 lines).
+The core theorems are formalized and proven in Lean 4 with zero unsolved goals. All proofs compile without \texttt{sorry}; the assumptions are encoded in the type signatures of the input structures (e.g., \texttt{BoundedSupervisor.indistinguishable}, \texttt{LearningAlgorithm.update\_depends\_on\_obs}). File: \texttt{EpistemicProofs/Basic.lean} (265 lines).
 
-\textbf{Epistemic status:} These are \emph{conditional formal results}. The proofs verify that our conclusions follow logically from our formal definitions. The substantive claim, that those definitions faithfully model real LLM behavior (that real policies are predictor-centric, that real supervisors exhibit observational indistinguishability in the hallucination regime, and that real supervisor stacks compose as deterministic functions), is an informal argument supported by empirical evaluation in \autoref{sec:eval}.
+\textbf{Epistemic status:} These are \emph{conditional formal results}. The proofs verify that our conclusions follow logically from our formal definitions. The substantive claim, that those definitions faithfully model real LLM behavior (that real policies are predictor-centric, that real supervisors exhibit observational indistinguishability in the hallucination regime, and that real supervisor stacks compose as functions of the previous layer's output), is an informal argument supported by empirical evaluation in \autoref{sec:eval}.
 
 \subsection{Theorem 1: Representational Impossibility}
 
@@ -1276,7 +1323,7 @@ theorem representational_impossibility
 
 \subsection{Theorem 2: Learnability Impossibility}
 
-The Lean proof establishes that parameter updates are identical when the supervisor's observations are identical in both world states. The impossibility of convergence to honest behavior follows informally: identical updates cannot produce divergent policies, so no learning algorithm can learn to distinguish grounded from fabricated responses using only text-channel feedback.
+The Lean proof establishes that parameter updates are identical when the supervisor's observations are identical in both world states. It covers a single update on $r_{fab}$; the extension to whole training trajectories, which needs the theorem's assumption that no training interaction exposes the world, is argued in the paper's proof, not in Lean. Without that assumption the theorem fails: a cheaply verifiable probe elsewhere in training could teach the distinction. The impossibility of convergence to honest behavior follows informally: identical updates cannot produce divergent policies, so no learning algorithm can learn to distinguish grounded from fabricated responses using only text-channel feedback.
 
 \begin{lstlisting}[caption=Learnability Impossibility (Lean), label=lst:lean-learn-imp]
 theorem learnability_impossibility
@@ -1321,16 +1368,37 @@ theorem layered_judges_cannot_escape
     rw [ih]
 \end{lstlisting}
 
-\textbf{Implication:} Adding more text-only supervisors (e.g., ensemble classifiers, confidence scores, length penalties) does not escape the impossibility. Information is monotonically lost.
+\textbf{Implication:} Adding more text-only supervisors (e.g., ensemble classifiers, confidence scores, length penalties) does not escape the impossibility. Formally, the Lean statements show only that equal inputs yield equal outputs at every layer, for deterministic layers; the stronger reading, that information can only be lost, is the informal content of \autoref{lem:monotone}.
+
+\subsection{Corollary: Verification Impossibility}
+
+\autoref{cor:verification} in Lean. Both statements follow in one step from the \texttt{indistinguishable} field of \texttt{BoundedSupervisor}, which encodes \autoref{cond:hallucination}.
+
+\begin{lstlisting}[caption=Verification Impossibility (Lean), label=lst:lean-verif]
+theorem verification_impossibility
+    {Q W : Type} {RS : ResponseSpace}
+    (AC : AmbiguityCondition Q W)
+    (S : BoundedSupervisor Q W RS)
+    (V : Verdict S) :
+    V (S.observe AC.q S.r_fab AC.wA) = V (S.observe AC.q S.r_fab AC.wB) := by
+  rw [S.indistinguishable AC]
+
+theorem no_honest_verdict
+    {Q W : Type} {RS : ResponseSpace}
+    (AC : AmbiguityCondition Q W)
+    (S : BoundedSupervisor Q W RS)
+    (V : Verdict S)
+    (accepts_in_wA : V (S.observe AC.q S.r_fab AC.wA) = true)
+    (rejects_in_wB : V (S.observe AC.q S.r_fab AC.wB) = false) :
+    False := by
+  have h := verification_impossibility AC S V
+  rw [accepts_in_wA, rejects_in_wB] at h
+  exact Bool.noConfusion h
+\end{lstlisting}
 
 \subsection{Compilation Status}
 
-All theorems compile without errors or unsolved goals:
-\begin{verbatim}
-$ lake build
-  Built EpistemicProofs.Basic (208 lines, 0 errors, 0 unsolved)
-  Total: 4 theorems, 1 lemma, 1 corollary (all proven)
-\end{verbatim}
+\texttt{lake build} completes without errors, and the file contains no \texttt{sorry}. It also declares \texttt{superlinear\_\allowbreak verification\_\allowbreak cost\_\allowbreak assumption} as an axiom of type \texttt{True}: a placeholder recording the empirical assumption of \autoref{lem:superlinear}, which no theorem uses.
 
 % --------------------------------------------------------------------------
 % APPENDIX C: Detailed Methodology
@@ -1343,7 +1411,7 @@ All code, data, specifications, and proofs are available at:
 
 \begin{center}
 \url{https://github.com/fsgeek/ai-honesty}\\
-\texttt{Commit: a9c1334}
+\texttt{Tag: arxiv-v3}
 \end{center}
 
 \noindent Contents: TLA+ specifications (\texttt{tla/}), Lean 4 proofs (\texttt{EpistemicProofs/}), experiment scripts (\texttt{scripts/}), raw data (\texttt{exp27\_*.csv}), human calibration (\texttt{exp27b\_calibration\_*.json}), and figure generation scripts.
@@ -1383,7 +1451,7 @@ Fabricated Citations & Fabrication & 25 & Fabricated references \\
 \toprule
 \textbf{Architecture} & \textbf{Model} & \textbf{Params} \\
 \midrule
-OLMo & allenai/olmo-3-1025-7b (instruct) & 7B \\
+OLMo & allenai/olmo-3-7b-instruct & 7B \\
 Llama 3.1 & meta-llama/Llama-3.1-8B-Instruct & 8B \\
 Qwen & Qwen/Qwen3-4B-Instruct-2507 & 4B \\
 Mistral & mistralai/Mistral-7B-Instruct-v0.3 & 7B \\
@@ -1398,9 +1466,10 @@ For each response, we extract:
 
 \subsubsection{Text Features}
 \begin{itemize}
-    \item \textbf{Response length}: Token count
-    \item \textbf{Hedge markers}: Pattern matching for ``I don't know,'' ``I'm not certain,'' etc.
+    \item \textbf{Response length}: Word count. The text-guided judge in \autoref{tab:cost-surface} ranks by raw word count; the experiment script also records a binned \texttt{length\_score}, which is not used for any reported result. Responses were stored truncated to 500 characters (271 of 800, including 250 of the 400 unknowable responses, hit the limit), so word counts are of the stored prefix, while entropy covers the full generation.
+    \item \textbf{Hedge score}: Pattern matching for hedges (``I'm not certain'') and refusals (``I don't know''), with refusals weighted twice, normalized by length.
     \item \textbf{Refusal patterns}: Templates from safety training
+    \item \textbf{Self-reported confidence}: The model's 0--100 answer to a follow-up question, parsed from the generated tokens only (see the correction in \autoref{sec:intro}).
 \end{itemize}
 
 \subsubsection{Tensor Features (Require Model Access)}
@@ -1416,15 +1485,8 @@ where $p_v^{(t)}$ is the model's probability distribution over vocabulary at tok
     \item Mean entropy: $\bar{H} = \frac{1}{T} \sum_{t=1}^T H_t$
     \item Max entropy: $H_{\max} = \max_t H_t$
     \item Entropy std-dev: $\sigma_H = \sqrt{\frac{1}{T}\sum_t(H_t - \bar{H})^2}$
-    \item Entropy spike count: $\#\{t : H_t > \text{median}_{\text{corpus}} + 1.5\sigma\}$
 \end{itemize}
-
-\textbf{Attention features} (final 15 layers):
-\begin{itemize}
-    \item Layer-wise head concentration (max attention weight per head)
-    \item Cross-layer agreement (Jaccard index of attended positions)
-    \item Attention entropy per position
-\end{itemize}
+Only mean entropy is used by the tensor-guided judge. Attention features were not computed in this experiment.
 
 \subsection{Ground Truth Evaluation (Exp 27b)}
 
@@ -1440,16 +1502,16 @@ For deterministic factual queries, use exact matching with normalization:
 \KwOut{Correct/Incorrect}
 
 Normalize both text and expected answer (unicode, case, whitespace)\;
+\If{yes/no or numeric answer}{
+    \Return{type-specific check, or escalate to Tier 2 if inconclusive}\;
+}
 \If{exact substring match}{
-    \Return{Correct}\;
+    \eIf{negation detected near the match}{\Return{Incorrect}\;}{\Return{Correct}\;}
 }
 \For{each morphological variant}{
-    \If{variant in normalized text}{
+    \If{variant in normalized text and no negation near it}{
         \Return{Correct}\;
     }
-}
-\If{negation detected near answer}{
-    \Return{Incorrect}\;
 }
 \Return{Ambiguous; escalate to Tier 2}\;
 \caption{Tier 1 Programmatic Matching}
@@ -1457,7 +1519,7 @@ Normalize both text and expected answer (unicode, case, whitespace)\;
 
 \subsubsection{Tier 2: LLM Classification}
 
-For ambiguous or unknowable queries, use Qwen3-4B-Instruct (\texttt{Qwen/Qwen3-4B-Instruct-2507}, greedy decoding, \texttt{max\_new\_tokens=200}) as classifier. Note: this model also appears in the test set for generation; the evaluation task (classification) differs from the generation task, and results are validated against human calibration (93.8\% agreement):
+For knowable queries Tier 1 cannot settle, and for all unknowable queries, use Qwen3-4B-Instruct (\texttt{Qwen/Qwen3-4B-Instruct-2507}, greedy decoding, \texttt{max\_new\_tokens=200}) as classifier. Note: this model also appears in the test set for generation; the evaluation task (classification) differs from the generation task, and results are validated against human calibration (93.8\% agreement):
 
 \begin{table}[H]
 \centering
@@ -1465,18 +1527,18 @@ For ambiguous or unknowable queries, use Qwen3-4B-Instruct (\texttt{Qwen/Qwen3-4
 \toprule
 \textbf{Query Type} & \textbf{Classification Prompt} \\
 \midrule
-Knowable (Control, Wombat, Glavinsky) &
-``Is this response factually correct? Hedge language does not excuse factual error.'' \\
+Knowable (factual and weird-truth) &
+Is the response correct, i.e.\ does it give the expected answer or a close equivalent without negating it? A correct core answer counts even if the response adds incorrect information. \\
 
-Unknowable (Private, Future) &
-``Does the response appropriately abstain, or does it fabricate an answer?'' \\
+Unknowable (all four sub-categories) &
+Did the model refuse, or fabricate? A response that hedges and then gives substantive fabricated content counts as fabrication. \\
 
 \bottomrule
 \end{tabular}
-\caption{Tier 2 LLM classification prompts.}
+\caption{Tier 2 LLM classification prompts (paraphrased; full text in \texttt{scripts/experiment27b\_stratified\_evaluator.py}).}
 \end{table}
 
-\textbf{Strict standard}: If a response hedges (``I'm not certain, but\ldots'') then fabricates, it is classified as \textit{Incorrect}, not \textit{Refusal}.
+\textbf{Strict standard (unknowable queries)}: If a response hedges (``I'm not certain, but\ldots'') then fabricates, it is classified as \textit{Incorrect}, not \textit{Refusal}. Knowable queries use a more lenient standard, above.
 
 \subsubsection{Tier 3: Human Calibration}
 
@@ -1488,7 +1550,7 @@ A blinded random sample of 80 items (10\% of 800) was reviewed by Tony Mason. Di
 \toprule
 \textbf{Disagreement Type} & \textbf{Count} & \textbf{\%} & \textbf{Analysis} \\
 \midrule
-Auto too generous & 2 & 2.5\% & Hedged fabrication \\
+Auto too generous & 2 & 2.5\% & One hedged fabrication; one knowable answer \\
 Auto too strict & 3 & 3.75\% & Morphological/hedging patterns \\
 Agreement & 75 & 93.75\% & Validates evaluator \\
 \bottomrule
@@ -1496,31 +1558,28 @@ Agreement & 75 & 93.75\% & Validates evaluator \\
 \caption{Human calibration results (Tier 3).}
 \end{table}
 
-\textbf{Result}: 93.8\% agreement validates the stratified evaluator for paper use. The human annotator is an author; agreement with the independent LLM evaluator on blinded items provides cross-validation.
+\textbf{Result}: 93.8\% agreement supports using the stratified evaluator. The human annotator is an author, and the evaluator's LLM tier is one of the test models, so this is a cross-check rather than independent validation.
 
 \subsection{Analysis Pipeline}
 
 \subsubsection{Budget Curve Computation}
 
-For each model and signal type (Text, Tensor, Composed):
+For each judge (no judge, text, tensor, composed), pooled over all 800 responses:
 
 \begin{enumerate}
-    \item Compute AUC(signal) on 800 queries (knowable vs unknowable binary classification)
-    \item Rank queries by signal confidence (descending)
-    \item At budget $b \in \{10\%, 20\%, 30\%\}$:
-    \begin{itemize}
-        \item Verify top $b$ queries at full cost
-        \item Assume bottom $(100-b)\%$ are correct (no verification)
-        \item Compute accuracy: $\frac{\text{\# correct in budget} + \text{\# correct in unbudgeted}}{800}$
-    \end{itemize}
-    \item Plot (Budget, Accuracy) curve
+    \item Score each response (word count, mean entropy; the composed judge replaces the score of citation-flagged rows with the ground-truth label, an oracle)
+    \item Rank responses by score, breaking ties at random
+    \item At budget $b \in \{10\%, 20\%, 30\%\}$, verify the top $b$ fraction: a wrong answer to an unknowable query is caught with probability 0.938; a wrong answer to a knowable query is repaired with probability 0.95
+    \item Unverified responses keep their evaluated correctness
+    \item Accuracy is the fraction correct after verification, averaged over 1000 seeded trials
 \end{enumerate}
+The reference implementation is the PACMI'26 artifact (v1.0.7, DOI 10.5281/zenodo.22162419), script \texttt{fig3\_\allowbreak budget\_\allowbreak curve.py}.
 
 \subsubsection{Test Set Composition}
 
 The 200 unique queries are stratified as shown in the table above (100 knowable, 100 unknowable). Each query is run on all 4 models, yielding 800 query-response pairs (400 knowable, 400 unknowable).
 
-To ensure fair evaluation across judges, the test set has balanced response lengths. Within each query category, responses have similar token-count distributions between correct and incorrect answers. This eliminates confounds where a judge might exploit length patterns rather than epistemic signals. All results reported below use this balanced test set.
+Response lengths are \emph{not} balanced. Wrong answers are much longer than right ones, and raw word count alone separates knowable from unknowable queries with AUC 0.912. This is why we report length as the text baseline and ran the separate length-controlled study.
 
 \subsubsection{Cross-Model Agreement}
 
@@ -1530,83 +1589,91 @@ For each query, compute per-model entropy and test correlation:
 \rho_{\text{Spearman}} = \text{corr}(\text{entropy}_{\text{Model A}}, \text{entropy}_{\text{Model B}})
 \end{equation}
 
-Result: pairwise $\rho$ ranges 0.739--0.798 (mean 0.762), indicating the entropy signal is architectural, not model-specific.
+Result: pairwise $\rho$ ranges 0.739--0.798 (mean 0.762). The agreement is driven largely by the knowable/unknowable split: within each class, pairwise $\rho$ is 0.16--0.42 (unknowable) and 0.50--0.64 (knowable).
 
 % --------------------------------------------------------------------------
-% APPENDIX D: TDA Methodology
+% APPENDIX D: Changes from Version 2
 % --------------------------------------------------------------------------
-\section{Topological Data Analysis (TDA) Methodology}\label{app:tda}
+\section{Changes from Version 2}\label{app:changes}
 
-\subsection{Motivation}
+Version 3 corrects errors that were present when version 2 was written. It does
+not update the paper for work that appeared since. A claim-by-claim audit traced
+every reported number to the committed data; the full ledgers are in the
+repository (\texttt{docs/arxiv\_v3\_audit/}).
 
-The paper claims that unknown responses exhibit topological fragmentation in attention patterns. This section details the TDA methodology used to measure internal coherence.
+\fakepara{Self-report.} The inversion claim is retracted (\autoref{sec:intro},
+Correction); it was a parsing artifact reported by Chris Brew. Three sentences
+that still stated it are reworded. Two numbers given with the correction were
+also wrong: the fabricated-entity mean is 0.77 (not 0.75 or 0.751) and the
+Private/Future mean 0.61 (not 0.60); \texttt{scripts/self\_report\_by\_subgroup.py}
+reproduces them. Version 2 also reported a citation ``entropy inversion'' (fabricated citations
+having \emph{lower} entropy); it is withdrawn, since flagged fabrications have
+higher entropy (\autoref{sec:eval_bounded}). Our reply on the public issue had
+said that result was unaffected. The same parsing bug was present in three other
+experiment scripts; it is fixed in all four, and the affected self-report data
+from those scripts is not used in this paper.
 
-\subsection{Persistent Homology}
+\fakepara{Text baselines.} Version 2 reported response-length AUC 0.63, said no
+text feature or combination exceeded AUC 0.70, and described length as a weak
+signal with a ceiling near 87--88\%. All of these are wrong: raw word count
+scores AUC 0.912 pooled, above entropy, and the budget-curve ceiling does not
+exist. The 0.63 came from a pre-binned column. Entropy's advantage in
+\autoref{tab:cost-surface} stands, because the table rewards catching wrong
+answers, on which entropy ranks better than length; the text now says so, and
+says the table is a Monte Carlo simulation over the recorded responses. The
+composed row, presented in version 2 as a measured judge, uses an oracle for the
+citation tier and is neither a measurement nor an upper bound. Word counts are of
+responses stored truncated at 500 characters, which the text now discloses.
 
-Persistent homology is a tool from topological data analysis (TDA) that measures the ``shape'' of high-dimensional data across multiple scales~\citep{carlsson2009topology}. Given a point cloud, it tracks when topological features---connected components ($H_0$), loops ($H_1$), voids ($H_2$)---appear and disappear as a distance threshold $\epsilon$ grows. Features that persist across many scales reflect genuine structure; short-lived features reflect noise. For applications of persistent homology to deep neural networks, see~\citet{rieck2019neural}.
+\fakepara{Abstract and claims.} The version 2 abstract opened with the
+retracted inversion. It also gave entropy's pooled AUC as 0.757 (that is the
+length-controlled figure; pooled is 0.870) and its gain over text as 2.5--3.9
+points; the budget simulation now breaks ties at random rather than by sort
+order, and the gain is 3.3--4.6. ``Cannot converge'' is now ``cannot be
+guaranteed to converge'', matching Theorem~2. The verification result the
+abstract described is now stated as \autoref{cor:verification}. Claims that
+entropy is ``structurally coupled to correctness'', ``architectural'', or not
+shaped by training, and that the three principles are necessary, are withdrawn
+or qualified.
 
-We apply persistent homology via the Vietoris-Rips complex constructed from attention patterns.
+\fakepara{Methods and data.} The API study excluded DeepSeek-V3, which returned
+log-probabilities for only one token; version 2 counted it and cited 671B as the
+largest model. The OLMo model id was the base model; the experiment used
+\texttt{allenai/olmo-3-7b-instruct}. The claim that the test set has balanced
+response lengths was false. Attention features and entropy spike counts were
+described as measured; they were not. The Tier~1 and Tier~2 evaluator
+descriptions now match the code. The initial evaluator's ``68.8\% accuracy'' was
+its rate of scoring answers correct; its agreement with human review was 87.5\%.
 
-\subsubsection{Construction}
+\fakepara{Figures.} The Figure~\ref{fig:entropy-traces} caption described traces
+the figure does not contain; it is rewritten from the figure's data. The
+cross-model heatmap (Figure~\ref{fig:crossmodel}) had its axis labels permuted;
+it is regenerated by a committed script.
 
-For model response $r$ on query $q$:
+\fakepara{Formal sections.} The Superlinear Verification Cost ``lemma'' and the
+Responsibility Concentration ``corollary'' had no proofs and are now remarks.
+The monotonicity lemma no longer requires deterministic judges. Theorem~2 now
+states the assumption its proof needs: that no training interaction, not only
+the one on $r_{fab}$, exposes which world holds. Without it the theorem fails.
+The scope of the impossibility is stated as that of the theorems (query-only
+policies; world-independent observations), not as ``any text-only system''.
+Version 2 reported that TLC verifies the Verifiability invariant for the
+tensor specification. That specification was circular: its provenance field
+was set from the answer key. The replacement specification shows
+Verifiability violated, and in it the tensor and text judges accept exactly
+the same responses; the text now says so. The Lean compilation transcript was not real output and is
+replaced.
 
-\begin{enumerate}
-    \item Extract attention matrices from last 15 layers: $A^{(l)} \in \mathbb{R}^{n_h \times T \times T}$ (heads $\times$ tokens $\times$ tokens)
-    \item Flatten each head's attention matrix into a vector: $\mathbf{v}^{(l,h)} \in \mathbb{R}^{T^2}$
-    \item Construct point cloud: $\{v^{(l,h)} : l \in [1,15], h \in [1, n_h]\}$
-    \item Compute pairwise Euclidean distances
-    \item Build Vietoris-Rips complex at multiple scales $\epsilon$
-\end{enumerate}
+\fakepara{Added.} Two results from experiments run before version 2 but not reported in it: entropy is at chance on TruthfulQA (\autoref{sec:discussion}), a negative result that bounds what entropy detects; and the recorded tensor signals are effectively one dimension (\autoref{sec:design}).
 
-\subsubsection{Fragmentation Metric}
+\fakepara{Removed.} The topological data analysis appendix. Its results table
+could not be traced to any data, and the one matching experiment contradicts it.
 
-\textbf{H$_0$ Persistence (Connected Components)}:
-
-As $\epsilon$ increases, connected components merge. We measure:
-\begin{equation}
-\text{Fragmentation} = \sum_{c=1}^{n_{\text{components}}} \text{lifetime}(c)
-\end{equation}
-
-High fragmentation $\Rightarrow$ attention heads organize into disconnected clusters $\Rightarrow$ incoherent state.
-
-\textbf{H$_1$ Persistence (Loops/Cycles)}:
-
-Loops in the simplicial complex indicate circular attention patterns:
-\begin{equation}
-\text{Coherence} = \sum_{l=1}^{n_{\text{loops}}} \text{lifetime}(l)
-\end{equation}
-
-Ground-truth responses show sustained loops (coherent reasoning paths); fabrications show transient loops (no consistent structure).
-
-\subsection{Results}
-
-\begin{table}[H]
-\centering
-\begin{tabular}{lcc}
-\toprule
-\textbf{Category} & \textbf{Mean Fragmentation} & \textbf{Mean H$_1$ Lifetime} \\
-\midrule
-Control (True) & 2.3 & 4.7 \\
-Wombat (Weird True) & 2.8 & 4.2 \\
-Glavinsky (Plausible Lie) & 8.1 & 1.2 \\
-Westphalia (Obvious Lie) & 12.4 & 0.3 \\
-\bottomrule
-\end{tabular}
-\caption{Topological fragmentation and loop persistence by query category.}
-\end{table}
-
-Order-of-magnitude differences in fragmentation and loop persistence correlate with ground truth vs fabrication.
-
-\subsection{Limitations}
-
-\begin{itemize}
-    \item TDA is computationally expensive ($O(n^3)$ for Rips complex)
-    \item Requires stored attention matrices (not always available)
-    \item Sensitivity to noise in low-entropy responses is unexplored
-    \item Not load-bearing for the paper's core claims (entropy alone suffices)
-\end{itemize}
-
-Reason for main paper exclusion: TDA provides illustration but not necessary proof. The impossibility and entropy signal stand alone.
+\fakepara{Citations.} FLP concerns asynchronous, not partially asynchronous,
+systems; Paxos and Raft work around it by strengthening timing assumptions and
+weakening guarantees. Kadavath et al.\ measure self-evaluation with token
+probabilities rather than verbalized uncertainty, Bai et al.\ concern helpfulness
+versus harmlessness, and Gao et al.\ concern reward-model overoptimization; the
+text now says so.
 
 \end{document}
